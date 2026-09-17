@@ -132,159 +132,26 @@
   .rappels-ligne { font-size: calc(var(--u) * 3.5); margin-top: calc(var(--u) * 1); color: var(--or); font-weight: 600; }
   .rappels-ligne:empty, .details:empty { display: none; }
 
-  /* ---------- Avatars de Lou et Alba ---------- */
-  .avatar { height: 100%; max-height: calc(var(--u) * 60); min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .avatar svg { flex: 1 1 auto; min-height: 0; height: 100%; max-height: calc(var(--u) * 52); aspect-ratio: 2 / 3; width: auto; overflow: visible; }
-  .scene.fort .avatar svg { filter: drop-shadow(0 0 calc(var(--u) * 1.5) var(--c)); }
+  /* ---------- Avatars de Lou et Alba (animés par avatars.js) ---------- */
+  .avatar { height: 100%; max-height: calc(var(--u) * 64); min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .avatar svg { flex: 1 1 auto; min-height: 0; height: 100%; max-height: calc(var(--u) * 58); aspect-ratio: 220 / 260; width: auto; overflow: visible; }
+  .scene.fort .avatar svg { filter: drop-shadow(0 0 calc(var(--u) * 1.2) var(--c)); }
   .avatar .prenom {
     font-size: calc(var(--u) * 4.2); font-weight: 700; color: var(--f);
     background: rgba(20,24,51,.75); padding: 0 calc(var(--u) * 2); border-radius: 99px; margin-top: calc(var(--u) * -1);
   }
-
-  /* Articulations (coordonnées du dessin 160 × 240) */
-  .avatar-svg .tout, .avatar-svg .haut, .avatar-svg .tete, .avatar-svg .bras, .avatar-svg .avant-bras,
-  .avatar-svg .jambe, .avatar-svg .yeux, .avatar-svg .bouche-ouverte { transform-box: view-box; }
-  .avatar-svg .tout { transform-origin: 80px 232px; }
-  .avatar-svg .haut { transform-origin: 80px 178px; }
-  .avatar-svg .tete { transform-origin: 80px 112px; }
-  .avatar-svg .bras-g { transform-origin: 58px 122px; }
-  .avatar-svg .bras-d { transform-origin: 102px 122px; }
-  .avatar-svg .avant-bras-g { transform-origin: 56px 146px; }
-  .avatar-svg .avant-bras-d { transform-origin: 104px 146px; }
-  .avatar-svg .jambe-g { transform-origin: 70px 176px; }
-  .avatar-svg .jambe-d { transform-origin: 90px 176px; }
-  .avatar-svg .bouche-ouverte { transform-origin: 80px 101px; }
-  .avatar-svg .yeux { transform-origin: 80px 82px; animation: cligne 4.5s infinite; }
-  .avatar-svg .couette, .avatar-svg .queue, .avatar-svg .mousse, .avatar-svg .etincelle,
-  .avatar-svg .ballon-avatar, .avatar-svg .zzz-avatar, .avatar-svg .bulle-av, .avatar-svg .robe, .avatar-svg .fil { transform-box: fill-box; }
-  .avatar-svg .couette, .avatar-svg .queue { transform-origin: 50% 0%; animation: balance calc(1.8s * var(--t)) ease-in-out infinite alternate; }
-  .avatar-svg .zzz-avatar, .avatar-svg .ballon-avatar, .avatar-svg .fil { animation: flotte 1.6s ease-in-out infinite alternate; }
-  .avatar-svg .etincelle { transform-origin: center; animation: scintilleAv 1.2s ease-in-out infinite alternate; }
-  .avatar-svg .e2 { animation-delay: -.4s; }
-  .avatar-svg .e3 { animation-delay: -.8s; }
-  .avatar-svg .bulle-av { transform-origin: center; animation: bulleAv 2.4s ease-in infinite; }
-  .avatar-svg .b2 { animation-delay: -.8s; }
-  .avatar-svg .b3 { animation-delay: -1.6s; }
-  @keyframes cligne { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+  .avatar-svg .couette, .avatar-svg .queue { transform-box: fill-box; transform-origin: 50% 0%; animation: balance 1.8s ease-in-out infinite alternate; }
   @keyframes balance { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
-  @keyframes flotte { from { transform: translate(-2px, 0); } to { transform: translate(3px, -6px); } }
-  @keyframes scintilleAv { from { transform: scale(.4); opacity: .3; } to { transform: scale(1.2); opacity: 1; } }
-  @keyframes bulleAv { from { transform: translateY(10px) scale(.6); opacity: 0; } 30% { opacity: 1; } to { transform: translateY(-40px) scale(1.2); opacity: 0; } }
 
-  /* Au calme */
-  .act-etoiles .tout { animation: respire calc(2.6s * var(--t)) ease-in-out infinite; }
-  .act-etoiles .bras-d { animation: balanceBras calc(1.3s * var(--t)) ease-in-out infinite alternate; }
-  @keyframes respire { 50% { transform: translateY(-3px) scaleY(1.02); } }
-  @keyframes balanceBras { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+  /* Papa ou Maman au centre de l'anneau pendant le câlin */
+  .parent-anneau { position: absolute; left: 20%; right: 20%; top: 9%; height: 56%; display: none; }
+  .parent-anneau svg { width: 100%; height: 100%; overflow: visible; }
+  .anneau.calin .parent-anneau { display: block; }
+  .anneau.calin .emoji-centre { visibility: hidden; }
 
-  /* Réveil et pyjama : on s'étire en bâillant */
-  .act-reveil .tout, .act-pyjama .tout { animation: etirement calc(3.4s * var(--t)) ease-in-out infinite; }
-  .act-reveil .bras-g, .act-pyjama .bras-g { animation: etireG calc(3.4s * var(--t)) ease-in-out infinite; }
-  .act-reveil .bras-d, .act-pyjama .bras-d { animation: etireD calc(3.4s * var(--t)) ease-in-out infinite; }
-  .act-reveil .tete, .act-pyjama .tete { animation: baille calc(3.4s * var(--t)) ease-in-out infinite; }
-  .act-reveil .bouche-ouverte, .act-pyjama .bouche-ouverte { animation: bailleBouche calc(3.4s * var(--t)) ease-in-out infinite; }
-  @keyframes etirement { 0%, 12%, 88%, 100% { transform: scale(1, 1); } 38%, 62% { transform: scale(.96, 1.06); } }
-  @keyframes etireG { 0%, 12%, 88%, 100% { transform: rotate(8deg); } 38%, 62% { transform: rotate(168deg); } }
-  @keyframes etireD { 0%, 12%, 88%, 100% { transform: rotate(-8deg); } 38%, 62% { transform: rotate(-168deg); } }
-  @keyframes baille { 0%, 12%, 88%, 100% { transform: rotate(0); } 38%, 62% { transform: rotate(-8deg); } }
-  @keyframes bailleBouche { 0%, 12%, 88%, 100% { transform: scale(.6); } 38%, 62% { transform: scale(1.3, 1.6); } }
-
-  /* Petit déjeuner : la cuillère va du bol à la bouche */
-  .act-repas .bras-g { transform: rotate(-20deg); }
-  .act-repas .avant-bras-g { transform: rotate(-60deg); }
-  .act-repas .bras-d { animation: cuillereHaut calc(2s * var(--t)) ease-in-out infinite; }
-  .act-repas .avant-bras-d { animation: cuillereBas calc(2s * var(--t)) ease-in-out infinite; }
-  .act-repas .bouche-ouverte { animation: machoireO calc(2s * var(--t)) infinite; }
-  .act-repas .bouche-fermee { animation: machoireF calc(2s * var(--t)) infinite; }
-  .act-repas .tete { animation: mache calc(.5s * var(--t)) ease-in-out infinite alternate; }
-  @keyframes cuillereHaut { 0%, 15%, 85%, 100% { transform: rotate(20deg); } 40%, 60% { transform: rotate(35deg); } }
-  @keyframes cuillereBas { 0%, 15%, 85%, 100% { transform: rotate(50deg); } 40%, 60% { transform: rotate(125deg); } }
-  @keyframes machoireO { 0%, 34%, 66%, 100% { opacity: 0; } 40%, 60% { opacity: 1; } }
-  @keyframes machoireF { 0%, 34%, 66%, 100% { opacity: 1; } 40%, 60% { opacity: 0; } }
-  @keyframes mache { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
-
-  /* Habillage : on tourne sur soi-même pour montrer la tenue */
-  .act-habits .tout { animation: tourne calc(2.8s * var(--t)) ease-in-out infinite; }
-  .act-habits .bras-g { transform: rotate(38deg); }
-  .act-habits .bras-d { transform: rotate(-38deg); }
-  @keyframes tourne {
-    0%, 40%, 100% { transform: scaleX(1) translateY(0); }
-    55% { transform: scaleX(.06) translateY(-10px); }
-    70% { transform: scaleX(-1) translateY(-4px); }
-    85% { transform: scaleX(.06) translateY(-10px); }
-  }
-
-  /* Dents : on frotte, ça mousse */
-  .act-dents .bras-g { transform: rotate(14deg); }
-  .act-dents .avant-bras-g { transform: rotate(-70deg); }
-  .act-dents .bras-d { transform: rotate(35deg); }
-  .act-dents .avant-bras-d { animation: brosse calc(.2s * var(--t)) ease-in-out infinite alternate; }
-  .act-dents .tete { animation: dodeline calc(1s * var(--t)) ease-in-out infinite alternate; }
-  .act-dents .mousse { transform-origin: center; animation: mousse calc(.5s * var(--t)) ease-in-out infinite alternate; }
-  @keyframes brosse { from { transform: rotate(112deg); } to { transform: rotate(134deg); } }
-  @keyframes dodeline { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
-  @keyframes mousse { from { transform: scale(.8); } to { transform: scale(1.3); } }
-
-  /* Coiffure : on se brosse les cheveux */
-  .act-coiffure .bras-g { transform: rotate(14deg); }
-  .act-coiffure .avant-bras-g { transform: rotate(-70deg); }
-  .act-coiffure .bras-d { transform: rotate(-160deg); }
-  .act-coiffure .avant-bras-d { animation: brossage calc(1.1s * var(--t)) ease-in-out infinite alternate; }
-  .act-coiffure .tete { animation: penche calc(2.2s * var(--t)) ease-in-out infinite alternate; }
-  .act-coiffure .couette, .act-coiffure .queue { animation-duration: calc(.55s * var(--t)); }
-  @keyframes brossage { from { transform: rotate(-55deg); } to { transform: rotate(-15deg); } }
-  @keyframes penche { from { transform: rotate(-5deg); } to { transform: rotate(4deg); } }
-
-  /* Rangement : on ramasse le doudou et on le lance dans le panier */
-  .act-rangement .tout { animation: accroupi calc(2.4s * var(--t)) ease-in-out infinite; }
-  .act-rangement .bras-d { animation: lance calc(2.4s * var(--t)) ease-in-out infinite; }
-  .act-rangement .bras-g { animation: ramasse calc(2.4s * var(--t)) ease-in-out infinite; }
-  .act-rangement .objet-main { animation: jouet calc(2.4s * var(--t)) infinite; }
-  @keyframes accroupi { 0%, 100% { transform: scaleY(1) translateY(0); } 35%, 45% { transform: scaleY(.85) translateY(4px); } 70% { transform: scaleY(1.03) translateY(-8px); } }
-  @keyframes lance { 0%, 100% { transform: rotate(0); } 35%, 45% { transform: rotate(20deg); } 70% { transform: rotate(-125deg); } }
-  @keyframes ramasse { 0%, 100% { transform: rotate(0); } 35%, 45% { transform: rotate(-20deg); } 70% { transform: rotate(30deg); } }
-  @keyframes jouet { 0%, 62% { opacity: 1; } 72%, 92% { opacity: 0; } 100% { opacity: 1; } }
-
-  /* Chaussures : on marche sur place */
-  .act-chaussures .jambe-g { animation: pas calc(.8s * var(--t)) ease-in-out infinite; }
-  .act-chaussures .jambe-d { animation: pas calc(.8s * var(--t)) ease-in-out infinite; animation-delay: calc(-.4s * var(--t)); }
-  .act-chaussures .bras-g { animation: marcheBras calc(.8s * var(--t)) ease-in-out infinite; }
-  .act-chaussures .bras-d { animation: marcheBras calc(.8s * var(--t)) ease-in-out infinite; animation-delay: calc(-.4s * var(--t)); }
-  .act-chaussures .haut { animation: rebond calc(.4s * var(--t)) ease-in-out infinite alternate; }
-  @keyframes pas { 0%, 50%, 100% { transform: translateY(0); } 25% { transform: translateY(-14px); } }
-  @keyframes marcheBras { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(-18deg); } }
-  @keyframes rebond { from { transform: translateY(0); } to { transform: translateY(-4px); } }
-
-  /* Temps libre : on saute de joie avec le ballon */
-  .act-jeu .tout { animation: saut calc(.9s * var(--t)) cubic-bezier(.3, 0, .6, 1) infinite; }
-  .act-jeu .bras-g { animation: joie calc(.9s * var(--t)) ease-in-out infinite; }
-  .act-jeu .bras-d { transform: rotate(-150deg); }
-  @keyframes saut { 0%, 100% { transform: translateY(0) scaleY(.94); } 45% { transform: translateY(-28px) scaleY(1.04); } }
-  @keyframes joie { 0%, 100% { transform: rotate(120deg); } 45% { transform: rotate(165deg); } }
-
-  /* Bain : on se frotte en se trémoussant */
-  .act-bain .tout { animation: tortille calc(1.2s * var(--t)) ease-in-out infinite alternate; }
-  .act-bain .bras-g { transform: rotate(-25deg); }
-  .act-bain .bras-d { transform: rotate(25deg); }
-  .act-bain .avant-bras-g { animation: frotteG calc(.35s * var(--t)) ease-in-out infinite alternate; }
-  .act-bain .avant-bras-d { animation: frotteD calc(.35s * var(--t)) ease-in-out infinite alternate; }
-  @keyframes tortille { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
-  @keyframes frotteG { from { transform: rotate(-80deg); } to { transform: rotate(-45deg); } }
-  @keyframes frotteD { from { transform: rotate(80deg); } to { transform: rotate(45deg); } }
-
-  /* Histoire : on lit le livre */
-  .act-histoire .bras-g { transform: rotate(-20deg); }
-  .act-histoire .avant-bras-g { transform: rotate(-60deg); }
-  .act-histoire .bras-d { transform: rotate(20deg); }
-  .act-histoire .avant-bras-d { transform: rotate(50deg); }
-  .act-histoire .tete { animation: lit calc(3s * var(--t)) ease-in-out infinite; }
-  @keyframes lit { 0%, 100% { transform: rotate(0); } 30%, 50% { transform: rotate(6deg) translateY(3px); } 70% { transform: rotate(-4deg); } }
-
-  /* Bravo : coucou et petits sauts */
-  .act-coucou .tout { animation: saut .8s cubic-bezier(.3, 0, .6, 1) infinite; }
-  .act-coucou .bras-g { transform: rotate(12deg); }
-  .act-coucou .bras-d { transform: rotate(-150deg); }
-  .act-coucou .avant-bras-d { animation: coucouMain .35s ease-in-out infinite alternate; }
+  /* Au départ du bus */
+  .fin-duo { position: absolute; left: 3vw; right: 3vw; bottom: calc(var(--u) * 3); display: flex; justify-content: space-between; pointer-events: none; }
+  .fin-duo > div { height: calc(var(--u) * 44); }
   @keyframes coucouMain { from { transform: rotate(-30deg); } to { transform: rotate(25deg); } }
 
   /* ---------- La route ---------- */
@@ -368,7 +235,7 @@
   .bravo-contenu { display: flex; align-items: center; gap: 6vw; }
   .bravo-titre { font-size: calc(var(--u) * 11); font-weight: 700; margin-bottom: calc(var(--u) * 3); }
   .bravo-filles { display: flex; gap: 5vw; }
-  .avatar-bravo svg { width: calc(var(--u) * 22); height: calc(var(--u) * 33); overflow: visible; }
+  .avatar-bravo svg { width: calc(var(--u) * 26); height: calc(var(--u) * 31); overflow: visible; }
   .bravo-fille { margin-bottom: calc(var(--u) * 3); animation: pop .9s cubic-bezier(.2,1.6,.4,1) backwards; }
   .bravo-fille + .bravo-fille { animation-delay: .4s; }
   .bravo-fille .nom { font-size: calc(var(--u) * 8); font-weight: 700; color: var(--f); }
@@ -420,6 +287,7 @@
           <circle class="fond" cx="100" cy="100" r="90"></circle>
           <circle class="reste" id="arc" cx="100" cy="100" r="90" transform="rotate(-90 100 100)"></circle>
         </svg>
+        <div class="parent-anneau" id="parentAnneau"></div>
         <div class="dans-anneau">
           <div class="emoji-centre" id="emojiTache"></div>
           <div class="restant" id="restant"></div>
@@ -469,6 +337,7 @@
   <h2 id="finMessage">Bonne journée les filles !</h2>
   <p id="finSous">❤️ À ce soir</p>
   <p class="bocal-ligne" id="finBocal"></p>
+  <div class="fin-duo"><div id="finGauche"></div><div id="finDroite"></div></div>
 </section>
 
 <!-- Rien aujourd'hui -->
@@ -513,6 +382,7 @@
 <div id="modeTest">MODE TEST</div>
 
 <script src="commun.js"></script>
+<script src="avatars.js"></script>
 <script>
 (function () {
   "use strict";
@@ -653,186 +523,54 @@
   }
 
   // =====================================================================
-  // Scènes animées par étape (même dessin que l'app Apple TV).
-  // Elles jouent en grand aux temps forts (juste après l'annonce, dernière minute)
-  // et restent discrètes le reste du temps.
+  // Effets autour de l'anneau : rayons au réveil, cœurs envoyés à Papa pendant le câlin,
+  // ballon lancé d'une fille à l'autre au temps libre. Halo des avatars aux temps forts.
   // =====================================================================
   var Scene = (function () {
-    var type = null, debutEtape = 0, reste = 999, force = 0.25, actif = false;
+    var type = null, debutEtape = 0, reste = 999, actif = false, calin = false;
     var cv = $("sceneCanvas"), ctx = cv.getContext("2d");
-    var POLICE = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-    var COULEURS = ["#FF6B9D", "#54A0FF", "#FFD93D", "#10AC84", "#A55EEA", "#FF9F43"];
 
-    function alea(i, k) { var x = Math.sin((i * 127 + k * 311) * 12.9898) * 43758.5453; return x - Math.floor(x); }
-    function cycle(t, p, ph) { var v = t / p + ph; return v - Math.floor(v); }
-    function fondu(p) { return Math.max(0, Math.min(1, p / 0.12) * Math.min(1, (1 - p) / 0.2)); }
-    function nb(m, f) { return Math.max(1, Math.round(m * f)); }
-    function emo(e, x, y, taille, o, rot, ech) {
-      if (o === undefined) o = 1;
-      if (o <= 0.01) return;
+    function cycle(t, p) { var v = t / p; return v - Math.floor(v); }
+    function lisse(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+    function mix(a, b, t) { return a + (b - a) * t; }
+    function versEcran(av, x, y, bz) {
+      var b = av.svg.getBoundingClientRect();
+      return { x: b.left - bz.left + x / 220 * b.width, y: b.top - bz.top + y / 260 * b.height };
+    }
+    function coeur(x, y, taille, o) {
+      if (o <= 0.02) return;
       ctx.save();
       ctx.globalAlpha = o;
       ctx.translate(x, y);
-      if (rot) ctx.rotate(rot * Math.PI / 180);
-      if (ech && ech !== 1) ctx.scale(ech, ech);
-      ctx.font = Math.round(taille) + "px " + POLICE;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(e, 0, 0);
+      ctx.scale(taille / 24, taille / 24);
+      ctx.beginPath();
+      ctx.moveTo(0, -4);
+      ctx.bezierCurveTo(0, -12, -12, -14, -12, -4);
+      ctx.bezierCurveTo(-12, 4, -3, 9, 0, 13);
+      ctx.bezierCurveTo(3, 9, 12, 4, 12, -4);
+      ctx.bezierCurveTo(12, -14, 0, -12, 0, -4);
+      ctx.fillStyle = "#FF5C8A";
+      ctx.fill();
       ctx.restore();
     }
-    function rond(x, y, s, remplissage, trait, epaisseur) {
+    function ballon(x, y, rayon, rotation) {
+      var couleurs = ["#FF5C5C", "#FFD93D", "#54A0FF", "#FFFFFF"];
+      for (var i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, rayon, rotation + i * Math.PI / 2, rotation + (i + 1) * Math.PI / 2);
+        ctx.closePath();
+        ctx.fillStyle = couleurs[i];
+        ctx.fill();
+      }
       ctx.beginPath();
-      ctx.arc(x, y, s / 2, 0, Math.PI * 2);
-      if (remplissage) { ctx.fillStyle = remplissage; ctx.fill(); }
-      if (trait) { ctx.strokeStyle = trait; ctx.lineWidth = epaisseur; ctx.stroke(); }
+      ctx.arc(x, y, rayon, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(0,0,0,.25)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
     }
 
-    // c = centre, r = rayon de l'anneau, k = échelle (dessins pensés pour 1000 px)
-    var dessins = {
-      reveil: function (cx, cy, r, t, f, k) {
-        ctx.save();
-        ctx.globalAlpha = 0.25 + 0.55 * f;
-        ctx.strokeStyle = "#FFD93D"; ctx.lineWidth = 14 * k; ctx.lineCap = "round";
-        for (var i = 0; i < 14; i++) {
-          var a = (t * 12 + i * 360 / 14) * Math.PI / 180, l = r * (0.22 + 0.12 * Math.sin(t * 2.5 + i));
-          ctx.beginPath();
-          ctx.moveTo(cx + Math.cos(a) * r * 1.14, cy + Math.sin(a) * r * 1.14);
-          ctx.lineTo(cx + Math.cos(a) * (r * 1.14 + l), cy + Math.sin(a) * (r * 1.14 + l));
-          ctx.stroke();
-        }
-        ctx.restore();
-        var coeurs = ["💛", "❤️", "🧡"];
-        for (var j = 0; j < nb(7, f); j++) {
-          var p = cycle(t, 3.5, alea(j, 1));
-          emo(coeurs[j % 3], cx + (alea(j, 2) - 0.5) * r * 1.4 + Math.sin(p * 6 + j) * 25 * k, cy - p * r * 1.8, (46 + p * 22) * k, fondu(p));
-        }
-      },
-      repas: function (cx, cy, r, t, f, k) {
-        for (var i = 0; i < nb(9, f); i++) {
-          var p = cycle(t, 3.4, alea(i, 1)), s = (40 + p * 90) * k;
-          ctx.save();
-          ctx.globalAlpha = fondu(p) * 0.28;
-          ctx.fillStyle = "#FFFFFF";
-          ctx.beginPath();
-          ctx.ellipse(cx + (alea(i, 2) - 0.5) * r * 0.7 + Math.sin(p * 6 + i) * 22 * k, cy - r * 0.25 - p * r * 1.5, s / 2, s * 0.4, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-        var aliments = ["🥐", "🍓", "🥛", "🍞", "🍌", "🧃"];
-        for (var j = 0; j < nb(5, f); j++) {
-          var q = cycle(t, 4.2, alea(j, 3)), sens = alea(j, 4) < 0.5 ? -1 : 1, portee = r * (0.9 + alea(j, 5) * 0.7);
-          emo(aliments[j % aliments.length], cx + sens * q * portee, cy - r * 0.15 - 3.6 * r * q * (1 - q) + q * r * 0.6, 64 * k, fondu(q), sens * q * 300);
-        }
-      },
-      habits: function (cx, cy, r, t, f, k) {
-        var v = ["👕", "👗", "🧦", "👖", "🧢", "🧥"];
-        for (var i = 0; i < nb(6, f); i++) {
-          var p = cycle(t, 3.6, alea(i, 1)), a = alea(i, 2) * Math.PI * 2;
-          var dx = cx + Math.cos(a) * r * 1.9, dy = cy + Math.sin(a) * r * 1.9;
-          var e = p * p * (3 - 2 * p), courbe = Math.sin(p * Math.PI) * r * 0.5;
-          var o = Math.min(1, p / 0.1) * (p > 0.8 ? (1 - p) / 0.2 : 1);
-          emo(v[i % v.length], dx + (cx - dx) * e - Math.sin(a) * courbe, dy + (cy - dy) * e + Math.cos(a) * courbe, 76 * k, o, (1 - p) * 360, 1 - p * 0.6);
-        }
-      },
-      bulles: function (cx, cy, r, t, f, k, maxi, teinte) {
-        for (var i = 0; i < nb(maxi, f); i++) {
-          var p = cycle(t, 3 + alea(i, 1) * 2, alea(i, 2));
-          var x = cx + (alea(i, 3) - 0.5) * r * 2.6 + Math.sin(p * 8 + i) * 18 * k, y = cy + r * 1.2 - p * r * 3;
-          var s = (24 + alea(i, 4) * 40 + p * 20) * k, o = fondu(p);
-          ctx.save();
-          ctx.globalAlpha = 0.18 * o; rond(x, y, s, teinte);
-          ctx.globalAlpha = 0.75 * o; rond(x, y, s, null, "#FFFFFF", 3 * k);
-          ctx.globalAlpha = 0.8 * o;
-          ctx.fillStyle = "#FFFFFF";
-          ctx.beginPath(); ctx.ellipse(x - s * 0.15, y - s * 0.23, s * 0.1, s * 0.07, 0, 0, Math.PI * 2); ctx.fill();
-          ctx.restore();
-        }
-      },
-      etincelles: function (cx, cy, r, t, f, k, maxi) {
-        for (var i = 0; i < nb(maxi, f); i++) {
-          var periode = 1.8 + alea(i, 1), p = cycle(t, periode, alea(i, 2));
-          var a = alea(i, 3) * Math.PI * 2 + Math.floor(t / periode + alea(i, 2)) * 1.3, d = r * (1.05 + alea(i, 4) * 0.6);
-          var o = Math.sin(p * Math.PI);
-          emo("✨", cx + Math.cos(a) * d, cy + Math.sin(a) * d, (34 + alea(i, 5) * 24) * k, o, 0, 0.6 + 0.4 * o);
-        }
-      },
-      coiffure: function (cx, cy, r, t, f, k) {
-        for (var i = 0; i < 3; i++) {
-          var a = (t * 35 + i * 120) * Math.PI / 180;
-          emo("🎀", cx + Math.cos(a) * r * 1.2, cy + Math.sin(a) * r * 1.2, 60 * k, 0.45 + 0.55 * f, Math.sin(t * 2 + i) * 15);
-        }
-        dessins.etincelles(cx, cy, r, t, f, k, 14);
-      },
-      rangement: function (cx, cy, r, t, f, k) {
-        var j = ["🧸", "🧦", "🥣", "🚗", "🧩", "📚", "💡"];
-        for (var i = 0; i < nb(6, f); i++) {
-          var p = cycle(t, 2.8, alea(i, 1)), x0 = (alea(i, 2) - 0.5) * r * 1.6, haut = -r * 1.7, bas = r * 0.25, dx = 0, dy;
-          if (p < 0.7) { var q = p / 0.7; dy = haut + (bas - haut) * q * q; dx = x0 * (1 - q); }
-          else { dy = bas - Math.sin((p - 0.7) / 0.3 * Math.PI) * 30 * k; }
-          var o = Math.min(1, p / 0.08) * (p > 0.85 ? (1 - p) / 0.15 : 1);
-          emo(j[i % j.length], cx + dx, cy + dy, 64 * k, o, p < 0.7 ? p * 200 : 0, p > 0.7 ? 0.8 : 1);
-        }
-      },
-      chaussures: function (cx, cy, r, t, f, k) {
-        var q = cycle(t, 5, 0);
-        for (var i = 0; i < 12; i++) {
-          var apparition = i / 12 * 0.8;
-          if (q < apparition) continue;
-          var age = (q - apparition) * 5;
-          emo("👣", cx - r * 1.6 + i * (r * 3.2 / 11), cy + r * 1.15 + (i % 2 === 0 ? -22 : 22) * k, 50 * k,
-              Math.max(0, 1 - age / 2.5) * (0.4 + 0.6 * f), 90);
-        }
-        for (var n = 0; n < 2; n++) {
-          var rebond = Math.abs(Math.sin(t * 4 + n * 1.6)) * 40 * k * f;
-          emo("👟", cx + (n === 0 ? -1 : 1) * r * 1.25, cy - r * 0.9 - rebond, 70 * k, 0.4 + 0.6 * f);
-        }
-      },
-      jeu: function (cx, cy, r, t, f, k) {
-        for (var i = 0; i < nb(9, f); i++) {
-          var p = cycle(t, 5 + alea(i, 1) * 2, alea(i, 2));
-          var x = cx + (alea(i, 3) - 0.5) * r * 3.2 + Math.sin(p * 5 + i) * 30 * k, y = cy + r * 1.6 - p * r * 3.6;
-          var w = 58 * k, h = 70 * k;
-          ctx.save();
-          ctx.globalAlpha = fondu(p);
-          ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.lineWidth = 2 * k;
-          ctx.beginPath(); ctx.moveTo(x, y + h / 2);
-          ctx.quadraticCurveTo(x - 14 * k, y + h / 2 + 35 * k, x + Math.sin(t * 3 + i) * 10 * k, y + h / 2 + 70 * k);
-          ctx.stroke();
-          ctx.fillStyle = COULEURS[i % COULEURS.length];
-          ctx.beginPath(); ctx.ellipse(x, y, w / 2, h / 2, 0, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = "rgba(255,255,255,.5)";
-          ctx.beginPath(); ctx.ellipse(x - w * 0.14, y - h * 0.21, w * 0.11, h * 0.09, 0, 0, Math.PI * 2); ctx.fill();
-          ctx.restore();
-        }
-      },
-      bain: function (cx, cy, r, t, f, k) {
-        dessins.bulles(cx, cy, r, t, f, k, 18, "#FFFFFF");
-        emo("🦆", cx + Math.sin(t * 0.6) * r * 1.2, cy + r * 1.25 + Math.sin(t * 2.2) * 10 * k, 80 * k, 0.5 + 0.5 * f, Math.sin(t * 2.2) * 8);
-      },
-      pyjama: function (cx, cy, r, t, f, k) {
-        var a = t * 0.35;
-        emo("🌙", cx + Math.cos(a) * r * 1.3, cy + Math.sin(a) * r * 1.3, 80 * k, 0.5 + 0.5 * f);
-        for (var i = 0; i < nb(14, f); i++) {
-          var p = cycle(t, 2.4 + alea(i, 1), alea(i, 2)), an = alea(i, 3) * Math.PI * 2, d = r * (1.1 + alea(i, 4) * 0.6);
-          emo("⭐", cx + Math.cos(an) * d, cy + Math.sin(an) * d, (28 + alea(i, 5) * 20) * k, Math.sin(p * Math.PI) * 0.9);
-        }
-      },
-      histoire: function (cx, cy, r, t, f, k) {
-        var m = ["✨", "🐉", "🧚", "🏰", "⭐", "🦄"];
-        for (var i = 0; i < nb(7, f); i++) {
-          var p = cycle(t, 4, alea(i, 1)), a = (-90 + (alea(i, 2) - 0.5) * 120) * Math.PI / 180, d = r * 0.2 + p * r * 1.6;
-          emo(m[i % m.length], cx + Math.cos(a) * d, cy + Math.sin(a) * d, (40 + p * 34) * k, fondu(p), Math.sin(p * 6) * 15);
-        }
-      },
-      etoiles: function (cx, cy, r, t, f, k) { dessins.etincelles(cx, cy, r, t, f, k, 16); },
-      dents: function (cx, cy, r, t, f, k) {
-        dessins.bulles(cx, cy, r, t, f, k, 16, "#9BE7FF");
-        dessins.etincelles(cx, cy, r, t, f, k, 5);
-      }
-    };
-
-    function image(ts) {
+    function image() {
       if (!actif) return;
       var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
       if (w && (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr))) {
@@ -841,28 +579,92 @@
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      var depuis = (performance.now() - debutEtape) / 1000;
-      var cibleForce = ((depuis > 4.5 && depuis < 16) || reste <= 60) ? 1 : 0.25;
-      force += (cibleForce - force) * 0.04;
+      var t = performance.now() / 1000;
+      var depuis = t - debutEtape;
       var zone = $("sceneZone");
-      zone.classList.toggle("fort", cibleForce === 1);
+      zone.classList.toggle("fort", (depuis > 4.5 && depuis < 16) || reste <= 60);
       zone.classList.toggle("presse", reste <= 60);
-      // la scène se dessine autour de l'anneau, au centre
+
       var bz = cv.getBoundingClientRect(), ba = $("anneau").getBoundingClientRect();
-      var r = ba.width * 0.46;
-      if (type && dessins[type] && w && r) {
-        dessins[type](ba.left - bz.left + ba.width / 2, ba.top - bz.top + ba.height / 2, r, ts / 1000, force, r / 280);
+      var cx = ba.left - bz.left + ba.width / 2, cy = ba.top - bz.top + ba.height / 2, r = ba.width * 0.46;
+      var duo = animes.filter(function (a) { return a.zone === "routine"; });
+
+      if (type === "reveil") {
+        ctx.save();
+        ctx.globalAlpha = 0.22;
+        ctx.strokeStyle = "#FFD93D";
+        ctx.lineWidth = r * 0.05;
+        ctx.lineCap = "round";
+        for (var i = 0; i < 12; i++) {
+          var a = (t * 8 + i * 30) * Math.PI / 180, l = r * (0.16 + 0.06 * Math.sin(t * 2 + i));
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a) * r * 1.12, cy + Math.sin(a) * r * 1.12);
+          ctx.lineTo(cx + Math.cos(a) * (r * 1.12 + l), cy + Math.sin(a) * (r * 1.12 + l));
+          ctx.stroke();
+        }
+        ctx.restore();
+        if (calin) {
+          duo.forEach(function (av, n) {
+            var depart = versEcran(av.objet, 110, 140, bz);
+            for (var k = 0; k < 4; k++) {
+              var q = cycle(t + k * 0.6 + n * 0.3, 2.4);
+              var x = mix(depart.x, cx, lisse(q)), y = mix(depart.y, cy, lisse(q)) - Math.sin(q * Math.PI) * r * 0.45;
+              coeur(x, y, r * (0.12 + 0.08 * q), Math.sin(q * Math.PI) * 0.95);
+            }
+          });
+        }
+      }
+
+      if (type === "jeu" && duo.length === 2) {
+        var c = cycle(t, 2.4);
+        var g = versEcran(duo[0].objet, 162, 94, bz), d = versEcran(duo[1].objet, 58, 94, bz);
+        var pos;
+        if (c < 0.4) { var q1 = c / 0.4; pos = { x: mix(g.x, d.x, q1), y: mix(g.y, d.y, q1) - Math.sin(q1 * Math.PI) * r * 1.35 }; }
+        else if (c < 0.5) pos = d;
+        else if (c < 0.9) { var q2 = (c - 0.5) / 0.4; pos = { x: mix(d.x, g.x, q2), y: mix(d.y, g.y, q2) - Math.sin(q2 * Math.PI) * r * 1.35 }; }
+        else pos = g;
+        ballon(pos.x, pos.y, r * 0.13, t * 5);
       }
       requestAnimationFrame(image);
     }
 
     return {
-      etape: function (nouveauType) { type = nouveauType; debutEtape = performance.now(); },
+      etape: function (nouveauType) { type = nouveauType; debutEtape = performance.now() / 1000; },
       reste: function (s) { reste = s; },
+      calin: function (oui) { calin = oui; },
       demarrer: function () { if (!actif) { actif = true; requestAnimationFrame(image); } },
       arreter: function () { actif = false; $("sceneZone").classList.remove("fort", "presse"); }
     };
   })();
+
+  // ---------- Avatars animés (routine, bravo, départ) ----------
+  var animes = [];          // {objet, etat, zone, sens}
+  var progressionEtape = 0, parentAnime = null;
+
+  function animerAvatars() {
+    var t = performance.now() / 1000;
+    animes = animes.filter(function (a) { return document.body.contains(a.objet.svg); });
+    animes.forEach(function (a) {
+      a.objet.maj(a.etat, a.etat.activite, t, a.zone === "routine" ? progressionEtape : 0, a.sens);
+    });
+    if (parentAnime && $("anneau").classList.contains("calin")) parentAnime.maj(t);
+    requestAnimationFrame(animerAvatars);
+  }
+
+  function poserAvatars(zone, ids, etat, avecPrenom) {
+    animes = animes.filter(function (a) { return a.zone !== zone; });
+    ids.forEach(function (id, n) {
+      var f = FILLES[n], boite = $(id);
+      if (!f || !boite) return;
+      boite.innerHTML = avecPrenom ? '<div class="avatar" style="--f:' + f.couleur + '"><div class="prenom">' + f.nom + '</div></div>' : "";
+      var hote = avecPrenom ? boite.firstChild : boite;
+      var objet = AVATARS.creer(hote, f, regl.avatars[f.nom]);
+      if (avecPrenom) hote.insertBefore(objet.svg, hote.firstChild);
+      var e = MATIN.copie(etat);
+      objet.maj(e, e.activite, performance.now() / 1000, 0, n === 0 ? 1 : -1);
+      animes.push({ objet: objet, etat: e, zone: zone, sens: n === 0 ? 1 : -1 });
+    });
+  }
 
   // ---------- Affichage d'une routine ----------
   var etatCourant = null, cible = null, cleEtape = null, pisteSig = null, idxCourant = 0;
@@ -884,12 +686,9 @@
 
   function dessinerAvatars(r, i) {
     var etat = MATIN.etatAvatar(r, i);
-    ["coteGauche", "coteDroit"].forEach(function (id, n) {
-      var f = FILLES[n];
-      if (!f) return;
-      $(id).innerHTML = '<div class="avatar" style="--f:' + f.couleur + '">' + MATIN.avatarSVG(f.nom, regl.avatars[f.nom], etat) +
-                        '<div class="prenom">' + f.nom + '</div></div>';
-    });
+    poserAvatars("routine", ["coteGauche", "coteDroit"], etat, true);
+    $("parentAnneau").innerHTML = "";
+    parentAnime = etat.calin ? AVATARS.creerParent($("parentAnneau"), PARENT) : null;
   }
 
   function construirePiste(r) {
@@ -953,12 +752,16 @@
     if (cle !== cleEtape) {
       cleEtape = cle;
       afficherEtape(r, i);
-      Scene.etape(MATIN.sceneDe(e));
+      Scene.etape(MATIN.activiteDe(e));
       alerteFaite = (e.f - s) <= 60;
       if (demarre) annoncer(r, i);
     }
     var dur = Math.max(1, e.f - e.d), reste = Math.max(0, e.f - s);
     Scene.reste(reste);
+    progressionEtape = Math.max(0, Math.min(1, (s - e.d) / dur));
+    var enCalin = !!parentAnime && progressionEtape >= 0.5;
+    $("anneau").classList.toggle("calin", enCalin);
+    Scene.calin(enCalin);
     $("arc").style.strokeDashoffset = C * (1 - reste / dur);
     $("restant").innerHTML = reste > 60
       ? "<b>" + Math.ceil(reste / 60) + "</b> min"
@@ -1063,10 +866,8 @@
       '<div class="bravo-titre">Bravo les filles !</div>' +
       '<div class="bravo-contenu"><div class="bravo-filles">' + FILLES.map(function (f) {
         var n = notes[f.nom] || 0;
-        var etat = MATIN.etatAvatar(cible && cible.r, cible ? cible.r.etapes.length - 1 : 0);
-        etat.animation = "coucou"; etat.expression = "rire";
         return '<div class="bravo-fille" style="--f:' + f.couleur + '">' +
-               '<div class="avatar-bravo">' + MATIN.avatarSVG(f.nom, regl.avatars[f.nom], etat) + '</div>' +
+               '<div class="avatar-bravo" id="bravoAv' + FILLES.indexOf(f) + '"></div>' +
                '<div class="nom">' + f.nom + '</div>' +
                '<div class="gagne">' + new Array(n + 1).join("★") + '</div>' +
                '<div class="total">Total : ' + MATIN.total(stock, f.nom) + ' ⭐</div></div>';
@@ -1076,6 +877,10 @@
     $("notesBoite").style.display = "none";
     $("bravo").style.display = "block";
     $("notes").classList.add("visible");
+    var etatBravo = MATIN.etatFinAvatar(cible && cible.r);
+    etatBravo.activite = "coucou";
+    etatBravo.cartable = false;
+    poserAvatars("bravo", ["bravoAv0", "bravoAv1"], etatBravo, false);
     jouer("fanfare");
     var phrase = FILLES.filter(function (f) { return notes[f.nom]; }).map(function (f) {
       return "Bravo " + f.nom + ", " + pluriel(notes[f.nom], "étoile") + " !";
@@ -1176,6 +981,7 @@
       if (etat !== "routine") { cleEtape = null; pisteSig = null; }
       etatCourant = cleEtat;
       montrerEcran(etat);
+      if (etat === "fin") poserAvatars("fin", ["finGauche", "finDroite"], MATIN.etatFinAvatar(nouvelle.r), true);
     }
     cible = nouvelle;
     var fete = decor.fete ? "🎂 Joyeux anniversaire " + decor.fete.nom + " !" : null;
@@ -1269,6 +1075,7 @@
   verifierNouvellesNotes();
   tick();
   setInterval(tick, 200);
+  requestAnimationFrame(animerAvatars);
   if (q.auto === "1") lancer(q.parent || "Papa");
 })();
 </script>

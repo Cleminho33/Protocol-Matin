@@ -144,7 +144,7 @@
   .avatar-reglage { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
   .avatar-reglage:last-child { border: none; }
   .apercu { width: 92px; flex-shrink: 0; text-align: center; }
-  .apercu svg { width: 92px; height: 138px; overflow: visible; }
+  .apercu svg { width: 100px; height: 118px; overflow: visible; }
   .apercu .nom { font-weight: 700; color: var(--f); font-size: 18px; }
   .options-avatar { flex: 1; min-width: 0; }
   .options-avatar > * + * { margin-top: 8px; }
@@ -277,6 +277,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="commun.js"></script>
+<script src="avatars.js"></script>
 <script>
 (function () {
   "use strict";
@@ -830,7 +831,6 @@
     { v: "", e: "👧👧", nom: "Les filles" }
   ];
   function dessinerAvatars(regl) {
-    var apercu = { tenue: "ecole", chaussures: true, pose: "coucou", expression: "sourire" };
     $("avatars").innerHTML = FILLES.map(function (f) {
       var a = regl.avatars[f.nom];
       var nuancier = Object.keys(MATIN.CHEVEUX).map(function (c) {
@@ -843,10 +843,14 @@
         }).join("") + '</select>';
       }
       return '<div class="avatar-reglage" style="--f:' + f.couleur + '">' +
-        '<div class="apercu">' + MATIN.avatarSVG(f.nom, a, apercu) + '<div class="nom">' + f.nom + '</div></div>' +
+        '<div class="apercu"><div id="apercu-' + f.nom + '"></div><div class="nom">' + f.nom + '</div></div>' +
         '<div class="options-avatar"><small>Cheveux</small><div class="nuancier">' + nuancier + '</div>' +
         liste("coiffure", MATIN.COIFFURES) + liste("accessoire", MATIN.ACCESSOIRES) + '</div></div>';
     }).join("");
+    FILLES.forEach(function (f, n) {
+      var av = AVATARS.creer($("apercu-" + f.nom), f, regl.avatars[f.nom]);
+      av.maj({ tenue: "ecole", chaussures: true }, "coucou", 0.3, 0, n === 0 ? 1 : -1);
+    });
   }
   $("avatars").addEventListener("click", function (ev) {
     var b = ev.target.closest("button[data-avatar]");
