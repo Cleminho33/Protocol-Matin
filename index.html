@@ -729,7 +729,9 @@
     var a = $("annonce");
     a.classList.remove("visible"); void a.offsetWidth; a.classList.add("visible");
     clearTimeout(timerAnnonce);
-    timerAnnonce = setTimeout(function () { a.classList.remove("visible"); }, 5000);
+    // en essai accéléré, l'annonce est raccourcie pour ne pas cacher les étapes courtes
+    var dureeAnnonce = SIM && SIM.vitesse > 3 ? Math.max(1200, 15000 / SIM.vitesse) : 5000;
+    timerAnnonce = setTimeout(function () { a.classList.remove("visible"); }, dureeAnnonce);
     jouer("etape");
     var phrase = perso(e.voix);
     if (i === 0 && decor.fete) {
