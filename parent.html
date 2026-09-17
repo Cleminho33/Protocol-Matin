@@ -560,7 +560,22 @@
   // =====================================================================
   var edition = null; // { id, r }
   var CHAMPS_ROUTINE = ["nom", "emoji", "jours", "ecole", "fin", "finEmoji", "finTitre", "finVoix", "finMessage", "finSous", "etoiles", "heureNotes"];
-  var CHAMPS_ETAPE = ["debut", "titre", "emoji", "couleur", "voix", "alerte", "rappels", "details"];
+  var CHAMPS_ETAPE = ["debut", "titre", "emoji", "couleur", "voix", "alerte", "rappels", "details", "scene"];
+  var SCENES = [
+    ["", "Animation : automatique selon l'étape"],
+    ["reveil", "☀️ Réveil : rayons et petits cœurs"],
+    ["repas", "🥣 Repas : vapeur et aliments qui sautent"],
+    ["habits", "👕 Habillage : vêtements qui volent"],
+    ["dents", "🫧 Dents : bulles"],
+    ["coiffure", "🎀 Coiffure : rubans et paillettes"],
+    ["rangement", "🧸 Rangement : jouets dans le panier"],
+    ["chaussures", "👣 Chaussures : traces de pas"],
+    ["jeu", "🎈 Jeu : ballons"],
+    ["bain", "🦆 Bain : bulles et canard"],
+    ["pyjama", "🌙 Pyjama : lune et étoiles"],
+    ["histoire", "📖 Histoire : la magie sort du livre"],
+    ["etoiles", "✨ Paillettes"]
+  ];
 
   function nettoyer(r) {
     var out = {};
@@ -670,6 +685,9 @@
           '<option value="voix"' + (e.rappels === "voix" ? " selected" : "") + '>Rappels du jour : lus à voix haute</option>' +
           '<option value="complet"' + (e.rappels === "complet" ? " selected" : "") + '>Rappels du jour : affichés en grand et lus</option>' +
         '</select>' +
+        '<select data-e="' + i + '" data-k="scene">' + SCENES.map(function (s) {
+          return '<option value="' + s[0] + '"' + ((e.scene || "") === s[0] ? " selected" : "") + '>' + s[1] + '</option>';
+        }).join("") + '</select>' +
         '<button type="button" class="btn danger petit" data-suppr-etape="' + i + '">Supprimer l\'étape</button>' +
         '</details></div>';
     });
@@ -736,7 +754,7 @@
   $("routineEditeur").addEventListener("change", function (ev) {
     var t = ev.target;
     if (t.type === "time") dessinerEditeur();   // retrie les étapes et met à jour les durées
-    if (t.tagName === "SELECT" && edition) edition.r.etapes[+t.getAttribute("data-e")].rappels = t.value;
+    if (t.tagName === "SELECT" && edition) edition.r.etapes[+t.getAttribute("data-e")][t.getAttribute("data-k")] = t.value;
   });
   $("routineEditeur").addEventListener("click", function (ev) {
     if (!edition) return;
