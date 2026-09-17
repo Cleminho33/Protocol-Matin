@@ -3,7 +3,7 @@ var MATIN = (function () {
   "use strict";
 
   // ✏️ Adresse de la base Firebase (Realtime Database). Vide = mode local, sans synchronisation.
-  var DB_URL = "";
+  var DB_URL = "https://protocol-matin-default-rtdb.europe-west1.firebasedatabase.app";
 
   var FILLES = [
     { nom: "Lou",  couleur: "#FF6B9D" },
