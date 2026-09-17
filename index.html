@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Le matin">
+<meta name="theme-color" content="#141833">
+<link rel="apple-touch-icon" href="icone.png">
+<title>Le matin de Lou et Alba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* --u = unité d'échelle : s'adapte à la télé (16:9) comme à l'iPad (4:3) */
+  :root { --c: #FF9F43; --nuit: #141833; --or: #FFD93D; --u: min(1vh, 0.6vw); }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: "Fredoka", "Trebuchet MS", "Segoe UI", sans-serif;
+    color: #fff; background: var(--nuit);
+    -webkit-user-select: none; user-select: none;
+  }
+  button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
+
+  #halo {
+    position: fixed; left: -20vw; top: -30vh; width: 90vw; height: 120vh;
+    border-radius: 50%; background: var(--c); opacity: .28; filter: blur(12vh);
+    transition: background-color 1.5s;
+  }
+
+  .ecran {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    padding: calc(var(--u) * 5) 5vw; display: none; flex-direction: column;
+  }
+  .ecran.actif { display: flex; }
+
+  /* ---------- Barre du haut ---------- */
+  .barre { display: flex; justify-content: space-between; align-items: center; gap: 2vw; }
+  .horloge { font-size: calc(var(--u) * 8); font-weight: 700; }
+  .bus {
+    font-size: calc(var(--u) * 5); font-weight: 600; background: rgba(255,255,255,.12);
+    padding: calc(var(--u) * 1.2) calc(var(--u) * 3); border-radius: 99px; white-space: nowrap;
+  }
+  .bus b { font-size: calc(var(--u) * 6); }
+  .compteurs {
+    display: flex; gap: calc(var(--u) * 1.5); border: none; background: none; color: inherit;
+  }
+  .compteur {
+    font-size: calc(var(--u) * 4.2); font-weight: 600; white-space: nowrap;
+    background: rgba(255,255,255,.1); border: calc(var(--u) * .5) solid var(--f);
+    padding: calc(var(--u) * .8) calc(var(--u) * 2.2); border-radius: 99px;
+  }
+  .compteur .n { color: var(--or); font-weight: 700; }
+
+  /* ---------- Étape en cours ---------- */
+  .scene { flex: 1; display: flex; align-items: center; gap: 5vw; min-height: 0; }
+  .anneau { position: relative; width: calc(var(--u) * 56); height: calc(var(--u) * 56); flex-shrink: 0; }
+  .anneau svg { width: 100%; height: 100%; }
+  .anneau .fond { fill: rgba(255,255,255,.06); stroke: rgba(255,255,255,.14); stroke-width: 18; }
+  .anneau .reste {
+    fill: none; stroke: var(--c); stroke-width: 18; stroke-linecap: round;
+    transition: stroke-dashoffset .3s linear, stroke 1.5s;
+  }
+  .emoji-centre {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: center; font-size: calc(var(--u) * 25);
+  }
+  .anneau.urgent { animation: battement 1s ease-in-out infinite; }
+  @keyframes battement { 50% { transform: scale(1.05); } }
+
+  .texte { min-width: 0; }
+  .etape-num { font-size: calc(var(--u) * 4); opacity: .7; font-weight: 500; }
+  .texte h1 { font-size: calc(var(--u) * 11); line-height: 1.05; margin: calc(var(--u) * 1) 0 calc(var(--u) * 3); }
+  .details { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 2); margin-bottom: calc(var(--u) * 3); }
+  .puce {
+    font-size: calc(var(--u) * 4.5); font-weight: 600; background: rgba(255,255,255,.12);
+    border: calc(var(--u) * .5) solid var(--c); padding: calc(var(--u) * 1) calc(var(--u) * 2.5); border-radius: 99px;
+  }
+  .puce .e { margin-right: calc(var(--u) * 1); }
+  .restant { font-size: calc(var(--u) * 6); font-weight: 500; }
+  .restant b { font-size: calc(var(--u) * 10); color: var(--c); }
+
+  /* ---------- La route vers le bus ---------- */
+  .route { display: flex; align-items: flex-end; gap: 2vw; height: calc(var(--u) * 19); }
+  .piste-zone { position: relative; flex: 1; height: 100%; }
+  .piste { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: .6vw; }
+  .seg { flex-basis: 0; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+  .seg-emoji { font-size: calc(var(--u) * 5); height: calc(var(--u) * 7); position: relative; }
+  .seg-barre { width: 100%; height: calc(var(--u) * 3.2); border-radius: 99px; }
+  .seg.fait { opacity: .35; }
+  .seg.fait .seg-emoji::after {
+    content: "✓"; position: absolute; right: calc(var(--u) * -2.2); top: calc(var(--u) * -1);
+    font-size: calc(var(--u) * 4); font-weight: 700; color: #7CFFB2;
+  }
+  .seg.encours .seg-emoji { font-size: calc(var(--u) * 6.5); }
+  .seg.encours .seg-barre { box-shadow: 0 0 calc(var(--u) * 2.5) var(--c); }
+  .perso {
+    position: absolute; bottom: calc(var(--u) * 3.6); font-size: calc(var(--u) * 6); transform: translateX(-50%);
+    transition: left .3s linear; white-space: nowrap;
+  }
+  .arret { font-size: calc(var(--u) * 9); line-height: 1; }
+
+  /* ---------- Écrans calmes (dodo, fin, repos) ---------- */
+  .calme { justify-content: center; align-items: center; text-align: center; }
+  .calme .grand { font-size: calc(var(--u) * 28); line-height: 1.1; }
+  .calme h2 { font-size: calc(var(--u) * 10); margin-top: calc(var(--u) * 2); }
+  .calme p { font-size: calc(var(--u) * 5.5); opacity: .8; margin-top: calc(var(--u) * 2); }
+  .calme .horloge { position: absolute; top: calc(var(--u) * 5); left: 5vw; }
+  .calme .compteurs { position: absolute; top: calc(var(--u) * 6); right: 5vw; }
+  .etoile-ciel { position: absolute; width: calc(var(--u) * .8); height: calc(var(--u) * .8); border-radius: 50%; background: #fff; animation: scintille 3s ease-in-out infinite; }
+  @keyframes scintille { 50% { opacity: .15; } }
+  .bus-roule { display: inline-block; animation: roule 6s linear infinite; }
+  @keyframes roule { from { transform: translateX(-70vw); } to { transform: translateX(70vw); } }
+
+  /* ---------- Annonce de changement d'étape ---------- */
+  #annonce {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(20,24,51,.92); text-align: center;
+    opacity: 0; pointer-events: none; transition: opacity .5s;
+  }
+  #annonce.visible { opacity: 1; }
+  #annonce .annonce-emoji { font-size: calc(var(--u) * 38); line-height: 1.1; }
+  #annonce.visible .annonce-emoji { animation: pop .9s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes pop { from { transform: scale(.2) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
+  #annonce .annonce-sur { font-size: calc(var(--u) * 6); color: var(--c); font-weight: 600; }
+  #annonce .annonce-titre { font-size: calc(var(--u) * 12); font-weight: 700; }
+
+  /* ---------- Les étoiles du matin ---------- */
+  #notes {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 15;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(20,24,51,.95); text-align: center;
+  }
+  #notes.visible { display: flex; }
+  .notes-titre { font-size: calc(var(--u) * 9); font-weight: 700; }
+  .notes-bus { font-size: calc(var(--u) * 4.5); opacity: .75; margin: calc(var(--u) * 1) 0 calc(var(--u) * 4); }
+  .ligne-fille {
+    display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 4);
+    margin-bottom: calc(var(--u) * 3);
+  }
+  .ligne-fille .nom {
+    width: calc(var(--u) * 30); text-align: right; font-size: calc(var(--u) * 9); font-weight: 700; color: var(--f);
+  }
+  .etoiles { display: flex; gap: calc(var(--u) * 1.5); }
+  .etoile-btn {
+    background: none; border: none; line-height: 1;
+    font-size: calc(var(--u) * 15); color: rgba(255,255,255,.18); transition: color .2s, transform .2s;
+  }
+  .etoile-btn.pleine { color: var(--or); text-shadow: 0 0 calc(var(--u) * 3) rgba(255,217,61,.6); transform: scale(1.08); }
+  .notes-actions { display: flex; gap: calc(var(--u) * 3); justify-content: center; margin-top: calc(var(--u) * 3); }
+  .btn {
+    font-size: calc(var(--u) * 5.5); font-weight: 700; border: none; border-radius: 99px;
+    padding: calc(var(--u) * 2) calc(var(--u) * 6);
+  }
+  .btn-principal { background: var(--or); color: var(--nuit); }
+  .btn-principal:disabled { opacity: .3; }
+  .btn-secondaire { background: rgba(255,255,255,.12); color: #fff; }
+  #bravo { display: none; }
+  #bravo .bravo-titre { font-size: calc(var(--u) * 12); font-weight: 700; margin-bottom: calc(var(--u) * 4); }
+  .bravo-fille { margin-bottom: calc(var(--u) * 4); animation: pop .9s cubic-bezier(.2,1.6,.4,1) backwards; }
+  .bravo-fille:nth-child(3) { animation-delay: .4s; }
+  .bravo-fille .nom { font-size: calc(var(--u) * 9); font-weight: 700; color: var(--f); }
+  .bravo-fille .gagne { font-size: calc(var(--u) * 11); color: var(--or); letter-spacing: .1em; }
+  .bravo-fille .total { font-size: calc(var(--u) * 5); opacity: .85; }
+
+  /* ---------- Démarrage ---------- */
+  #demarrer {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 20;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(20,24,51,.9); text-align: center; padding: 0 5vw;
+  }
+  #demarrer h2 { font-size: calc(var(--u) * 9); }
+  #demarrer p { font-size: calc(var(--u) * 4); opacity: .75; margin: calc(var(--u) * 2) 0 calc(var(--u) * 5); }
+  #modeTest {
+    position: fixed; bottom: calc(var(--u) * 1); right: 1vw; z-index: 30; font-size: calc(var(--u) * 2.2);
+    background: #EE5A52; padding: calc(var(--u) * .5) calc(var(--u) * 1.5); border-radius: 99px; display: none;
+  }
+</style>
+</head>
+<body>
+<div id="halo"></div>
+
+<!-- Pendant la routine -->
+<section id="routine" class="ecran">
+  <div class="barre">
+    <div class="horloge">7h25</div>
+    <button class="compteurs" aria-label="Donner les étoiles"></button>
+    <div class="bus">🚌 dans <b id="busMin">43</b> min</div>
+  </div>
+  <div class="scene">
+    <div class="anneau" id="anneau">
+      <svg viewBox="0 0 200 200">
+        <circle class="fond" cx="100" cy="100" r="88"></circle>
+        <circle class="reste" id="arc" cx="100" cy="100" r="88" transform="rotate(-90 100 100)"></circle>
+      </svg>
+      <div class="emoji-centre" id="emojiTache"></div>
+    </div>
+    <div class="texte">
+      <div class="etape-num" id="etapeNum"></div>
+      <h1 id="titreTache"></h1>
+      <div class="details" id="details"></div>
+      <div class="restant" id="restant"></div>
+    </div>
+  </div>
+  <div class="route">
+    <div class="piste-zone">
+      <div class="piste" id="piste"></div>
+      <div class="perso" id="perso">👧👧</div>
+    </div>
+    <div class="arret">🚏</div>
+  </div>
+</section>
+
+<!-- Avant le réveil -->
+<section id="dodo" class="ecran calme">
+  <div class="horloge">7h00</div>
+  <div class="grand">🌙</div>
+  <h2>Chut… tout le monde dort</h2>
+  <p id="dodoReste"></p>
+</section>
+
+<!-- Après le départ du bus -->
+<section id="fin" class="ecran calme">
+  <div class="horloge">8h08</div>
+  <button class="compteurs" aria-label="Donner les étoiles"></button>
+  <div class="grand"><span class="bus-roule">🚌</span></div>
+  <h2>Bonne journée les filles !</h2>
+  <p>❤️ À ce soir</p>
+</section>
+
+<!-- Pas d'école -->
+<section id="repos" class="ecran calme">
+  <div class="horloge">9h00</div>
+  <button class="compteurs" aria-label="Donner les étoiles"></button>
+  <div class="grand">🎉</div>
+  <h2>Pas d'école aujourd'hui</h2>
+  <p>Profitez bien !</p>
+</section>
+
+<div id="annonce">
+  <div class="annonce-emoji" id="annonceEmoji"></div>
+  <div class="annonce-sur">C'est l'heure !</div>
+  <div class="annonce-titre" id="annonceTitre"></div>
+</div>
+
+<div id="notes">
+  <div id="notesBoite">
+    <div class="notes-titre">⭐ Les étoiles du matin</div>
+    <div class="notes-bus" id="notesBus"></div>
+    <div id="notesFilles"></div>
+    <div class="notes-actions">
+      <button class="btn btn-secondaire" id="notesPlusTard">Plus tard</button>
+      <button class="btn btn-principal" id="notesValider" disabled>Valider</button>
+    </div>
+  </div>
+  <div id="bravo"></div>
+</div>
+
+<div id="demarrer">
+  <h2>☀️ Le matin de Lou et Alba</h2>
+  <p>Touche le bouton pour lancer (ça active la musique et la voix)</p>
+  <button class="btn btn-principal" id="btnGo">▶ C'est parti</button>
+</div>
+
+<div id="modeTest">MODE TEST</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // =====================================================================
+  // ✏️  LE MATIN : pour changer les horaires ou les étapes, c'est ici.
+  //     couleur = couleur de l'anneau, voix = phrase dite à voix haute,
+  //     details = pastilles sous le titre (facultatif),
+  //     alerte = phrase dite à 1 minute de la fin (facultatif).
+  // =====================================================================
+  var ROUTINE = [
+    { debut: "07:25", fin: "07:30", titre: "Réveil + câlins à Papa", emoji: "🤗", couleur: "#FF9F43",
+      voix: "Debout les filles ! C'est l'heure des câlins à Papa !" },
+    { debut: "07:30", fin: "07:45", titre: "Petit déjeuner", emoji: "🥣", couleur: "#EE5A52",
+      voix: "À table ! C'est l'heure du petit déjeuner." },
+    { debut: "07:45", fin: "07:50", titre: "On s'habille", emoji: "👕", couleur: "#2E86DE",
+      voix: "C'est l'heure de s'habiller !" },
+    { debut: "07:50", fin: "07:55", titre: "Dents + coiffure", emoji: "🪥", couleur: "#10AC84",
+      voix: "Brossage des dents et coiffure !",
+      details: [{ e: "🪥", t: "Les dents" }, { e: "🎀", t: "Les cheveux" }] },
+    { debut: "07:55", fin: "07:58", titre: "On range !", emoji: "🧺", couleur: "#A55EEA",
+      voix: "On range ! Le pyjama, la veilleuse et le petit déjeuner.",
+      details: [{ e: "👚", t: "Pyjama" }, { e: "💡", t: "Veilleuse" }, { e: "🥣", t: "Petit déj" }] },
+    { debut: "07:58", fin: "08:00", titre: "Les chaussures", emoji: "👟", couleur: "#00B8C4",
+      voix: "Les chaussures ! Vite, avant le temps libre !" },
+    { debut: "08:00", fin: "08:08", titre: "Temps libre", emoji: "🎈", couleur: "#F7B731",
+      voix: "Bravo les filles ! C'est le temps libre !",
+      alerte: "Plus qu'une minute ! On file au bus !" }
+  ];
+  var DEPART_BUS = "08:08";
+  var HEURE_NOTES = "08:06";          // l'écran des étoiles s'ouvre tout seul à cette heure
+  var JOURS_ECOLE = [1, 2, 3, 4, 5];  // 0 = dimanche, 1 = lundi … 6 = samedi
+  var FILLES = [
+    { nom: "Lou",  couleur: "#FF6B9D" },
+    { nom: "Alba", couleur: "#54A0FF" }
+  ];
+
+  // =====================================================================
+  // Test : ajoute à l'adresse  ?heure=07:44:50&vitesse=10&ecole=1
+  //        voix=0 pour couper la voix, auto=1 pour sauter l'écran de démarrage
+  // =====================================================================
+  var q = {};
+  location.search.replace(/^\?/, "").split("&").forEach(function (kv) {
+    if (!kv) return;
+    var p = kv.split("=");
+    q[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || "");
+  });
+
+  var SIM = null;
+  if (q.heure) {
+    var hp = q.heure.split(":"), base = new Date();
+    base.setHours(+hp[0], +hp[1], +(hp[2] || 0), 0);
+    SIM = { debut: base.getTime(), reel: Date.now(), vitesse: parseFloat(q.vitesse) || 1 };
+    document.getElementById("modeTest").style.display = "block";
+  }
+  var VOIX_ACTIVE = q.voix !== "0";
+  // En mode test, les étoiles sont rangées à part pour ne pas fausser les vrais compteurs
+  var CLE_STOCKAGE = SIM ? "matinDesFilles.test" : "matinDesFilles";
+
+  function $(id) { return document.getElementById(id); }
+  function sec(hhmm) { var p = hhmm.split(":"); return (+p[0]) * 3600 + (+p[1]) * 60; }
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function maintenant() {
+    return SIM ? new Date(SIM.debut + (Date.now() - SIM.reel) * SIM.vitesse) : new Date();
+  }
+  function cleJour(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function pluriel(n, mot) { return n + " " + mot + (n > 1 ? "s" : ""); }
+
+  ROUTINE.forEach(function (e) { e.d = sec(e.debut); e.f = sec(e.fin); });
+  var T_DEBUT = ROUTINE[0].d, T_BUS = sec(DEPART_BUS), T_NOTES = sec(HEURE_NOTES);
+  var C = 2 * Math.PI * 88;
+  $("arc").style.strokeDasharray = C;
+
+  // ---------- Mémoire des étoiles (sur l'appareil) ----------
+  function lire() {
+    try {
+      var brut = localStorage.getItem(CLE_STOCKAGE);
+      var data = brut ? JSON.parse(brut) : null;
+      if (data && data.notes) return data;
+    } catch (err) {}
+    return { notes: {} };
+  }
+  function ecrire(data) {
+    try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(data)); } catch (err) {}
+  }
+  function total(nom) {
+    var notes = lire().notes, t = 0;
+    for (var jour in notes) if (notes[jour][nom]) t += notes[jour][nom];
+    return t;
+  }
+  function majCompteurs() {
+    var html = FILLES.map(function (f) {
+      return '<span class="compteur" style="--f:' + f.couleur + '">' + f.nom +
+             ' <span class="n">⭐ ' + total(f.nom) + '</span></span>';
+    }).join("");
+    var blocs = document.querySelectorAll(".compteurs");
+    for (var k = 0; k < blocs.length; k++) blocs[k].innerHTML = html;
+  }
+
+  // ---------- Son (généré, aucun fichier) ----------
+  var audio = null;
+  function note(freq, t0, dur, vol) {
+    var o = audio.createOscillator(), g = audio.createGain();
+    o.type = "triangle"; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(audio.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  var SONS = {
+    etape:   [[523, 0], [659, .15], [784, .3], [1047, .45, .8]],
+    alerte:  [[880, 0, .25], [880, .35, .25]],
+    bus:     [[784, 0], [659, .2], [784, .4], [1047, .6], [1319, .8, 1]],
+    etoile:  [[1319, 0, .15]],
+    fanfare: [[523, 0, .2], [523, .2, .2], [523, .4, .2], [659, .6, .5], [587, 1.1, .2], [659, 1.3, .2], [784, 1.5, 1.2]]
+  };
+  function jouer(nom) {
+    if (!audio) return;
+    var t = audio.currentTime + 0.05;
+    SONS[nom].forEach(function (n) { note(n[0], t + n[1], n[2] || .4, .3); });
+  }
+
+  // ---------- Voix ----------
+  function parler(txt, delai) {
+    if (!VOIX_ACTIVE || !demarre || !window.speechSynthesis || !txt) return;
+    setTimeout(function () {
+      var u = new SpeechSynthesisUtterance(txt);
+      u.lang = "fr-FR"; u.rate = .95; u.pitch = 1.1;
+      var v = speechSynthesis.getVoices().filter(function (x) { return /^fr/i.test(x.lang); })[0];
+      if (v) u.voice = v;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    }, delai === undefined ? 1100 : delai);
+  }
+
+  // ---------- La route ----------
+  var piste = $("piste");
+  ROUTINE.forEach(function (e) {
+    var seg = document.createElement("div");
+    seg.className = "seg";
+    seg.style.flexGrow = (e.f - e.d);
+    seg.innerHTML = '<div class="seg-emoji">' + e.emoji + '</div>' +
+                    '<div class="seg-barre" style="background:' + e.couleur + '"></div>';
+    piste.appendChild(seg);
+  });
+
+  // ---------- Affichage de la routine ----------
+  var etatCourant = null, etapeCourante = -1, alerteFaite = false, demarre = false, timerAnnonce = null;
+
+  function montrerEcran(nom) {
+    ["routine", "dodo", "fin", "repos"].forEach(function (id) {
+      $(id).classList.toggle("actif", id === nom);
+    });
+    $("halo").style.display = nom === "routine" ? "block" : "none";
+  }
+
+  function afficherEtape(i) {
+    var e = ROUTINE[i];
+    document.documentElement.style.setProperty("--c", e.couleur);
+    $("halo").style.backgroundColor = e.couleur;
+    $("emojiTache").textContent = e.emoji;
+    $("titreTache").textContent = e.titre;
+    $("etapeNum").textContent = "Étape " + (i + 1) + " sur " + ROUTINE.length;
+    $("details").innerHTML = (e.details || []).map(function (d) {
+      return '<span class="puce"><span class="e">' + d.e + '</span>' + d.t + '</span>';
+    }).join("");
+    var segs = piste.children;
+    for (var k = 0; k < segs.length; k++) {
+      segs[k].className = "seg" + (k < i ? " fait" : k === i ? " encours" : "");
+    }
+  }
+
+  function annoncer(i) {
+    var e = ROUTINE[i];
+    $("annonceEmoji").textContent = e.emoji;
+    $("annonceTitre").textContent = e.titre;
+    var a = $("annonce");
+    a.classList.remove("visible"); void a.offsetWidth; a.classList.add("visible");
+    clearTimeout(timerAnnonce);
+    timerAnnonce = setTimeout(function () { a.classList.remove("visible"); }, 5000);
+    jouer("etape");
+    parler(e.voix);
+  }
+
+  function majRoutine(i, s) {
+    var e = ROUTINE[i];
+    if (i !== etapeCourante) {
+      etapeCourante = i;
+      afficherEtape(i);
+      alerteFaite = (e.f - s) <= 60;
+      if (demarre) annoncer(i);
+    }
+    var dur = e.f - e.d, r = Math.max(0, e.f - s);
+    $("arc").style.strokeDashoffset = C * (1 - r / dur);
+    $("restant").innerHTML = r > 60
+      ? "encore <b>" + Math.ceil(r / 60) + "</b> min"
+      : "encore <b>" + Math.ceil(r) + "</b> secondes";
+    $("anneau").classList.toggle("urgent", r <= 60);
+    if (demarre && !alerteFaite && r <= 60 && dur >= 180) {
+      alerteFaite = true;
+      jouer("alerte");
+      parler(e.alerte || "Plus qu'une minute !");
+    }
+    $("busMin").textContent = Math.ceil((T_BUS - s) / 60);
+    $("perso").style.left = ((s - T_DEBUT) / (T_BUS - T_DEBUT) * 100) + "%";
+  }
+
+  // ---------- Les étoiles du matin ----------
+  var notesEnCours = {}, jourNotes = null, autoOuvertLe = null, timerBravo = null;
+
+  function ouvrirNotes() {
+    jourNotes = cleJour(maintenant());
+    var deja = lire().notes[jourNotes] || {};
+    notesEnCours = {};
+    FILLES.forEach(function (f) { notesEnCours[f.nom] = deja[f.nom] || 0; });
+    $("notesFilles").innerHTML = FILLES.map(function (f) {
+      var btns = "";
+      for (var n = 1; n <= 3; n++) {
+        btns += '<button class="etoile-btn" data-nom="' + f.nom + '" data-n="' + n + '" aria-label="' + n + ' étoile">★</button>';
+      }
+      return '<div class="ligne-fille" style="--f:' + f.couleur + '"><div class="nom">' + f.nom +
+             '</div><div class="etoiles">' + btns + '</div></div>';
+    }).join("");
+    $("notesBoite").style.display = "block";
+    $("bravo").style.display = "none";
+    majEtoiles();
+    $("notes").classList.add("visible");
+  }
+
+  function majEtoiles() {
+    var btns = document.querySelectorAll(".etoile-btn"), complet = true;
+    for (var k = 0; k < btns.length; k++) {
+      var b = btns[k];
+      b.classList.toggle("pleine", +b.getAttribute("data-n") <= notesEnCours[b.getAttribute("data-nom")]);
+    }
+    FILLES.forEach(function (f) { if (!notesEnCours[f.nom]) complet = false; });
+    $("notesValider").disabled = !complet;
+  }
+
+  function fermerNotes() {
+    clearTimeout(timerBravo);
+    $("notes").classList.remove("visible");
+  }
+
+  function validerNotes() {
+    var data = lire();
+    data.notes[jourNotes] = {};
+    FILLES.forEach(function (f) { data.notes[jourNotes][f.nom] = notesEnCours[f.nom]; });
+    ecrire(data);
+    majCompteurs();
+
+    $("bravo").innerHTML = '<div class="bravo-titre">Bravo les filles !</div>' + FILLES.map(function (f) {
+      var n = notesEnCours[f.nom];
+      return '<div class="bravo-fille" style="--f:' + f.couleur + '"><div class="nom">' + f.nom + '</div>' +
+             '<div class="gagne">' + new Array(n + 1).join("★") + '</div>' +
+             '<div class="total">Total : ' + total(f.nom) + ' ⭐</div></div>';
+    }).join("");
+    $("notesBoite").style.display = "none";
+    $("bravo").style.display = "block";
+    jouer("fanfare");
+    parler(FILLES.map(function (f) {
+      return "Bravo " + f.nom + ", " + pluriel(notesEnCours[f.nom], "étoile") + " !";
+    }).join(" "), 900);
+    clearTimeout(timerBravo);
+    timerBravo = setTimeout(fermerNotes, 9000);
+  }
+
+  $("notesFilles").addEventListener("click", function (ev) {
+    var b = ev.target.closest(".etoile-btn");
+    if (!b) return;
+    notesEnCours[b.getAttribute("data-nom")] = +b.getAttribute("data-n");
+    jouer("etoile");
+    majEtoiles();
+  });
+  $("notesValider").addEventListener("click", validerNotes);
+  $("notesPlusTard").addEventListener("click", fermerNotes);
+  $("notes").addEventListener("click", function (ev) { if (ev.target.id === "bravo" || ev.target.closest("#bravo")) fermerNotes(); });
+  var blocsCompteurs = document.querySelectorAll(".compteurs");
+  for (var k = 0; k < blocsCompteurs.length; k++) blocsCompteurs[k].addEventListener("click", ouvrirNotes);
+
+  // ---------- Boucle principale ----------
+  function tick() {
+    var d = maintenant();
+    var s = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000;
+    var txt = d.getHours() + "h" + pad(d.getMinutes());
+    var horloges = document.querySelectorAll(".horloge");
+    for (var k = 0; k < horloges.length; k++) horloges[k].textContent = txt;
+
+    var ecole = q.ecole === "1" || JOURS_ECOLE.indexOf(d.getDay()) >= 0;
+    var etat, idx = 0;
+    if (!ecole) etat = "repos";
+    else if (s < T_DEBUT) etat = "dodo";
+    else if (s >= T_BUS) etat = "fin";
+    else {
+      etat = "routine";
+      for (var i = 0; i < ROUTINE.length; i++) if (s >= ROUTINE[i].d) idx = i;
+    }
+
+    if (etat !== etatCourant) {
+      if (etat === "fin" && etatCourant === "routine" && demarre) {
+        jouer("bus");
+        parler("C'est l'heure du bus ! Bonne journée les filles !");
+      }
+      if (etat !== "routine") etapeCourante = -1;
+      etatCourant = etat;
+      montrerEcran(etat);
+    }
+
+    if (etat === "dodo") {
+      var reste = T_DEBUT - s;
+      $("dodoReste").textContent = reste <= 3600
+        ? "Réveil dans " + Math.ceil(reste / 60) + " min"
+        : "Réveil à " + ROUTINE[0].debut.replace(":", "h");
+    }
+    if (etat === "routine") majRoutine(idx, s);
+
+    // Ouverture automatique des étoiles, une fois par jour d'école, si pas encore notées
+    var jour = cleJour(d);
+    if (demarre && ecole && s >= T_NOTES && s < T_BUS + 3600 && autoOuvertLe !== jour) {
+      autoOuvertLe = jour;
+      if (!lire().notes[jour]) {
+        ouvrirNotes();
+        jouer("etoile");
+        parler("Papa, c'est l'heure des étoiles !", 300);
+      }
+    }
+    var bus = T_BUS - s;
+    $("notesBus").textContent = ecole && bus > 0 && bus < 3600
+      ? "🚌 Le bus dans " + Math.ceil(bus / 60) + " min" : "";
+  }
+
+  // Étoiles du ciel de l'écran dodo
+  for (var n = 0; n < 40; n++) {
+    var et = document.createElement("div");
+    et.className = "etoile-ciel";
+    et.style.left = Math.random() * 100 + "%";
+    et.style.top = Math.random() * 100 + "%";
+    et.style.animationDelay = (Math.random() * 3) + "s";
+    $("dodo").appendChild(et);
+  }
+
+  // ---------- Démarrage ----------
+  function lancer() {
+    if (demarre) return;
+    demarre = true;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) { audio = new AC(); if (audio.resume) audio.resume(); }
+    } catch (err) { audio = null; }
+    // iPad : la voix doit parler une première fois pendant le toucher pour être débloquée
+    if (VOIX_ACTIVE && window.speechSynthesis) {
+      var u = new SpeechSynthesisUtterance("C'est parti !");
+      u.lang = "fr-FR";
+      speechSynthesis.speak(u);
+    }
+    $("demarrer").style.display = "none";
+    try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (err) {}
+    if (etatCourant === "routine") annoncer(etapeCourante);
+  }
+  $("btnGo").addEventListener("click", lancer);
+  document.addEventListener("keydown", function (ev) { if (!demarre) { ev.preventDefault(); lancer(); } });
+  if (window.speechSynthesis) speechSynthesis.getVoices();
+
+  majCompteurs();
+  tick();
+  setInterval(tick, 200);
+  if (q.auto === "1") lancer();
+})();
+</script>
+</body>
+</html>
