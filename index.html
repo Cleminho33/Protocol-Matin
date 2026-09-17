@@ -30,11 +30,47 @@
     transition: background-color 1.5s;
   }
 
+  /* ---------- Décor des saisons ---------- */
+  #decor { position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; pointer-events: none; }
+  .particule {
+    position: absolute; top: -12vh; line-height: 1;
+    animation: chute linear infinite; will-change: transform;
+  }
+  @keyframes chute {
+    0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+    25%  { transform: translate3d(3vw, 30vh, 0) rotate(60deg); }
+    50%  { transform: translate3d(-2vw, 62vh, 0) rotate(140deg); }
+    75%  { transform: translate3d(3vw, 92vh, 0) rotate(220deg); }
+    100% { transform: translate3d(0, 125vh, 0) rotate(300deg); }
+  }
+
   .ecran {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     padding: calc(var(--u) * 5) 5vw; display: none; flex-direction: column;
   }
   .ecran.actif { display: flex; }
+
+  /* ---------- Sundae ---------- */
+  .miroir { display: inline-block; transform: scaleX(-1); }
+  .sans-chat .miroir.mascotte { transform: none; }
+  .trot { display: inline-block; animation: trot .4s ease-in-out infinite alternate; }
+  @keyframes trot { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(calc(var(--u) * -1.2)) rotate(3deg); } }
+  .sundae-dodo { position: relative; display: inline-block; font-size: calc(var(--u) * 12); margin-top: calc(var(--u) * 3); }
+  .sundae-dodo .corps { display: inline-block; animation: respire 3s ease-in-out infinite; transform-origin: bottom; }
+  @keyframes respire { 50% { transform: scaleY(.92) scaleX(1.03); } }
+  .zzz {
+    position: absolute; right: calc(var(--u) * -5); top: calc(var(--u) * -4); font-size: calc(var(--u) * 5);
+    animation: zzz 3s ease-in infinite; opacity: 0;
+  }
+  @keyframes zzz { 0% { opacity: 0; transform: translate(0, 0) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(var(--u) * 4), calc(var(--u) * -8)) scale(1.2); } }
+  .sans-chat .sundae-dodo, .sans-chat .sundae-saut { display: none; }
+  .sundae-saut {
+    position: absolute; bottom: calc(var(--u) * 6); font-size: calc(var(--u) * 14);
+    animation: saut .9s cubic-bezier(.3,0,.6,1) infinite;
+  }
+  .sundae-saut.gauche { left: 6vw; }
+  .sundae-saut.droite { right: 6vw; animation-delay: .45s; }
+  @keyframes saut { 0%, 100% { transform: translateY(0) scaleY(.9); } 45% { transform: translateY(calc(var(--u) * -14)) scaleY(1.05); } }
 
   /* ---------- Barre du haut ---------- */
   .barre { display: flex; justify-content: space-between; align-items: center; gap: 2vw; }
@@ -53,6 +89,8 @@
     padding: calc(var(--u) * .8) calc(var(--u) * 2.2); border-radius: 99px;
   }
   .compteur .n { color: var(--or); font-weight: 700; }
+  .compteur.bocal { --f: var(--or); }
+  .compteur.bocal.pleine { animation: battement 1s ease-in-out infinite; background: rgba(255,217,61,.25); }
 
   /* ---------- Étape en cours ---------- */
   .scene { flex: 1; display: flex; align-items: center; gap: 5vw; min-height: 0; }
@@ -79,12 +117,11 @@
     border: calc(var(--u) * .5) solid var(--c); padding: calc(var(--u) * 1) calc(var(--u) * 2.5); border-radius: 99px;
   }
   .puce.rappel { border-color: var(--or); background: rgba(255,217,61,.15); }
-  .puce .e { margin-right: calc(var(--u) * 1); }
   .restant { font-size: calc(var(--u) * 6); font-weight: 500; }
   .restant b { font-size: calc(var(--u) * 10); color: var(--c); }
   .rappels-ligne { font-size: calc(var(--u) * 3.8); margin-top: calc(var(--u) * 3); color: var(--or); font-weight: 600; }
 
-  /* ---------- La route vers le bus ---------- */
+  /* ---------- La route ---------- */
   .route { display: flex; align-items: flex-end; gap: 2vw; height: calc(var(--u) * 19); }
   .piste-zone { position: relative; flex: 1; height: 100%; }
   .piste { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: .6vw; }
@@ -99,22 +136,23 @@
   .seg.encours .seg-emoji { font-size: calc(var(--u) * 6.5); }
   .seg.encours .seg-barre { box-shadow: 0 0 calc(var(--u) * 2.5) var(--c); }
   .perso {
-    position: absolute; bottom: calc(var(--u) * 3.6); font-size: calc(var(--u) * 6); transform: translateX(-50%);
+    position: absolute; bottom: calc(var(--u) * 3.6); font-size: calc(var(--u) * 7); transform: translateX(-50%);
     transition: left .3s linear; white-space: nowrap;
   }
   .arret { font-size: calc(var(--u) * 9); line-height: 1; }
 
-  /* ---------- Écrans calmes (dodo, fin, repos) ---------- */
+  /* ---------- Écrans calmes ---------- */
   .calme { justify-content: center; align-items: center; text-align: center; }
-  .calme .grand { font-size: calc(var(--u) * 28); line-height: 1.1; }
+  .calme .grand { font-size: calc(var(--u) * 26); line-height: 1.1; }
   .calme h2 { font-size: calc(var(--u) * 10); margin-top: calc(var(--u) * 2); }
   .calme p { font-size: calc(var(--u) * 5.5); opacity: .8; margin-top: calc(var(--u) * 2); }
   .calme .horloge { position: absolute; top: calc(var(--u) * 5); left: 5vw; }
   .calme .compteurs { position: absolute; top: calc(var(--u) * 6); right: 5vw; }
+  .calme p.bocal-ligne { color: var(--or); opacity: 1; font-size: calc(var(--u) * 4.5); }
   .etoile-ciel { position: absolute; width: calc(var(--u) * .8); height: calc(var(--u) * .8); border-radius: 50%; background: #fff; animation: scintille 3s ease-in-out infinite; }
   @keyframes scintille { 50% { opacity: .15; } }
-  .bus-roule { display: inline-block; animation: roule 6s linear infinite; }
-  @keyframes roule { from { transform: translateX(-70vw); } to { transform: translateX(70vw); } }
+  .bus-roule { display: inline-block; animation: roule 7s linear infinite; white-space: nowrap; }
+  @keyframes roule { from { transform: translateX(-80vw); } to { transform: translateX(80vw); } }
 
   /* ---------- Annonce de changement d'étape ---------- */
   #annonce {
@@ -130,7 +168,7 @@
   #annonce .annonce-sur { font-size: calc(var(--u) * 6); color: var(--c); font-weight: 600; }
   #annonce .annonce-titre { font-size: calc(var(--u) * 12); font-weight: 700; }
 
-  /* ---------- Les étoiles du matin ---------- */
+  /* ---------- Les étoiles ---------- */
   #notes {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 15;
     display: none; align-items: center; justify-content: center;
@@ -161,12 +199,22 @@
   .btn-principal:disabled { opacity: .3; }
   .btn-secondaire { background: rgba(255,255,255,.12); color: #fff; }
   #bravo { display: none; }
-  #bravo .bravo-titre { font-size: calc(var(--u) * 12); font-weight: 700; margin-bottom: calc(var(--u) * 4); }
-  .bravo-fille { margin-bottom: calc(var(--u) * 4); animation: pop .9s cubic-bezier(.2,1.6,.4,1) backwards; }
-  .bravo-fille:nth-child(3) { animation-delay: .4s; }
-  .bravo-fille .nom { font-size: calc(var(--u) * 9); font-weight: 700; color: var(--f); }
-  .bravo-fille .gagne { font-size: calc(var(--u) * 11); color: var(--or); letter-spacing: .1em; }
-  .bravo-fille .total { font-size: calc(var(--u) * 5); opacity: .85; }
+  .bravo-contenu { display: flex; align-items: center; gap: 6vw; }
+  .bravo-titre { font-size: calc(var(--u) * 11); font-weight: 700; margin-bottom: calc(var(--u) * 3); }
+  .bravo-fille { margin-bottom: calc(var(--u) * 3); animation: pop .9s cubic-bezier(.2,1.6,.4,1) backwards; }
+  .bravo-fille + .bravo-fille { animation-delay: .4s; }
+  .bravo-fille .nom { font-size: calc(var(--u) * 8); font-weight: 700; color: var(--f); }
+  .bravo-fille .gagne { font-size: calc(var(--u) * 10); color: var(--or); letter-spacing: .1em; line-height: 1.1; }
+  .bravo-fille .total { font-size: calc(var(--u) * 4.5); opacity: .85; }
+  .bocal { width: calc(var(--u) * 30); text-align: center; }
+  .bocal svg { width: calc(var(--u) * 26); height: calc(var(--u) * 31); overflow: visible; }
+  .bocal .niveau {
+    transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0);
+    transition: transform 1.6s cubic-bezier(.3,.7,.3,1);
+  }
+  .bocal .texte-bocal { font-size: calc(var(--u) * 4.2); font-weight: 600; margin-top: calc(var(--u) * 1.5); }
+  .bocal .chiffre { font-size: calc(var(--u) * 7); font-weight: 700; color: var(--or); }
+  .bocal.pleine svg { animation: battement .8s ease-in-out 1.6s infinite; }
 
   /* ---------- Démarrage ---------- */
   #demarrer {
@@ -186,13 +234,14 @@
 </head>
 <body>
 <div id="halo"></div>
+<div id="decor"></div>
 
-<!-- Pendant la routine -->
+<!-- Pendant une routine -->
 <section id="routine" class="ecran">
   <div class="barre">
     <div class="horloge">7h25</div>
     <button class="compteurs" aria-label="Donner les étoiles"></button>
-    <div class="bus">🚌 dans <b id="busMin">43</b> min</div>
+    <div class="bus"><span id="finEmoji">🚌</span> dans <b id="busMin">43</b> min</div>
   </div>
   <div class="scene">
     <div class="anneau" id="anneau">
@@ -213,36 +262,48 @@
   <div class="route">
     <div class="piste-zone">
       <div class="piste" id="piste"></div>
-      <div class="perso" id="perso">👧👧</div>
+      <div class="perso" id="perso"><span class="trot"><span class="miroir mascotte">🐈</span></span></div>
     </div>
-    <div class="arret">🚏</div>
+    <div class="arret" id="arret">🚏</div>
   </div>
 </section>
 
-<!-- Avant le réveil -->
+<!-- Avant la routine du matin -->
 <section id="dodo" class="ecran calme">
   <div class="horloge">7h00</div>
   <div class="grand">🌙</div>
-  <h2>Chut… tout le monde dort</h2>
+  <h2 id="dodoTitre">Chut… tout le monde dort</h2>
   <p id="dodoReste"></p>
+  <div class="sundae-dodo"><span class="corps miroir mascotte">🐈</span><span class="zzz">💤</span></div>
 </section>
 
-<!-- Après le départ du bus -->
+<!-- Avant une routine de la journée -->
+<section id="attente" class="ecran calme">
+  <div class="horloge">19h00</div>
+  <button class="compteurs" aria-label="Donner les étoiles"></button>
+  <div class="grand" id="attenteEmoji">🌙</div>
+  <h2 id="attenteTitre"></h2>
+  <p id="attenteTexte"></p>
+</section>
+
+<!-- Après une routine -->
 <section id="fin" class="ecran calme">
   <div class="horloge">8h08</div>
   <button class="compteurs" aria-label="Donner les étoiles"></button>
-  <div class="grand"><span class="bus-roule">🚌</span></div>
-  <h2>Bonne journée les filles !</h2>
-  <p>❤️ À ce soir</p>
+  <div class="grand"><span class="bus-roule"><span class="miroir"><span id="finAnim">🚌</span> <span class="trot"><span class="mascotte">🐈</span></span></span></span></div>
+  <h2 id="finMessage">Bonne journée les filles !</h2>
+  <p id="finSous">❤️ À ce soir</p>
+  <p class="bocal-ligne" id="finBocal"></p>
 </section>
 
-<!-- Pas d'école -->
+<!-- Rien aujourd'hui -->
 <section id="repos" class="ecran calme">
   <div class="horloge">9h00</div>
   <button class="compteurs" aria-label="Donner les étoiles"></button>
-  <div class="grand">🎉</div>
-  <h2>Pas d'école aujourd'hui</h2>
+  <div class="grand" id="reposEmoji">🎉</div>
+  <h2 id="reposTitre">Pas d'école aujourd'hui</h2>
   <p id="reposTexte">Profitez bien !</p>
+  <p class="bocal-ligne" id="reposBocal"></p>
 </section>
 
 <div id="annonce">
@@ -253,7 +314,7 @@
 
 <div id="notes">
   <div id="notesBoite">
-    <div class="notes-titre">⭐ Les étoiles du matin</div>
+    <div class="notes-titre" id="notesTitre">⭐ Les étoiles du matin</div>
     <div class="notes-bus" id="notesBus"></div>
     <div id="notesFilles"></div>
     <div class="notes-actions">
@@ -266,7 +327,7 @@
 
 <div id="demarrer">
   <h2>☀️ Le matin de Lou et Alba</h2>
-  <p>Qui est là ce matin ?</p>
+  <p>Qui est là aujourd'hui ?</p>
   <div class="choix-parent">
     <button class="btn btn-principal" data-parent="Papa">👨 Papa</button>
     <button class="btn btn-principal" data-parent="Maman">👩 Maman</button>
@@ -281,41 +342,14 @@
 (function () {
   "use strict";
 
-  // =====================================================================
-  // ✏️  LE MATIN : pour changer les horaires ou les étapes, c'est ici.
-  //     {parent} est remplacé par Papa ou Maman selon le bouton du démarrage.
-  //     couleur = couleur de l'anneau, voix = phrase dite à voix haute,
-  //     details = pastilles sous le titre (facultatif),
-  //     alerte = phrase dite à 1 minute de la fin (facultatif),
-  //     rappels = "voix" (lus à voix haute) ou "complet" (affichés en grand et lus).
-  // =====================================================================
-  var ROUTINE = [
-    { debut: "07:25", fin: "07:30", titre: "Réveil + câlins à {parent}", emoji: "🤗", couleur: "#FF9F43",
-      voix: "Debout les filles ! C'est l'heure des câlins à {parent} !", rappels: "voix" },
-    { debut: "07:30", fin: "07:45", titre: "Petit déjeuner", emoji: "🥣", couleur: "#EE5A52",
-      voix: "À table ! C'est l'heure du petit déjeuner." },
-    { debut: "07:45", fin: "07:50", titre: "On s'habille", emoji: "👕", couleur: "#2E86DE",
-      voix: "C'est l'heure de s'habiller !" },
-    { debut: "07:50", fin: "07:55", titre: "Dents + coiffure", emoji: "🪥", couleur: "#10AC84",
-      voix: "Brossage des dents et coiffure !",
-      details: [{ e: "🪥", t: "Les dents" }, { e: "🎀", t: "Les cheveux" }] },
-    { debut: "07:55", fin: "07:58", titre: "On range !", emoji: "🧺", couleur: "#A55EEA",
-      voix: "On range ! Le pyjama, la veilleuse et le petit déjeuner.",
-      details: [{ e: "👚", t: "Pyjama" }, { e: "💡", t: "Veilleuse" }, { e: "🥣", t: "Petit déj" }] },
-    { debut: "07:58", fin: "08:00", titre: "Les chaussures", emoji: "👟", couleur: "#00B8C4",
-      voix: "Les chaussures ! Vite, avant le temps libre !", rappels: "complet" },
-    { debut: "08:00", fin: "08:08", titre: "Temps libre", emoji: "🎈", couleur: "#F7B731",
-      voix: "Bravo les filles ! C'est le temps libre !",
-      alerte: "Plus qu'une minute ! On file au bus !" }
-  ];
-  var DEPART_BUS = "08:08";
-  var HEURE_NOTES = "08:06";  // l'écran des étoiles s'ouvre tout seul à cette heure
-  // Les jours d'école, les rappels et les vacances se règlent dans l'espace parent (parent.html).
+  // Les routines (horaires, étapes, voix) se modifient dans l'espace parent, onglet Routines.
+  // La routine École d'origine est dans commun.js.
 
   // =====================================================================
   // Test : ajoute à l'adresse  ?heure=07:44:50&vitesse=10&ecole=1
-  //        voix=0 pour couper la voix, auto=1 pour sauter l'écran de démarrage
-  //        En mode test, rien n'est envoyé en ligne.
+  //        routine=<id> pour tester une routine précise, voix=0 pour couper la voix,
+  //        auto=1 pour sauter l'écran de démarrage, parent=Maman.
+  //        En mode test, rien n'est enregistré.
   // =====================================================================
   var q = {};
   location.search.replace(/^\?/, "").split("&").forEach(function (kv) {
@@ -337,29 +371,71 @@
   var PARENT = "Papa";
 
   function $(id) { return document.getElementById(id); }
-  function sec(hhmm) { var p = hhmm.split(":"); return (+p[0]) * 3600 + (+p[1]) * 60; }
-  var pad = MATIN.pad, cleJour = MATIN.cleJour;
+  var pad = MATIN.pad, cleJour = MATIN.cleJour, sec = MATIN.sec, esc = MATIN.esc;
   function maintenant() {
     return SIM ? new Date(SIM.debut + (Date.now() - SIM.reel) * SIM.vitesse) : new Date();
   }
   function pluriel(n, mot) { return n + " " + mot + (n > 1 ? "s" : ""); }
   function perso(t) { return (t || "").replace(/\{parent\}/g, PARENT); }
-  function esc(t) {
-    return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+  function heureLisible(hhmm) { return String(hhmm).replace(/^0/, "").replace(":", "h"); }
+  function dansMinutes(secondes) {
+    var m = Math.ceil(secondes / 60);
+    return m >= 60 ? Math.floor(m / 60) + " h " + (m % 60 ? pad(m % 60) : "") : m + " min";
   }
 
-  ROUTINE.forEach(function (e) { e.d = sec(e.debut); e.f = sec(e.fin); });
-  var T_DEBUT = ROUTINE[0].d, T_BUS = sec(DEPART_BUS), T_NOTES = sec(HEURE_NOTES);
   var C = 2 * Math.PI * 88;
   $("arc").style.strokeDasharray = C;
+
+  // ---------- Programme du jour et réglages (recalculés quand les données changent) ----------
+  var progCle = null, prog = null;
+  function programmeDuJour(d) {
+    var cle = cleJour(d) + "|" + stock.version() + "|" + Math.floor(Date.now() / 60000);
+    if (cle !== progCle) {
+      progCle = cle;
+      prog = MATIN.programme(stock, d, { forcer: q.ecole === "1" || !!q.routine, routine: q.routine });
+      prog.routines.forEach(function (x) { x.sig = JSON.stringify(x.r); });
+    }
+    return prog;
+  }
+  var decorCle = null, decor = { particules: [], fete: null }, regl = MATIN.reglages(stock);
+  function majReglages(d) {
+    regl = MATIN.reglages(stock);
+    decor = MATIN.decorDuJour(d, regl);
+    document.body.classList.toggle("sans-chat", !regl.mascotte);
+    var masc = document.querySelectorAll(".mascotte");
+    for (var k = 0; k < masc.length; k++) masc[k].textContent = regl.mascotte || "👧👧";
+    var cle = decor.particules.join("");
+    if (cle !== decorCle) { decorCle = cle; construireDecor(decor.particules); }
+  }
+  function construireDecor(liste) {
+    var html = "";
+    if (liste.length) {
+      for (var n = 0; n < 16; n++) {
+        var taille = 3 + Math.random() * 3.5;
+        html += '<span class="particule" style="left:' + (Math.random() * 96) + '%;font-size:calc(var(--u) * ' + taille.toFixed(1) +
+                ');opacity:' + (0.35 + Math.random() * 0.3).toFixed(2) + ';animation-duration:' + (11 + Math.random() * 9).toFixed(1) +
+                's;animation-delay:-' + (Math.random() * 20).toFixed(1) + 's">' + liste[n % liste.length] + '</span>';
+      }
+    }
+    $("decor").innerHTML = html;
+  }
 
   function majCompteurs() {
     var html = FILLES.map(function (f) {
       return '<span class="compteur" style="--f:' + f.couleur + '">' + f.nom +
              ' <span class="n">⭐ ' + MATIN.total(stock, f.nom) + '</span></span>';
     }).join("");
+    var c = MATIN.cagnotte(stock);
+    if (c) {
+      html += '<span class="compteur bocal' + (c.pleine ? " pleine" : "") + '">' + (c.pleine ? "🎉" : "🫙") +
+              ' <span class="n">' + Math.min(c.progres, c.objectif) + "/" + c.objectif + '</span></span>';
+    }
     var blocs = document.querySelectorAll(".compteurs");
     for (var k = 0; k < blocs.length; k++) blocs[k].innerHTML = html;
+    var texte = !c ? "" : c.pleine ? "🎉 Le bocal est plein : " + c.recompense
+      : "🫙 Encore " + pluriel(c.objectif - c.progres, "étoile") + " pour " + c.recompense;
+    $("finBocal").textContent = texte;
+    $("reposBocal").textContent = texte;
   }
 
   // ---------- Son (généré, aucun fichier) ----------
@@ -378,11 +454,12 @@
     alerte:  [[880, 0, .25], [880, .35, .25]],
     bus:     [[784, 0], [659, .2], [784, .4], [1047, .6], [1319, .8, 1]],
     etoile:  [[1319, 0, .15]],
-    fanfare: [[523, 0, .2], [523, .2, .2], [523, .4, .2], [659, .6, .5], [587, 1.1, .2], [659, 1.3, .2], [784, 1.5, 1.2]]
+    fanfare: [[523, 0, .2], [523, .2, .2], [523, .4, .2], [659, .6, .5], [587, 1.1, .2], [659, 1.3, .2], [784, 1.5, 1.2]],
+    bocal:   [[784, 0, .15], [988, .12, .15], [1175, .24, .15], [1568, .36, .9], [1319, 1.2, .2], [1568, 1.4, 1.2]]
   };
-  function jouer(nom) {
+  function jouer(nom, decalage) {
     if (!audio) return;
-    var t = audio.currentTime + 0.05;
+    var t = audio.currentTime + 0.05 + (decalage || 0);
     SONS[nom].forEach(function (n) { note(n[0], t + n[1], n[2] || .4, .3); });
   }
 
@@ -399,52 +476,49 @@
     }, delai === undefined ? 1100 : delai);
   }
 
-  // ---------- La route ----------
-  var piste = $("piste");
-  ROUTINE.forEach(function (e) {
-    var seg = document.createElement("div");
-    seg.className = "seg";
-    seg.style.flexGrow = (e.f - e.d);
-    seg.innerHTML = '<div class="seg-emoji">' + e.emoji + '</div>' +
-                    '<div class="seg-barre" style="background:' + e.couleur + '"></div>';
-    piste.appendChild(seg);
-  });
-
-  // ---------- Affichage de la routine ----------
-  var etatCourant = null, etapeCourante = -1, alerteFaite = false, demarre = false, timerAnnonce = null;
+  // ---------- Affichage d'une routine ----------
+  var etatCourant = null, cible = null, cleEtape = null, pisteSig = null, idxCourant = 0;
+  var alerteFaite = false, demarre = false, timerAnnonce = null;
 
   function montrerEcran(nom) {
-    ["routine", "dodo", "fin", "repos"].forEach(function (id) {
+    ["routine", "dodo", "attente", "fin", "repos"].forEach(function (id) {
       $(id).classList.toggle("actif", id === nom);
     });
     $("halo").style.display = nom === "routine" ? "block" : "none";
   }
 
-  function afficherEtape(i) {
-    var e = ROUTINE[i];
+  function construirePiste(r) {
+    $("piste").innerHTML = r.etapes.map(function (e) {
+      return '<div class="seg" style="flex-grow:' + (e.f - e.d) + '"><div class="seg-emoji">' + esc(e.emoji) + '</div>' +
+             '<div class="seg-barre" style="background:' + esc(e.couleur) + '"></div></div>';
+    }).join("");
+    $("arret").textContent = r.finEmoji || "🏁";
+    $("finEmoji").textContent = r.finEmoji || "🏁";
+  }
+
+  function afficherEtape(r, i) {
+    var e = r.etapes[i];
     var rappels = MATIN.rappelsDuJour(stock, maintenant());
     document.documentElement.style.setProperty("--c", e.couleur);
     $("halo").style.backgroundColor = e.couleur;
     $("emojiTache").textContent = e.emoji;
     $("titreTache").textContent = perso(e.titre);
-    $("etapeNum").textContent = "Étape " + (i + 1) + " sur " + ROUTINE.length;
-    var puces = (e.details || []).map(function (d) {
-      return '<span class="puce"><span class="e">' + d.e + '</span>' + esc(d.t) + '</span>';
-    });
+    $("etapeNum").textContent = "Étape " + (i + 1) + " sur " + r.etapes.length;
+    var puces = e.details.map(function (t) { return '<span class="puce">' + esc(t) + '</span>'; });
     if (e.rappels === "complet") {
       rappels.forEach(function (t) { puces.push('<span class="puce rappel">📌 ' + esc(t) + '</span>'); });
     }
     $("details").innerHTML = puces.join("");
     $("rappelsLigne").textContent = (e.rappels !== "complet" && rappels.length)
       ? "📌 Aujourd'hui : " + rappels.join(" · ") : "";
-    var segs = piste.children;
+    var segs = $("piste").children;
     for (var k = 0; k < segs.length; k++) {
       segs[k].className = "seg" + (k < i ? " fait" : k === i ? " encours" : "");
     }
   }
 
-  function annoncer(i) {
-    var e = ROUTINE[i];
+  function annoncer(r, i) {
+    var e = r.etapes[i];
     $("annonceEmoji").textContent = e.emoji;
     $("annonceTitre").textContent = perso(e.titre);
     var a = $("annonce");
@@ -453,6 +527,9 @@
     timerAnnonce = setTimeout(function () { a.classList.remove("visible"); }, 5000);
     jouer("etape");
     var phrase = perso(e.voix);
+    if (i === 0 && decor.fete) {
+      phrase = "Joyeux anniversaire " + decor.fete.nom + " ! " + decor.fete.age + " ans aujourd'hui ! " + phrase;
+    }
     var rappels = MATIN.rappelsDuJour(stock, maintenant());
     if (e.rappels && rappels.length) {
       phrase += " Aujourd'hui, n'oubliez pas : " + rappels.map(MATIN.sansEmoji).join(", ") + ".";
@@ -460,41 +537,52 @@
     parler(phrase);
   }
 
-  function majRoutine(i, s) {
-    var e = ROUTINE[i];
-    if (i !== etapeCourante) {
-      etapeCourante = i;
-      afficherEtape(i);
+  function majRoutine(x, s) {
+    var r = x.r, i = 0;
+    for (var k = 0; k < r.etapes.length; k++) if (s >= r.etapes[k].d) i = k;
+    var e = r.etapes[i];
+    if (x.sig !== pisteSig) { pisteSig = x.sig; construirePiste(r); afficherEtape(r, i); }
+    var cle = x.id + "|" + e.debut + "|" + e.titre;
+    idxCourant = i;
+    if (cle !== cleEtape) {
+      cleEtape = cle;
+      afficherEtape(r, i);
       alerteFaite = (e.f - s) <= 60;
-      if (demarre) annoncer(i);
+      if (demarre) annoncer(r, i);
     }
-    var dur = e.f - e.d, r = Math.max(0, e.f - s);
-    $("arc").style.strokeDashoffset = C * (1 - r / dur);
-    $("restant").innerHTML = r > 60
-      ? "encore <b>" + Math.ceil(r / 60) + "</b> min"
-      : "encore <b>" + Math.ceil(r) + "</b> secondes";
-    $("anneau").classList.toggle("urgent", r <= 60);
-    if (demarre && !alerteFaite && r <= 60 && dur >= 180) {
+    var dur = Math.max(1, e.f - e.d), reste = Math.max(0, e.f - s);
+    $("arc").style.strokeDashoffset = C * (1 - reste / dur);
+    $("restant").innerHTML = reste > 60
+      ? "encore <b>" + Math.ceil(reste / 60) + "</b> min"
+      : "encore <b>" + Math.ceil(reste) + "</b> secondes";
+    $("anneau").classList.toggle("urgent", reste <= 60);
+    if (demarre && !alerteFaite && reste <= 60 && dur >= 180) {
       alerteFaite = true;
       jouer("alerte");
-      parler(e.alerte || "Plus qu'une minute !");
+      parler(perso(e.alerte) || "Plus qu'une minute !");
     }
-    $("busMin").textContent = Math.ceil((T_BUS - s) / 60);
-    $("perso").style.left = ((s - T_DEBUT) / (T_BUS - T_DEBUT) * 100) + "%";
+    $("busMin").textContent = Math.ceil((r.finS - s) / 60);
+    $("perso").style.left = ((s - r.debutS) / (r.finS - r.debutS) * 100) + "%";
   }
 
-  // ---------- Les étoiles du matin ----------
-  var notesEnCours = {}, jourNotes = null, autoOuvertLe = null, timerBravo = null;
-  var notesVues = null; // sert à repérer une nouvelle note, donnée ici ou depuis un téléphone
+  // ---------- Les étoiles ----------
+  var notesEnCours = {}, cleNotesOuvertes = null, autoOuvert = {}, timerBravo = null;
+  var notesVues = null; // pour repérer une nouvelle note, donnée ici ou depuis un téléphone
 
-  function notesDuJour() { return stock.lire("notes/" + cleJour(maintenant())) || null; }
-  function signatureNotes() { return cleJour(maintenant()) + JSON.stringify(notesDuJour()); }
+  function routinePourNotes() {
+    if (cible && cible.r.etoiles) return cible;
+    var p = programmeDuJour(maintenant());
+    for (var i = 0; i < p.routines.length; i++) if (p.routines[i].r.etoiles) return p.routines[i];
+    return { id: "ecole", r: { nom: "École", etoiles: true } };
+  }
 
-  function ouvrirNotes() {
-    jourNotes = cleJour(maintenant());
-    var deja = notesDuJour() || {};
+  function ouvrirNotes(x) {
+    x = x && x.r ? x : routinePourNotes();
+    cleNotesOuvertes = MATIN.cleNote(cleJour(maintenant()), x.id);
+    var deja = stock.lire("notes/" + cleNotesOuvertes) || {};
     notesEnCours = {};
     FILLES.forEach(function (f) { notesEnCours[f.nom] = deja[f.nom] || 0; });
+    $("notesTitre").textContent = "⭐ Les étoiles " + (x.id === "ecole" ? "du matin" : "· " + x.r.nom);
     $("notesFilles").innerHTML = FILLES.map(function (f) {
       var btns = "";
       for (var n = 1; n <= 3; n++) {
@@ -528,36 +616,82 @@
     var valeur = {};
     FILLES.forEach(function (f) { valeur[f.nom] = notesEnCours[f.nom]; });
     // L'écriture déclenche verifierNouvellesNotes, qui affiche le bravo
-    stock.ecrire("notes/" + jourNotes, valeur).catch(function () {});
+    stock.ecrire("notes/" + cleNotesOuvertes, valeur).catch(function () {});
   }
 
-  function montrerBravo(notes) {
-    $("bravo").innerHTML = '<div class="bravo-titre">Bravo les filles !</div>' + FILLES.map(function (f) {
-      var n = notes[f.nom] || 0;
-      return '<div class="bravo-fille" style="--f:' + f.couleur + '"><div class="nom">' + f.nom + '</div>' +
-             '<div class="gagne">' + new Array(n + 1).join("★") + '</div>' +
-             '<div class="total">Total : ' + MATIN.total(stock, f.nom) + ' ⭐</div></div>';
-    }).join("");
+  function somme(notes) {
+    return FILLES.reduce(function (t, f) { return t + ((notes && notes[f.nom]) || 0); }, 0);
+  }
+
+  var BOCAL_FORME = "M22 34 Q12 40 12 54 V106 Q12 120 28 120 H72 Q88 120 88 106 V54 Q88 40 78 34 Z";
+
+  function montrerBravo(notes, avant) {
+    var gagne = somme(notes) - somme(avant);
+    var c = MATIN.cagnotte(stock);
+    var htmlBocal = "", bocalRempli = false;
+    if (c) {
+      var avantProgres = Math.max(0, c.progres - gagne);
+      bocalRempli = avantProgres < c.objectif && c.pleine;
+      htmlBocal = '<div class="bocal' + (c.pleine ? " pleine" : "") + '">' +
+        '<svg viewBox="0 0 100 124"><defs><clipPath id="formeBocal"><path d="' + BOCAL_FORME + '"/></clipPath></defs>' +
+        '<g clip-path="url(#formeBocal)"><rect class="niveau" id="niveauBocal" x="0" y="34" width="100" height="86" fill="#FFD93D"/></g>' +
+        '<path d="' + BOCAL_FORME + '" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.85)" stroke-width="4"/>' +
+        '<rect x="24" y="20" width="52" height="14" rx="4" fill="#C8A26B"/>' +
+        '<text x="50" y="84" text-anchor="middle" font-size="26">' + (c.pleine ? "🎉" : "⭐") + '</text></svg>' +
+        '<div class="chiffre">' + Math.min(c.progres, c.objectif) + ' / ' + c.objectif + '</div>' +
+        '<div class="texte-bocal">' + (c.pleine ? "Le bocal est plein !<br>" + esc(c.recompense)
+          : "Encore " + pluriel(c.objectif - c.progres, "étoile") + "<br>pour " + esc(c.recompense)) + '</div></div>';
+      setTimeout(function () {
+        var niv = $("niveauBocal");
+        if (!niv) return;
+        niv.style.transition = "none";
+        niv.style.transform = "scaleY(" + Math.min(1, avantProgres / c.objectif) + ")";
+        void niv.getBoundingClientRect();
+        niv.style.transition = "";
+        setTimeout(function () { niv.style.transform = "scaleY(" + Math.min(1, c.progres / c.objectif) + ")"; }, 400);
+      }, 50);
+    }
+    $("bravo").innerHTML =
+      '<div class="bravo-titre">Bravo les filles !</div>' +
+      '<div class="bravo-contenu"><div>' + FILLES.map(function (f) {
+        var n = notes[f.nom] || 0;
+        return '<div class="bravo-fille" style="--f:' + f.couleur + '"><div class="nom">' + f.nom + '</div>' +
+               '<div class="gagne">' + new Array(n + 1).join("★") + '</div>' +
+               '<div class="total">Total : ' + MATIN.total(stock, f.nom) + ' ⭐</div></div>';
+      }).join("") + '</div>' + htmlBocal + '</div>' +
+      '<div class="sundae-saut gauche"><span class="mascotte">' + esc(regl.mascotte) + '</span></div>' +
+      '<div class="sundae-saut droite"><span class="miroir mascotte">' + esc(regl.mascotte) + '</span></div>';
     $("notesBoite").style.display = "none";
     $("bravo").style.display = "block";
     $("notes").classList.add("visible");
     jouer("fanfare");
-    parler(FILLES.filter(function (f) { return notes[f.nom]; }).map(function (f) {
+    var phrase = FILLES.filter(function (f) { return notes[f.nom]; }).map(function (f) {
       return "Bravo " + f.nom + ", " + pluriel(notes[f.nom], "étoile") + " !";
-    }).join(" "), 900);
+    }).join(" ");
+    if (bocalRempli) {
+      jouer("bocal", 3);
+      phrase += " Et le bocal est plein ! " + MATIN.sansEmoji(c.recompense) + " !";
+    }
+    parler(phrase, 900);
     clearTimeout(timerBravo);
-    timerBravo = setTimeout(fermerNotes, 9000);
+    timerBravo = setTimeout(fermerNotes, bocalRempli ? 14000 : 10000);
   }
 
+  function notesAujourdhui() {
+    var jour = cleJour(maintenant()), toutes = stock.lire("notes") || {}, map = {};
+    for (var k in toutes) if (k.slice(0, 10) === jour) map[k] = JSON.stringify(toutes[k]);
+    return { jour: jour, map: map };
+  }
   function verifierNouvellesNotes() {
     if (!stock.synchronise()) return;
-    var sig = signatureNotes();
-    if (notesVues === null) { notesVues = sig; return; }
-    if (sig === notesVues) return;
-    var memeJour = notesVues.slice(0, 10) === sig.slice(0, 10);
-    notesVues = sig;
-    var n = notesDuJour();
-    if (memeJour && n && demarre) montrerBravo(n);
+    var n = notesAujourdhui();
+    if (!notesVues || notesVues.jour !== n.jour) { notesVues = n; return; }
+    var change = null;
+    for (var k in n.map) {
+      if (n.map[k] !== notesVues.map[k]) change = { cle: k, avant: notesVues.map[k] ? JSON.parse(notesVues.map[k]) : {} };
+    }
+    notesVues = n;
+    if (change && demarre) montrerBravo(JSON.parse(n.map[change.cle]), change.avant);
   }
 
   $("notesFilles").addEventListener("click", function (ev) {
@@ -571,77 +705,109 @@
   $("notesPlusTard").addEventListener("click", fermerNotes);
   $("bravo").addEventListener("click", fermerNotes);
   var blocsCompteurs = document.querySelectorAll(".compteurs");
-  for (var k = 0; k < blocsCompteurs.length; k++) blocsCompteurs[k].addEventListener("click", ouvrirNotes);
+  for (var k = 0; k < blocsCompteurs.length; k++) {
+    blocsCompteurs[k].addEventListener("click", function () { ouvrirNotes(null); });
+  }
 
   // Données modifiées (ici ou depuis l'espace parent)
   stock.surChangement(function () {
+    majReglages(maintenant());
     majCompteurs();
-    if (etatCourant === "routine" && etapeCourante >= 0) afficherEtape(etapeCourante);
+    if (etatCourant && etatCourant.indexOf("routine:") === 0 && cible && pisteSig === cible.sig) {
+      afficherEtape(cible.r, idxCourant);
+    }
     verifierNouvellesNotes();
     majEtatSync();
   });
 
   function majEtatSync() {
     var e = stock.etat();
-    $("etatSync").textContent = SIM ? "Mode test : rien n'est envoyé en ligne"
-      : e === "en ligne" ? "⭐ Étoiles et rappels synchronisés"
+    $("etatSync").textContent = SIM ? "Mode test : rien n'est enregistré"
+      : e === "en ligne" ? "⭐ Étoiles, rappels et routines synchronisés"
       : e === "connexion" ? "Connexion…"
       : e === "hors ligne" ? "Hors ligne : les étoiles seront envoyées au retour de la connexion"
       : "Mode local : étoiles enregistrées sur cet appareil seulement";
   }
 
   // ---------- Boucle principale ----------
+  var jourReglages = null;
   function tick() {
     var d = maintenant();
     var s = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000;
+    var jour = cleJour(d);
+    if (jour !== jourReglages) { jourReglages = jour; majReglages(d); }
     var txt = d.getHours() + "h" + pad(d.getMinutes());
     var horloges = document.querySelectorAll(".horloge");
     for (var k = 0; k < horloges.length; k++) horloges[k].textContent = txt;
 
-    var raison = q.ecole === "1" ? null : MATIN.Calendrier.raisonSansEcole(d, MATIN.reglages(stock));
-    var ecole = !raison;
-    var etat, idx = 0;
-    if (!ecole) etat = "repos";
-    else if (s < T_DEBUT) etat = "dodo";
-    else if (s >= T_BUS) etat = "fin";
-    else {
-      etat = "routine";
-      for (var i = 0; i < ROUTINE.length; i++) if (s >= ROUTINE[i].d) idx = i;
+    // Quelle routine maintenant, laquelle vient de finir, laquelle arrive ?
+    var p = programmeDuJour(d), courante = null, derniere = null, prochaine = null;
+    p.routines.forEach(function (x) {
+      if (s >= x.r.debutS && s < x.r.finS) courante = x;
+      else if (s >= x.r.finS) { if (!derniere || x.r.finS > derniere.r.finS) derniere = x; }
+      else if (!prochaine || x.r.debutS < prochaine.r.debutS) prochaine = x;
+    });
+    var etat, nouvelle = null;
+    if (courante) { etat = "routine"; nouvelle = courante; }
+    else if (prochaine && (prochaine.r.debutS - s <= 3600 || !derniere)) {
+      etat = prochaine.r.debutS < 12 * 3600 ? "dodo" : "attente"; nouvelle = prochaine;
     }
+    else if (derniere) { etat = "fin"; nouvelle = derniere; }
+    else etat = "repos";
 
-    if (etat !== etatCourant) {
-      if (etat === "fin" && etatCourant === "routine" && demarre) {
+    var cleEtat = etat + ":" + (nouvelle ? nouvelle.id : "");
+    if (cleEtat !== etatCourant) {
+      if (etat === "fin" && etatCourant === "routine:" + nouvelle.id && demarre) {
         jouer("bus");
-        parler("C'est l'heure du bus ! Bonne journée les filles !");
+        parler(perso(nouvelle.r.finVoix));
       }
-      if (etat !== "routine") etapeCourante = -1;
-      etatCourant = etat;
+      if (etat !== "routine") { cleEtape = null; pisteSig = null; }
+      etatCourant = cleEtat;
       montrerEcran(etat);
     }
+    cible = nouvelle;
+    var fete = decor.fete ? "🎂 Joyeux anniversaire " + decor.fete.nom + " !" : null;
 
-    if (etat === "repos") $("reposTexte").textContent = raison === "pas-ecole" ? "Profitez bien !" : raison;
+    if (etat === "routine") majRoutine(cible, s);
     if (etat === "dodo") {
-      var reste = T_DEBUT - s;
+      var reste = cible.r.debutS - s;
+      $("dodoTitre").textContent = fete || "Chut… tout le monde dort";
       $("dodoReste").textContent = reste <= 3600
         ? "Réveil dans " + Math.ceil(reste / 60) + " min"
-        : "Réveil à " + ROUTINE[0].debut.replace(":", "h");
+        : "Réveil à " + heureLisible(cible.r.etapes[0].debut);
     }
-    if (etat === "routine") majRoutine(idx, s);
+    if (etat === "attente") {
+      $("attenteEmoji").textContent = cible.r.emoji || "⏳";
+      $("attenteTitre").textContent = fete || cible.r.nom + " à " + heureLisible(cible.r.etapes[0].debut);
+      $("attenteTexte").textContent = (fete ? cible.r.nom + " " : "") + "dans " + dansMinutes(cible.r.debutS - s);
+    }
+    if (etat === "fin") {
+      $("finAnim").textContent = cible.r.finEmoji || "🏁";
+      $("finMessage").textContent = fete || perso(cible.r.finMessage) || "Bravo les filles !";
+      $("finSous").textContent = perso(cible.r.finSous);
+    }
+    if (etat === "repos") {
+      $("reposEmoji").textContent = fete ? "🎂" : "🎉";
+      $("reposTitre").textContent = fete || "Pas d'école aujourd'hui";
+      $("reposTexte").textContent = p.raison || "Profitez bien !";
+    }
 
-    // Ouverture automatique des étoiles, une fois par jour d'école, si pas encore notées
-    var jour = cleJour(d);
-    if (demarre && ecole && s >= T_NOTES && s < T_BUS + 3600 && autoOuvertLe !== jour && stock.synchronise()) {
-      autoOuvertLe = jour;
-      if (!notesDuJour()) {
-        ouvrirNotes();
-        jouer("etoile");
-        parler(PARENT + ", c'est l'heure des étoiles !", 300);
+    // Ouverture automatique des étoiles, une fois par routine, si pas encore notées
+    var xn = (etat === "routine" || etat === "fin") ? cible : null;
+    if (demarre && xn && xn.r.etoiles && xn.r.heureNotes && stock.synchronise()) {
+      var cleN = MATIN.cleNote(jour, xn.id);
+      if (s >= sec(xn.r.heureNotes) && s < xn.r.finS + 3600 && !autoOuvert[cleN]) {
+        autoOuvert[cleN] = true;
+        if (!stock.lire("notes/" + cleN)) {
+          ouvrirNotes(xn);
+          jouer("etoile");
+          parler(PARENT + ", c'est l'heure des étoiles !", 300);
+        }
       }
     }
-    var bus = T_BUS - s;
-    $("notesBus").textContent = ecole && bus > 0 && bus < 3600
-      ? "🚌 Le bus dans " + Math.ceil(bus / 60) + " min" : "";
-    if (notesVues && notesVues.slice(0, 10) !== jour) verifierNouvellesNotes();
+    $("notesBus").textContent = etat === "routine"
+      ? (cible.r.finEmoji || "") + " " + (cible.r.finTitre || "Fin") + " dans " + Math.ceil((cible.r.finS - s) / 60) + " min" : "";
+    if (notesVues && notesVues.jour !== jour) verifierNouvellesNotes();
   }
 
   // Étoiles du ciel de l'écran dodo
@@ -671,7 +837,10 @@
     }
     $("demarrer").style.display = "none";
     try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (err) {}
-    if (etatCourant === "routine") { afficherEtape(etapeCourante); annoncer(etapeCourante); }
+    if (etatCourant && etatCourant.indexOf("routine:") === 0 && cible) {
+      afficherEtape(cible.r, idxCourant);
+      annoncer(cible.r, idxCourant);
+    }
   }
   $("demarrer").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-parent]");
@@ -682,6 +851,7 @@
 
   MATIN.Calendrier.charger();
   setInterval(MATIN.Calendrier.charger, 6 * 3600 * 1000);
+  majReglages(maintenant());
   majCompteurs();
   majEtatSync();
   verifierNouvellesNotes();

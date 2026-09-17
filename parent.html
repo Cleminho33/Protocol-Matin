@@ -29,19 +29,19 @@
   .sync.ko { color: #FFB3B3; }
   .carte { background: var(--carte); border-radius: 20px; padding: 18px; margin-bottom: 14px; }
   .carte h2 { font-size: 19px; margin-bottom: 12px; }
-  small, .vide { color: var(--doux); font-size: 14px; }
+  small, .vide { color: var(--doux); font-size: 14px; line-height: 1.4; }
   .avert {
     background: rgba(255,159,67,.14); border: 1px solid rgba(255,159,67,.5);
     border-radius: 14px; padding: 12px 14px; font-size: 14px; margin-bottom: 14px; line-height: 1.4;
   }
 
   nav {
-    position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center;
+    position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; z-index: 5;
     background: #0E1128; border-top: 1px solid rgba(255,255,255,.08);
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
   }
   nav button {
-    flex: 1; max-width: 140px; background: none; border: none; color: var(--doux); font-size: 12px;
+    flex: 1; max-width: 120px; background: none; border: none; color: var(--doux); font-size: 11px;
     padding: 6px 0; display: flex; flex-direction: column; align-items: center; gap: 2px;
   }
   nav button .i { font-size: 22px; }
@@ -49,20 +49,25 @@
   .onglet { display: none; }
   .onglet.actif { display: block; }
 
-  input[type=date], input[type=text] {
+  input[type=date], input[type=text], input[type=time], input[type=number], input.emoji-in, select {
     font: inherit; font-size: 16px; background: var(--nuit); color: #fff;
     border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 10px 12px; width: 100%;
+    -webkit-appearance: none; appearance: none; min-height: 44px;
   }
   input::-webkit-calendar-picker-indicator { filter: invert(1); }
   .btn {
+    display: block; text-align: center; text-decoration: none;
     font-weight: 700; font-size: 17px; border: none; border-radius: 99px;
     padding: 13px 20px; background: var(--or); color: var(--nuit); width: 100%;
   }
   .btn:disabled { opacity: .35; }
   .btn.second { background: rgba(255,255,255,.1); color: #fff; }
+  .btn.danger { background: rgba(238,90,82,.18); color: #FFB3B3; }
+  .btn.petit { font-size: 15px; padding: 9px 14px; }
   .ligne { display: flex; gap: 8px; align-items: center; }
-  .ligne input { flex: 1; min-width: 0; }
-  .ligne .btn { width: auto; padding: 11px 16px; }
+  .ligne > input, .ligne > select { flex: 1; min-width: 0; }
+  .ligne .btn { width: auto; }
+  .ligne .btn.moitie { flex: 1; }
   .espace { margin-top: 10px; }
 
   .fille { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
@@ -74,17 +79,22 @@
   }
   .etoiles button.pleine { color: var(--or); transform: scale(1.05); }
 
+  .jauge { height: 18px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; margin: 8px 0; }
+  .jauge div { height: 100%; background: var(--or); border-radius: 99px; transition: width .6s; }
+  .bocal-chiffre { font-size: 28px; font-weight: 700; color: var(--or); }
+
   .totaux { display: flex; gap: 10px; }
   .totaux div { flex: 1; text-align: center; background: rgba(255,255,255,.06); border-radius: 16px; padding: 12px; }
   .totaux .v { font-size: 32px; font-weight: 700; color: var(--or); }
   .totaux .l { color: var(--f); font-weight: 600; }
-  .histo { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.07); font-size: 15px; }
+  .histo { display: flex; justify-content: space-between; gap: 8px; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.07); font-size: 15px; }
   .histo:last-child { border: none; }
-  .histo .n { color: var(--or); letter-spacing: 1px; }
+  .histo .n { color: var(--or); letter-spacing: 1px; text-align: right; }
   .histo .n span { color: var(--f); letter-spacing: 0; margin-left: 10px; }
+  .histo small { display: block; }
 
   .jour-titre { font-weight: 600; margin-top: 16px; }
-  .jour-titre:first-of-type { margin-top: 4px; }
+  .jour-titre:first-child { margin-top: 4px; }
   .puces { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
   .puce {
     background: rgba(255,255,255,.1); border-radius: 99px; padding: 5px 5px 5px 12px;
@@ -98,8 +108,41 @@
   .interrupteur input { width: 24px; height: 24px; accent-color: var(--or); flex-shrink: 0; }
   .lien { font-size: 13px; color: var(--doux); word-break: break-all; margin: 6px 0 8px; }
 
+  /* Routines */
+  .rc-haut { display: flex; gap: 12px; align-items: center; }
+  .rc-emoji { font-size: 38px; }
+  .rc-nom { font-size: 21px; font-weight: 700; }
+  .jours { display: flex; gap: 6px; margin: 12px 0 4px; }
+  .jours button {
+    flex: 1; height: 42px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2);
+    background: none; color: var(--doux); font-size: 15px; font-weight: 600;
+  }
+  .jours button.actif { background: var(--or); color: var(--nuit); border-color: var(--or); }
+  .emoji-in { flex: 0 0 60px !important; text-align: center; font-size: 22px !important; padding: 6px !important; }
+  .heure-in { flex: 0 0 104px !important; }
+  .etape { border-left: 5px solid var(--c); background: rgba(255,255,255,.04); border-radius: 14px; padding: 12px; margin-bottom: 12px; }
+  .etape > * + * { margin-top: 8px; }
+  .etape .duree { font-size: 13px; color: var(--doux); }
+  .couleurs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .couleurs button { width: 30px; height: 30px; border-radius: 50%; border: 3px solid transparent; }
+  .couleurs button.choisie { border-color: #fff; }
+  details summary { color: var(--doux); font-size: 14px; padding: 4px 0; cursor: pointer; }
+  details > * + * { margin-top: 8px; }
+  .etiquette { font-size: 14px; color: var(--doux); white-space: nowrap; }
+  .barre-edition {
+    position: sticky; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 4;
+    display: flex; gap: 10px; padding: 10px 0; background: var(--nuit);
+  }
+  .choix { display: flex; gap: 8px; flex-wrap: wrap; }
+  .choix button {
+    flex: 1; min-width: 100px; padding: 10px 6px; border-radius: 14px; border: 2px solid rgba(255,255,255,.15);
+    background: none; color: #fff; font-size: 14px;
+  }
+  .choix button .e { display: block; font-size: 30px; }
+  .choix button.actif { border-color: var(--or); background: rgba(255,217,61,.1); }
+
   .toast {
-    position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom));
+    position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 10;
     max-width: 528px; margin: 0 auto; background: #7CFFB2; color: var(--nuit); font-weight: 600;
     text-align: center; padding: 12px; border-radius: 14px;
     opacity: 0; transform: translateY(10px); transition: .3s; pointer-events: none;
@@ -121,10 +164,12 @@
   <div class="carte">
     <h2>Les étoiles du</h2>
     <input type="date" id="dateNote">
+    <select id="routineNote" class="espace" hidden></select>
     <div id="saisie" class="espace"></div>
     <button class="btn espace" id="btnNoter" disabled>Donner les étoiles</button>
-    <button class="btn second espace" id="btnEffacer" hidden>Effacer la note de ce jour</button>
+    <button class="btn second espace" id="btnEffacer" hidden>Effacer la note</button>
   </div>
+  <div class="carte" id="carteBocal"></div>
 </section>
 
 <!-- Historique -->
@@ -137,6 +182,10 @@
     <h2>Jour par jour</h2>
     <div id="histo"></div>
   </div>
+  <div class="carte" id="carteBocauxPasses" hidden>
+    <h2>🫙 Bocaux remplis</h2>
+    <div id="bocauxPasses"></div>
+  </div>
 </section>
 
 <!-- Rappels -->
@@ -148,7 +197,7 @@
   </div>
   <div class="carte">
     <h2>📌 Chaque semaine</h2>
-    <small>Lus au réveil, puis affichés en grand et lus pendant l'étape chaussures.</small>
+    <small>Lus et affichés pendant les étapes prévues pour (dans l'École : au réveil et aux chaussures).</small>
     <div id="hebdo" class="espace"></div>
   </div>
   <div class="carte">
@@ -162,17 +211,33 @@
   </div>
 </section>
 
+<!-- Routines -->
+<section class="onglet" id="o-routines">
+  <div id="routinesListe"></div>
+  <div id="routineEditeur" hidden></div>
+</section>
+
 <!-- Réglages -->
 <section class="onglet" id="o-reglages">
   <div class="carte">
-    <h2>🏫 Jours d'école</h2>
-    <div id="joursEcole"></div>
+    <h2>🐈 La mascotte</h2>
+    <small>Elle marche sur la route, dort avant le réveil et saute de joie au bravo.</small>
+    <div class="choix espace" id="choixMascotte"></div>
+  </div>
+  <div class="carte">
+    <h2>🍂 Décor des saisons</h2>
+    <label class="interrupteur">Feuilles, neige, fleurs, citrouilles… selon la date
+      <input type="checkbox" id="decor"></label>
+  </div>
+  <div class="carte">
+    <h2>🎂 Anniversaires</h2>
+    <small>Ce jour-là : ballons à l'écran et « Joyeux anniversaire » à la voix.</small>
+    <div id="anniversaires" class="espace"></div>
   </div>
   <div class="carte">
     <h2>🏖️ Vacances et jours fériés</h2>
-    <label class="interrupteur">Pas de routine pendant les vacances (zone A) et les jours fériés
-      <input type="checkbox" id="vacances"></label>
-    <small id="prochaines"></small>
+    <small>Les routines marquées « jours d'école » ne se lancent pas pendant les vacances de la zone A ni les jours fériés.</small>
+    <div class="espace"><small id="prochaines"></small></div>
   </div>
   <div class="carte" id="carteLiens">
     <h2>🔗 Liens</h2>
@@ -190,6 +255,7 @@
   <button class="actif" data-onglet="etoiles"><span class="i">⭐</span>Étoiles</button>
   <button data-onglet="histo"><span class="i">📖</span>Historique</button>
   <button data-onglet="rappels"><span class="i">📌</span>Rappels</button>
+  <button data-onglet="routines"><span class="i">🗓️</span>Routines</button>
   <button data-onglet="reglages"><span class="i">⚙️</span>Réglages</button>
 </nav>
 
@@ -200,25 +266,25 @@
 (function () {
   "use strict";
   var stock = MATIN.creerStock();
-  var FILLES = MATIN.FILLES, JOURS = MATIN.JOURS;
+  var FILLES = MATIN.FILLES, JOURS = MATIN.JOURS, esc = MATIN.esc, sec = MATIN.sec, pad = MATIN.pad;
   var EMOJIS = ["🏊", "🎒", "📚", "⚽", "🤸", "🎨", "🎵", "🍎", "🧥", "☔", "✉️", "🎂", "🥪", "🧦", "📝", "💰"];
+  var ORDRE_JOURS = [1, 2, 3, 4, 5, 6, 0];
 
   function $(id) { return document.getElementById(id); }
-  function esc(t) {
-    return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
-  }
   function aujourdhui() { return MATIN.cleJour(new Date()); }
   function dateLisible(k) {
     return new Date(k + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
   }
+  function heureLisible(hhmm) { return String(hhmm || "").replace(/^0/, "").replace(":", "h"); }
   function nouvelId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+  function pluriel(n, mot) { return n + " " + mot + (n > 1 ? "s" : ""); }
 
   function toast(msg, erreur) {
     var t = $("toast");
     t.textContent = msg;
     t.className = "toast visible" + (erreur ? " erreur" : "");
     clearTimeout(toast.minuteur);
-    toast.minuteur = setTimeout(function () { t.className = "toast"; }, 2600);
+    toast.minuteur = setTimeout(function () { t.className = "toast"; }, 2800);
   }
   function sauver(chemin, valeur, message) {
     return stock.ecrire(chemin, valeur).then(function () {
@@ -247,7 +313,7 @@
     s.className = "sync" + (e === "en ligne" ? " ok" : e === "hors ligne" ? " ko" : "");
     var avert = "";
     if (!MATIN.DB_URL) {
-      avert = "La base en ligne n'est pas encore branchée. Tout ce que tu fais ici reste sur ce téléphone et n'arrive pas sur l'iPad.";
+      avert = "La base en ligne n'est pas branchée. Tout ce que tu fais ici reste sur ce téléphone.";
     } else if (!stock.code) {
       avert = "Ouvre cette page avec le lien famille (celui qui se termine par #famille=…) pour la relier à l'iPad.";
     }
@@ -255,13 +321,26 @@
     $("carteLiens").hidden = !stock.code;
   }
 
-  // ---------- Étoiles ----------
+  // =====================================================================
+  // Étoiles
+  // =====================================================================
   var saisie = {}, saisieTouchee = false;
   $("dateNote").value = aujourdhui();
   $("dateNote").max = aujourdhui();
 
+  function routinesAvecEtoiles() { return MATIN.routines(stock).filter(function (x) { return x.r.etoiles; }); }
+  function cleSaisie() { return MATIN.cleNote($("dateNote").value, $("routineNote").value || "ecole"); }
+
+  function majChoixRoutine() {
+    var liste = routinesAvecEtoiles(), sel = $("routineNote"), avant = sel.value;
+    sel.innerHTML = liste.map(function (x) {
+      return '<option value="' + esc(x.id) + '">' + esc(x.r.emoji || "") + " " + esc(x.r.nom) + '</option>';
+    }).join("");
+    if (avant && liste.some(function (x) { return x.id === avant; })) sel.value = avant;
+    sel.hidden = liste.length <= 1;
+  }
   function chargerSaisie() {
-    var n = stock.lire("notes/" + $("dateNote").value) || {};
+    var n = stock.lire("notes/" + cleSaisie()) || {};
     saisie = {};
     FILLES.forEach(function (f) { saisie[f.nom] = n[f.nom] || 0; });
     saisieTouchee = false;
@@ -278,7 +357,7 @@
              '<div class="etoiles">' + b + '</div></div>';
     }).join("");
     $("btnNoter").disabled = FILLES.some(function (f) { return !saisie[f.nom]; });
-    $("btnEffacer").hidden = !stock.lire("notes/" + $("dateNote").value);
+    $("btnEffacer").hidden = !stock.lire("notes/" + cleSaisie());
   }
   $("saisie").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-nom]");
@@ -288,34 +367,118 @@
     dessinerSaisie();
   });
   $("dateNote").addEventListener("change", chargerSaisie);
+  $("routineNote").addEventListener("change", chargerSaisie);
   $("btnNoter").addEventListener("click", function () {
-    var k = $("dateNote").value, valeur = {};
+    var valeur = {};
     FILLES.forEach(function (f) { valeur[f.nom] = saisie[f.nom]; });
     saisieTouchee = false;
-    sauver("notes/" + k, valeur, k === aujourdhui() ? "Enregistré ✓ Le bravo s'affiche à la télé" : "Enregistré ✓");
+    sauver("notes/" + cleSaisie(), valeur,
+      $("dateNote").value === aujourdhui() ? "Enregistré ✓ Le bravo s'affiche à la télé" : "Enregistré ✓");
   });
   $("btnEffacer").addEventListener("click", function () {
-    var k = $("dateNote").value;
-    if (!confirm("Effacer les étoiles du " + dateLisible(k) + " ?")) return;
-    sauver("notes/" + k, null, "Note effacée").then(chargerSaisie);
+    if (!confirm("Effacer les étoiles du " + dateLisible($("dateNote").value) + " ?")) return;
+    sauver("notes/" + cleSaisie(), null, "Note effacée").then(chargerSaisie);
   });
 
-  // ---------- Historique ----------
+  // ---------- Le bocal commun ----------
+  var bocalEdition = null;
+  function dessinerBocal() {
+    var c = MATIN.cagnotte(stock), brut = stock.lire("cagnotte") || {}, html = "<h2>🫙 Le bocal commun</h2>";
+    if (bocalEdition) {
+      html += '<small>Les étoiles de Lou et Alba remplissent le même bocal.</small>' +
+        '<div class="ligne espace"><span class="etiquette">Objectif</span>' +
+        '<input type="number" min="1" max="500" inputmode="numeric" id="bocalObjectif" value="' + esc(bocalEdition.objectif) + '">' +
+        '<span class="etiquette">étoiles</span></div>' +
+        '<input type="text" class="espace" id="bocalRecompense" maxlength="40" placeholder="🥞 Soirée crêpes" value="' + esc(bocalEdition.recompense) + '">' +
+        '<div class="ligne espace"><button class="btn second moitie" data-bocal="annuler">Annuler</button>' +
+        '<button class="btn moitie" data-bocal="enregistrer">Enregistrer</button></div>';
+    } else if (!c) {
+      html += '<small>Les étoiles de Lou et Alba remplissent un même bocal. Quand il est plein : une récompense pour les deux. Idéal pour qu\'elles s\'entraident.</small>' +
+        '<button class="btn espace" data-bocal="creer">Créer un bocal</button>';
+    } else {
+      var pct = Math.min(100, Math.round(c.progres / c.objectif * 100));
+      html += '<div class="bocal-chiffre">' + Math.min(c.progres, c.objectif) + ' / ' + c.objectif + ' ⭐</div>' +
+        '<div class="jauge"><div style="width:' + pct + '%"></div></div>' +
+        '<div>' + (c.pleine ? "🎉 Plein ! Récompense : " : "Pour : ") + esc(c.recompense) + '</div>';
+      if (c.pleine) {
+        html += '<button class="btn espace" data-bocal="donnee">🎁 Récompense donnée : nouveau bocal</button>';
+      } else {
+        html += '<small>Encore ' + pluriel(c.objectif - c.progres, "étoile") + '.</small>';
+      }
+      html += '<div class="ligne espace"><button class="btn second petit moitie" data-bocal="modifier">Modifier</button>' +
+              '<button class="btn danger petit moitie" data-bocal="arreter">Arrêter</button></div>';
+    }
+    $("carteBocal").innerHTML = html;
+
+    var passes = MATIN.enTableau(brut.historique ? Object.keys(brut.historique).sort().reverse().map(function (k) { return brut.historique[k]; }) : []);
+    $("carteBocauxPasses").hidden = !passes.length;
+    $("bocauxPasses").innerHTML = passes.map(function (b) {
+      return '<div class="histo"><span>' + esc(b.recompense) + '</span><span class="etiquette">' + b.objectif + ' ⭐ · ' + dateLisible(b.le) + '</span></div>';
+    }).join("");
+  }
+  $("carteBocal").addEventListener("input", function (ev) {
+    if (!bocalEdition) return;
+    if (ev.target.id === "bocalObjectif") bocalEdition.objectif = ev.target.value;
+    if (ev.target.id === "bocalRecompense") bocalEdition.recompense = ev.target.value;
+  });
+  $("carteBocal").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-bocal]");
+    if (!b) return;
+    var action = b.getAttribute("data-bocal"), brut = stock.lire("cagnotte") || {};
+    if (action === "creer") { bocalEdition = { objectif: 25, recompense: "", nouveau: true }; }
+    if (action === "modifier") { bocalEdition = { objectif: brut.objectif, recompense: brut.recompense || "" }; }
+    if (action === "annuler") { bocalEdition = null; }
+    if (action === "enregistrer") {
+      var obj = parseInt(bocalEdition.objectif, 10), rec = String(bocalEdition.recompense || "").trim();
+      if (!(obj > 0)) return toast("Indique un objectif en étoiles", true);
+      if (!rec) return toast("Indique la récompense", true);
+      var valeur = MATIN.copie(brut);
+      valeur.objectif = obj;
+      valeur.recompense = rec;
+      if (bocalEdition.nouveau || !brut.objectif) valeur.base = MATIN.totalTous(stock);
+      bocalEdition = null;
+      sauver("cagnotte", valeur, "Bocal enregistré, il s'affiche à la télé");
+    }
+    if (action === "donnee") {
+      var c = MATIN.cagnotte(stock);
+      if (!confirm("Récompense « " + c.recompense + " » donnée ? Le bocal repart à zéro (les étoiles en trop sont gardées).")) return;
+      var v = MATIN.copie(brut);
+      v.historique = v.historique || {};
+      v.historique[Date.now().toString(36)] = { recompense: c.recompense, objectif: c.objectif, le: aujourdhui() };
+      v.base = (v.base || 0) + c.objectif;
+      sauver("cagnotte", v, "Nouveau bocal lancé ! Tu peux changer la récompense");
+    }
+    if (action === "arreter") {
+      if (!confirm("Arrêter le bocal ? Il disparaît de la télé.")) return;
+      sauver("cagnotte/objectif", null, "Bocal arrêté");
+    }
+    dessinerBocal();
+  });
+
+  // =====================================================================
+  // Historique
+  // =====================================================================
   function dessinerHisto() {
     $("totaux").innerHTML = FILLES.map(function (f) {
       return '<div style="--f:' + f.couleur + '"><div class="l">' + f.nom + '</div><div class="v">' + MATIN.total(stock, f.nom) + ' ⭐</div></div>';
     }).join("");
+    var noms = {};
+    MATIN.routines(stock).forEach(function (x) { noms[x.id] = x.r.nom; });
     var notes = stock.lire("notes") || {};
-    var jours = Object.keys(notes).sort().reverse().slice(0, 60);
-    $("histo").innerHTML = jours.length ? jours.map(function (k) {
-      return '<div class="histo"><span>' + dateLisible(k) + '</span><span class="n">' + FILLES.map(function (f) {
-        var n = notes[k][f.nom] || 0;
-        return '<span style="--f:' + f.couleur + '">' + f.nom + '</span> ' + new Array(n + 1).join("★") + new Array(4 - n).join("☆");
-      }).join("") + '</span></div>';
+    var cles = Object.keys(notes).sort().reverse().slice(0, 60);
+    $("histo").innerHTML = cles.length ? cles.map(function (k) {
+      var rid = k.split("~")[1];
+      return '<div class="histo"><span>' + dateLisible(k.slice(0, 10)) + (rid ? '<small>' + esc(noms[rid] || "Autre routine") + '</small>' : "") +
+        '</span><span class="n">' + FILLES.map(function (f) {
+          var n = Math.min(3, notes[k][f.nom] || 0);
+          return '<span style="--f:' + f.couleur + '">' + f.nom + '</span> ' + new Array(n + 1).join("★") + new Array(4 - n).join("☆");
+        }).join("") + '</span></div>';
     }).join("") : '<div class="vide">Aucune étoile donnée pour l\'instant.</div>';
   }
 
-  // ---------- Rappels ----------
+  // =====================================================================
+  // Rappels
+  // =====================================================================
   var dernierChamp = null;
   document.addEventListener("focusin", function (ev) {
     if (ev.target.matches && ev.target.matches("input[type=text]")) dernierChamp = ev.target;
@@ -325,8 +488,9 @@
   $("emojis").addEventListener("click", function (ev) {
     var b = ev.target.closest("button");
     if (!b) return;
-    var champ = dernierChamp || $("textePonct");
+    var champ = dernierChamp && document.body.contains(dernierChamp) ? dernierChamp : $("textePonct");
     champ.value = b.textContent + " " + champ.value.replace(/^\s+/, "");
+    champ.dispatchEvent(new Event("input", { bubbles: true }));
     champ.focus();
   });
 
@@ -339,19 +503,20 @@
   }
 
   function dessinerRappels() {
-    // on garde ce qui est en cours de saisie
     var enCours = {}, champs = $("hebdo").querySelectorAll("input");
     for (var i = 0; i < champs.length; i++) enCours[champs[i].id] = champs[i].value;
     var focus = document.activeElement && document.activeElement.id;
 
-    var regl = MATIN.reglages(stock), html = "";
-    for (var j = 1; j <= 6; j++) {
-      if (!regl.joursEcole[j]) continue;
+    var joursUtiles = {};
+    MATIN.routines(stock).forEach(function (x) { for (var j in x.r.jours) if (x.r.jours[j]) joursUtiles[j] = true; });
+    var html = "";
+    ORDRE_JOURS.forEach(function (j) {
+      if (!joursUtiles[j] && !stock.lire("rappels/hebdo/" + j)) return;
       html += '<div class="jour-titre">' + JOURS[j] + '</div>' +
         puces(stock.lire("rappels/hebdo/" + j), "rappels/hebdo/" + j) +
         '<div class="ligne"><input type="text" id="h' + j + '" maxlength="40" placeholder="🏊 Sac de piscine">' +
         '<button class="btn" data-ajout="' + j + '">+</button></div>';
-    }
+    });
     $("hebdo").innerHTML = html;
     for (var id in enCours) if ($(id)) $(id).value = enCours[id];
     if (focus && /^h\d$/.test(focus) && $(focus)) { $(focus).focus(); dernierChamp = $(focus); }
@@ -390,15 +555,261 @@
     sauver("rappels/dates/" + k + "/" + nouvelId(), texte, "Rappel ajouté pour le " + dateLisible(k));
   });
 
-  // ---------- Réglages ----------
-  function dessinerReglages() {
-    var regl = MATIN.reglages(stock), html = "";
-    for (var j = 1; j <= 6; j++) {
-      html += '<label class="interrupteur">' + JOURS[j] +
-              '<input type="checkbox" data-jour="' + j + '"' + (regl.joursEcole[j] ? " checked" : "") + '></label>';
+  // =====================================================================
+  // Routines
+  // =====================================================================
+  var edition = null; // { id, r }
+  var CHAMPS_ROUTINE = ["nom", "emoji", "jours", "ecole", "fin", "finEmoji", "finTitre", "finVoix", "finMessage", "finSous", "etoiles", "heureNotes"];
+  var CHAMPS_ETAPE = ["debut", "titre", "emoji", "couleur", "voix", "alerte", "rappels", "details"];
+
+  function nettoyer(r) {
+    var out = {};
+    CHAMPS_ROUTINE.forEach(function (k) { if (r[k] !== undefined && r[k] !== "") out[k] = r[k]; });
+    out.ecole = !!r.ecole;
+    out.etoiles = !!r.etoiles;
+    out.etapes = (r.etapes || []).map(function (e) {
+      var o = {};
+      CHAMPS_ETAPE.forEach(function (k) { if (e[k] !== undefined && e[k] !== "") o[k] = e[k]; });
+      o.details = MATIN.enTableau(e.details).map(function (t) { return String(t).trim(); }).filter(Boolean);
+      if (!o.details.length) delete o.details;
+      return o;
+    });
+    return out;
+  }
+  function trierEtapes() {
+    edition.r.etapes.sort(function (a, b) {
+      if (!a.debut) return 1;
+      if (!b.debut) return -1;
+      return sec(a.debut) - sec(b.debut);
+    });
+  }
+  function joursCourts(jours) {
+    var noms = ORDRE_JOURS.filter(function (j) { return jours[j]; }).map(function (j) { return JOURS[j].slice(0, 3); });
+    return noms.length === 7 ? "Tous les jours" : noms.join(" ") || "Aucun jour";
+  }
+  function lienTest(id, r) {
+    var t = Math.max(0, sec(r.etapes[0].debut) - 10);
+    var h = pad(Math.floor(t / 3600)) + ":" + pad(Math.floor(t % 3600 / 60)) + ":" + pad(t % 60);
+    return location.pathname.replace(/parent\.html$/, "") + "?heure=" + h + "&routine=" + encodeURIComponent(id) +
+           "&vitesse=10" + (stock.code ? "#famille=" + stock.code : "");
+  }
+
+  function dessinerListeRoutines() {
+    if (edition) return;
+    var liste = MATIN.routines(stock);
+    var html = liste.map(function (x) {
+      var r = x.r;
+      return '<div class="carte"><div class="rc-haut"><span class="rc-emoji">' + esc(r.emoji || "🗓️") + '</span><div>' +
+        '<div class="rc-nom">' + esc(r.nom) + '</div><small>' + joursCourts(r.jours) + ' · ' + heureLisible(r.etapes[0].debut) +
+        ' → ' + heureLisible(r.fin) + ' · ' + pluriel(r.etapes.length, "étape") +
+        (r.ecole ? ' · jours d\'école' : '') + (r.etoiles ? ' · ⭐' : '') + '</small></div></div>' +
+        '<div class="ligne espace"><button class="btn second moitie" data-modifier="' + esc(x.id) + '">Modifier</button>' +
+        '<a class="btn second moitie" href="' + esc(lienTest(x.id, r)) + '" target="_blank">▶ Tester</a></div></div>';
+    }).join("");
+    var ecoleSupprimee = (stock.lire("routines/ecole") || {}).supprimee;
+    html += '<div class="carte"><h2>+ Nouvelle routine</h2><div class="choix">' +
+      '<button data-modele="soir"><span class="e">🌙</span>Modèle du soir</button>' +
+      (ecoleSupprimee ? '<button data-modele="ecole"><span class="e">🎒</span>Modèle École</button>' : '') +
+      '<button data-modele="vide"><span class="e">✨</span>Vide</button></div>' +
+      '<small class="espace" style="display:block">« Tester » ouvre la routine en accéléré (×10), sans rien enregistrer.</small></div>';
+    $("routinesListe").innerHTML = html;
+  }
+
+  function ouvrirEditeur(id, r) {
+    edition = { id: id, r: r };
+    edition.r.jours = edition.r.jours || {};
+    edition.r.etapes = (edition.r.etapes || []).map(function (e) {
+      delete e.d; delete e.f;
+      e.details = MATIN.enTableau(e.details);
+      return e;
+    });
+    delete edition.r.debutS; delete edition.r.finS;
+    $("routinesListe").hidden = true;
+    $("routineEditeur").hidden = false;
+    dessinerEditeur();
+    window.scrollTo(0, 0);
+  }
+  function fermerEditeur() {
+    edition = null;
+    $("routineEditeur").hidden = true;
+    $("routinesListe").hidden = false;
+    dessinerListeRoutines();
+    window.scrollTo(0, 0);
+  }
+
+  function dessinerEditeur() {
+    var r = edition.r;
+    trierEtapes();
+    var html = '<div class="carte"><h2>' + (stock.lire("routines/" + edition.id) || edition.id === "ecole" ? "Modifier la routine" : "Nouvelle routine") + '</h2>' +
+      '<div class="ligne"><input class="emoji-in" data-k="emoji" value="' + esc(r.emoji) + '" maxlength="4">' +
+      '<input type="text" data-k="nom" placeholder="Nom de la routine" value="' + esc(r.nom) + '" maxlength="30"></div>' +
+      '<div class="jours">' + ORDRE_JOURS.map(function (j) {
+        return '<button type="button" data-jour="' + j + '" class="' + (r.jours[j] ? "actif" : "") + '">' + JOURS[j].charAt(0) + '</button>';
+      }).join("") + '</div>' +
+      '<label class="interrupteur">Seulement les jours d\'école (pas pendant les vacances ni les jours fériés)' +
+      '<input type="checkbox" data-k="ecole"' + (r.ecole ? " checked" : "") + '></label></div>';
+
+    html += '<div class="carte"><h2>Étapes</h2>';
+    r.etapes.forEach(function (e, i) {
+      var suivante = i + 1 < r.etapes.length ? r.etapes[i + 1].debut : r.fin;
+      var duree = e.debut && suivante ? Math.round((sec(suivante) - sec(e.debut)) / 60) : null;
+      html += '<div class="etape" style="--c:' + esc(e.couleur || "#fff") + '">' +
+        '<div class="ligne"><input type="time" class="heure-in" data-e="' + i + '" data-k="debut" value="' + esc(e.debut) + '">' +
+        '<input class="emoji-in" data-e="' + i + '" data-k="emoji" value="' + esc(e.emoji) + '" maxlength="4">' +
+        '<span class="duree">' + (duree === null ? "" : duree > 0 ? duree + " min" : "⚠️ horaire") + '</span></div>' +
+        '<input type="text" data-e="' + i + '" data-k="titre" placeholder="Titre (ex : Petit déjeuner)" value="' + esc(e.titre) + '" maxlength="40">' +
+        '<input type="text" data-e="' + i + '" data-k="voix" placeholder="Phrase dite à voix haute" value="' + esc(e.voix) + '">' +
+        '<div class="couleurs">' + MATIN.COULEURS.map(function (c) {
+          return '<button type="button" data-e="' + i + '" data-couleur="' + c + '" style="background:' + c + '" class="' + (e.couleur === c ? "choisie" : "") + '" aria-label="Couleur"></button>';
+        }).join("") + '</div>' +
+        '<details><summary>Plus d\'options</summary>' +
+        '<input type="text" data-e="' + i + '" data-k="details" placeholder="Pastilles, séparées par des virgules" value="' + esc(e.details.join(", ")) + '">' +
+        '<input type="text" data-e="' + i + '" data-k="alerte" placeholder="Phrase à 1 minute de la fin (étapes de 3 min et plus)" value="' + esc(e.alerte) + '">' +
+        '<select data-e="' + i + '" data-k="rappels">' +
+          '<option value=""' + (!e.rappels ? " selected" : "") + '>Rappels du jour : non</option>' +
+          '<option value="voix"' + (e.rappels === "voix" ? " selected" : "") + '>Rappels du jour : lus à voix haute</option>' +
+          '<option value="complet"' + (e.rappels === "complet" ? " selected" : "") + '>Rappels du jour : affichés en grand et lus</option>' +
+        '</select>' +
+        '<button type="button" class="btn danger petit" data-suppr-etape="' + i + '">Supprimer l\'étape</button>' +
+        '</details></div>';
+    });
+    html += '<button type="button" class="btn second" id="ajoutEtape">+ Ajouter une étape</button></div>';
+
+    html += '<div class="carte"><h2>Fin de la routine</h2>' +
+      '<div class="ligne"><input type="time" class="heure-in" data-k="fin" value="' + esc(r.fin) + '">' +
+      '<input class="emoji-in" data-k="finEmoji" value="' + esc(r.finEmoji) + '" maxlength="4">' +
+      '<input type="text" data-k="finTitre" placeholder="Le bus" value="' + esc(r.finTitre) + '" maxlength="20"></div>' +
+      '<input type="text" class="espace" data-k="finVoix" placeholder="Phrase dite à la fin" value="' + esc(r.finVoix) + '">' +
+      '<input type="text" class="espace" data-k="finMessage" placeholder="Grand message à l\'écran" value="' + esc(r.finMessage) + '" maxlength="40">' +
+      '<input type="text" class="espace" data-k="finSous" placeholder="Petite phrase dessous" value="' + esc(r.finSous) + '" maxlength="40"></div>';
+
+    html += '<div class="carte"><h2>Étoiles</h2>' +
+      '<label class="interrupteur">Donner des étoiles pour cette routine<input type="checkbox" data-k="etoiles"' + (r.etoiles ? " checked" : "") + '></label>' +
+      '<div class="ligne"' + (r.etoiles ? "" : " hidden") + '><span class="etiquette">L\'écran des étoiles s\'ouvre à</span>' +
+      '<input type="time" class="heure-in" data-k="heureNotes" value="' + esc(r.heureNotes) + '"></div>' +
+      '<small class="espace" style="display:block">Astuce : écris {parent} dans un texte pour que l\'écran dise Papa ou Maman.</small></div>';
+
+    html += '<div class="barre-edition"><button type="button" class="btn second moitie" id="annulerRoutine">Annuler</button>' +
+            '<button type="button" class="btn moitie" id="enregistrerRoutine">Enregistrer</button></div>';
+    if (stock.lire("routines/" + edition.id) || edition.id === "ecole") {
+      html += '<button type="button" class="btn danger" id="supprRoutine">Supprimer la routine</button>';
     }
-    $("joursEcole").innerHTML = html;
-    $("vacances").checked = regl.vacances;
+    $("routineEditeur").innerHTML = html;
+  }
+
+  $("routinesListe").addEventListener("click", function (ev) {
+    var m = ev.target.closest("[data-modifier]");
+    if (m) {
+      var id = m.getAttribute("data-modifier");
+      var x = MATIN.routines(stock).filter(function (y) { return y.id === id; })[0];
+      if (x) ouvrirEditeur(id, MATIN.copie(x.r));
+      return;
+    }
+    var mod = ev.target.closest("[data-modele]");
+    if (mod) {
+      var type = mod.getAttribute("data-modele");
+      if (type === "soir") ouvrirEditeur("r" + nouvelId(), MATIN.copie(MATIN.MODELE_SOIR));
+      if (type === "ecole") ouvrirEditeur("ecole", MATIN.copie(MATIN.ROUTINE_ECOLE));
+      if (type === "vide") ouvrirEditeur("r" + nouvelId(), {
+        nom: "", emoji: "✨", jours: {}, ecole: false, fin: "", finEmoji: "🏁", finTitre: "Fin",
+        finVoix: "Bravo les filles, c'est fini !", finMessage: "Bravo les filles !", finSous: "",
+        etoiles: false, heureNotes: "",
+        etapes: [{ debut: "", titre: "", emoji: "⭐", couleur: MATIN.COULEURS[0], voix: "", details: [] }]
+      });
+    }
+  });
+
+  $("routineEditeur").addEventListener("input", function (ev) {
+    if (!edition) return;
+    var t = ev.target, k = t.getAttribute("data-k");
+    if (!k) return;
+    var valeur = t.type === "checkbox" ? t.checked : t.value;
+    if (t.hasAttribute("data-e")) {
+      var e = edition.r.etapes[+t.getAttribute("data-e")];
+      if (k === "details") valeur = valeur.split(",").map(function (s) { return s.trim(); });
+      e[k] = valeur;
+    } else {
+      edition.r[k] = valeur;
+      if (k === "etoiles") dessinerEditeur();
+    }
+  });
+  $("routineEditeur").addEventListener("change", function (ev) {
+    var t = ev.target;
+    if (t.type === "time") dessinerEditeur();   // retrie les étapes et met à jour les durées
+    if (t.tagName === "SELECT" && edition) edition.r.etapes[+t.getAttribute("data-e")].rappels = t.value;
+  });
+  $("routineEditeur").addEventListener("click", function (ev) {
+    if (!edition) return;
+    var t = ev.target, r = edition.r;
+    var jour = t.closest("[data-jour]");
+    if (jour) { var j = jour.getAttribute("data-jour"); r.jours[j] = !r.jours[j]; dessinerEditeur(); return; }
+    var couleur = t.closest("[data-couleur]");
+    if (couleur) { r.etapes[+couleur.getAttribute("data-e")].couleur = couleur.getAttribute("data-couleur"); dessinerEditeur(); return; }
+    var suppr = t.closest("[data-suppr-etape]");
+    if (suppr) {
+      if (r.etapes.length <= 1) return toast("Une routine a au moins une étape", true);
+      r.etapes.splice(+suppr.getAttribute("data-suppr-etape"), 1);
+      dessinerEditeur();
+      return;
+    }
+    if (t.id === "ajoutEtape") {
+      var derniere = r.etapes[r.etapes.length - 1];
+      var debut = "";
+      if (derniere && derniere.debut) {
+        var s = sec(derniere.debut) + 5 * 60;
+        debut = pad(Math.floor(s / 3600) % 24) + ":" + pad(Math.floor(s % 3600 / 60));
+      }
+      r.etapes.push({ debut: debut, titre: "", emoji: "⭐", voix: "", details: [],
+        couleur: MATIN.COULEURS[r.etapes.length % MATIN.COULEURS.length] });
+      dessinerEditeur();
+      return;
+    }
+    if (t.id === "annulerRoutine") return fermerEditeur();
+    if (t.id === "supprRoutine") {
+      if (!confirm("Supprimer la routine « " + (r.nom || "sans nom") + " » ?")) return;
+      sauver("routines/" + edition.id, edition.id === "ecole" ? { supprimee: true } : null, "Routine supprimée");
+      return fermerEditeur();
+    }
+    if (t.id === "enregistrerRoutine") {
+      var erreur = null;
+      trierEtapes();
+      if (!String(r.nom || "").trim()) erreur = "Donne un nom à la routine";
+      else if (!Object.keys(r.jours).some(function (k) { return r.jours[k]; })) erreur = "Choisis au moins un jour";
+      else if (!r.fin) erreur = "Indique l'heure de fin";
+      else if (r.etapes.some(function (e) { return !e.debut || !String(e.titre || "").trim(); })) erreur = "Chaque étape a besoin d'une heure et d'un titre";
+      else if (r.etapes.some(function (e, i) { return i > 0 && e.debut === r.etapes[i - 1].debut; })) erreur = "Deux étapes commencent à la même heure";
+      else if (sec(r.etapes[r.etapes.length - 1].debut) >= sec(r.fin)) erreur = "La fin doit être après la dernière étape";
+      else if (r.etoiles && !r.heureNotes) erreur = "Indique l'heure de l'écran des étoiles";
+      if (erreur) { dessinerEditeur(); return toast(erreur, true); }
+      var id = edition.id;
+      r.nom = r.nom.trim();
+      sauver("routines/" + id, nettoyer(r), "Routine enregistrée ✓");
+      fermerEditeur();
+    }
+  });
+
+  // =====================================================================
+  // Réglages
+  // =====================================================================
+  var MASCOTTES = [
+    { v: "🐈", nom: "Sundae" },
+    { v: "🐈‍⬛", nom: "Sundae (noir)" },
+    { v: "", e: "👧👧", nom: "Les filles" }
+  ];
+  function dessinerReglages() {
+    var regl = MATIN.reglages(stock);
+    $("choixMascotte").innerHTML = MASCOTTES.map(function (m, i) {
+      return '<button type="button" data-mascotte="' + i + '" class="' + (regl.mascotte === m.v ? "actif" : "") + '"><span class="e">' +
+             (m.e || m.v) + '</span>' + m.nom + '</button>';
+    }).join("");
+    $("decor").checked = regl.decor;
+    var focus = document.activeElement && document.activeElement.getAttribute("data-anniv");
+    if (!focus) {
+      $("anniversaires").innerHTML = FILLES.map(function (f) {
+        return '<div class="ligne espace"><span class="etiquette" style="width:48px;color:' + f.couleur + '">' + f.nom + '</span>' +
+               '<input type="date" data-anniv="' + f.nom + '" value="' + esc(regl.anniversaires[f.nom] || "") + '"></div>';
+      }).join("");
+    }
     var v = MATIN.Calendrier.prochaines(new Date());
     $("prochaines").textContent = v ? "Prochaines : " + v.nom + (v.ete ? ", à partir du " + dateLisible(v.debut)
       : " du " + dateLisible(v.debut) + " à la reprise le " + dateLisible(v.fin)) : "";
@@ -408,12 +819,16 @@
       $("lienParent").textContent = base + "parent.html#famille=" + stock.code;
     }
   }
-  $("joursEcole").addEventListener("change", function (ev) {
-    var j = ev.target.getAttribute("data-jour");
-    if (j) sauver("reglages/joursEcole/" + j, ev.target.checked, "Jours d'école mis à jour");
+  $("choixMascotte").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-mascotte]");
+    if (b) sauver("reglages/mascotte", MASCOTTES[+b.getAttribute("data-mascotte")].v, "Mascotte changée");
   });
-  $("vacances").addEventListener("change", function () {
-    sauver("reglages/vacances", $("vacances").checked, "Réglage enregistré");
+  $("decor").addEventListener("change", function () {
+    sauver("reglages/decor", $("decor").checked, "Décor " + ($("decor").checked ? "activé" : "désactivé"));
+  });
+  $("anniversaires").addEventListener("change", function (ev) {
+    var nom = ev.target.getAttribute("data-anniv");
+    if (nom) sauver("reglages/anniversaires/" + nom, ev.target.value || null, "Anniversaire de " + nom + " enregistré");
   });
   document.addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-copier]");
@@ -426,9 +841,12 @@
   // ---------- Tout redessiner quand les données changent ----------
   function toutDessiner() {
     majEtat();
+    majChoixRoutine();
     if (!saisieTouchee) chargerSaisie(); else dessinerSaisie();
+    if (!bocalEdition) dessinerBocal();
     dessinerHisto();
     dessinerRappels();
+    dessinerListeRoutines();
     dessinerReglages();
   }
   stock.surChangement(toutDessiner);

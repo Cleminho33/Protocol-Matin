@@ -10,10 +10,60 @@ var MATIN = (function () {
     { nom: "Alba", couleur: "#54A0FF" }
   ];
   var JOURS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-  var JOURS_ECOLE_DEFAUT = { "1": true, "2": true, "3": true, "4": true, "5": true };
+  var COULEURS = ["#FF9F43", "#EE5A52", "#FF6B9D", "#A55EEA", "#2E86DE", "#00B8C4", "#10AC84", "#F7B731"];
+
+  // ---------- Routines par défaut (modifiables ensuite depuis l'espace parent) ----------
+  var ROUTINE_ECOLE = {
+    nom: "École", emoji: "🎒",
+    jours: { "1": true, "2": true, "3": true, "4": true, "5": true },
+    ecole: true,
+    fin: "08:08", finEmoji: "🚌", finTitre: "Le bus",
+    finVoix: "C'est l'heure du bus ! Bonne journée les filles !",
+    finMessage: "Bonne journée les filles !", finSous: "❤️ À ce soir",
+    etoiles: true, heureNotes: "08:06",
+    etapes: [
+      { debut: "07:25", titre: "Réveil + câlins à {parent}", emoji: "🤗", couleur: "#FF9F43",
+        voix: "Debout les filles ! C'est l'heure des câlins à {parent} !", rappels: "voix" },
+      { debut: "07:30", titre: "Petit déjeuner", emoji: "🥣", couleur: "#EE5A52",
+        voix: "À table ! C'est l'heure du petit déjeuner." },
+      { debut: "07:45", titre: "On s'habille", emoji: "👕", couleur: "#2E86DE",
+        voix: "C'est l'heure de s'habiller !" },
+      { debut: "07:50", titre: "Dents + coiffure", emoji: "🪥", couleur: "#10AC84",
+        voix: "Brossage des dents et coiffure !", details: ["🪥 Les dents", "🎀 Les cheveux"] },
+      { debut: "07:55", titre: "On range !", emoji: "🧺", couleur: "#A55EEA",
+        voix: "On range ! Le pyjama, la veilleuse et le petit déjeuner.",
+        details: ["👚 Pyjama", "💡 Veilleuse", "🥣 Petit déj"] },
+      { debut: "07:58", titre: "Les chaussures", emoji: "👟", couleur: "#00B8C4",
+        voix: "Les chaussures ! Vite, avant le temps libre !", rappels: "complet" },
+      { debut: "08:00", titre: "Temps libre", emoji: "🎈", couleur: "#F7B731",
+        voix: "Bravo les filles ! C'est le temps libre !", alerte: "Plus qu'une minute ! On file au bus !" }
+    ]
+  };
+  var MODELE_SOIR = {
+    nom: "Soir", emoji: "🌙",
+    jours: { "0": true, "1": true, "2": true, "3": true, "4": true },
+    ecole: false,
+    fin: "20:20", finEmoji: "🛏️", finTitre: "Le dodo",
+    finVoix: "C'est l'heure du dodo ! Bonne nuit les filles !",
+    finMessage: "Bonne nuit les filles !", finSous: "🌙 Faites de beaux rêves",
+    etoiles: false, heureNotes: "",
+    etapes: [
+      { debut: "19:30", titre: "Le bain", emoji: "🛁", couleur: "#00B8C4", voix: "C'est l'heure du bain !" },
+      { debut: "19:50", titre: "Pyjama", emoji: "👚", couleur: "#A55EEA", voix: "On met le pyjama !" },
+      { debut: "20:00", titre: "Les dents", emoji: "🪥", couleur: "#10AC84", voix: "Brossage des dents !" },
+      { debut: "20:05", titre: "L'histoire", emoji: "📖", couleur: "#F7B731", voix: "Au lit, c'est l'heure de l'histoire !" }
+    ]
+  };
 
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function cleJour(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function sec(hhmm) { var p = String(hhmm || "0:0").split(":"); return (+p[0]) * 3600 + (+p[1]) * 60; }
+  function copie(o) { return JSON.parse(JSON.stringify(o)); }
+  function enTableau(x) {
+    if (!x) return [];
+    if (Array.isArray(x)) return x.filter(function (v) { return v != null; });
+    return Object.keys(x).sort(function (a, b) { return +a - +b; }).map(function (k) { return x[k]; }).filter(Boolean);
+  }
   function lireLocal(cle, defaut) {
     try { var b = localStorage.getItem(cle); return b ? JSON.parse(b) : defaut; } catch (e) { return defaut; }
   }
@@ -21,8 +71,13 @@ var MATIN = (function () {
     try { localStorage.setItem(cle, JSON.stringify(v)); } catch (e) {}
   }
   function sansEmoji(t) {
-    try { return t.replace(new RegExp("\\p{Extended_Pictographic}|\\uFE0F|\\u200D", "gu"), "").trim(); }
+    try { return String(t).replace(new RegExp("\\p{Extended_Pictographic}|\\uFE0F|\\u200D", "gu"), "").trim(); }
     catch (e) { return t; }
+  }
+  function esc(t) {
+    return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
   }
 
   // Le code famille arrive par le lien (#famille=…) et reste dans l'adresse,
@@ -46,6 +101,7 @@ var MATIN = (function () {
     var ecouteurs = [];
     var etat = enLigne ? "connexion" : "local";
     var synchronise = false;
+    var version = 0;
 
     // Reprise des étoiles de la V1 (stockées sous une autre clé)
     var v1 = test ? null : lireLocal("matinDesFilles", null);
@@ -70,6 +126,7 @@ var MATIN = (function () {
     }
     var testModifie = false;
     function prevenir(chemin) {
+      version++;
       if (!testModifie) ecrireLocal(cleCache, arbre);
       ecouteurs.forEach(function (f) { f(chemin); });
     }
@@ -113,24 +170,92 @@ var MATIN = (function () {
       surChangement: function (f) { ecouteurs.push(f); },
       etat: function () { return etat; },
       synchronise: function () { return !enLigne || synchronise; },
+      version: function () { return version; },
       enLigne: enLigne,
       code: code
     };
   }
 
-  // ---------- Lectures pratiques ----------
+  // ---------- Réglages ----------
   function reglages(stock) {
     var r = stock.lire("reglages") || {};
-    var jours = {}, k;
-    for (k in JOURS_ECOLE_DEFAUT) jours[k] = JOURS_ECOLE_DEFAUT[k];
-    if (r.joursEcole) for (k in r.joursEcole) jours[k] = !!r.joursEcole[k];
-    return { joursEcole: jours, vacances: r.vacances !== false };
+    return {
+      mascotte: r.mascotte === undefined ? "🐈" : r.mascotte,
+      decor: r.decor !== false,
+      anniversaires: r.anniversaires || {}
+    };
   }
+
+  // ---------- Routines ----------
+  function normaliserRoutine(r) {
+    if (!r || r.supprimee) return null;
+    r = copie(r);
+    r.jours = r.jours || {};
+    r.etapes = enTableau(r.etapes).map(function (e) {
+      e.details = enTableau(e.details);
+      return e;
+    }).filter(function (e) { return e.debut; }).sort(function (a, b) { return sec(a.debut) - sec(b.debut); });
+    if (!r.etapes.length || !r.fin) return null;
+    r.etapes.forEach(function (e, i) {
+      e.d = sec(e.debut);
+      e.f = i + 1 < r.etapes.length ? sec(r.etapes[i + 1].debut) : sec(r.fin);
+    });
+    r.debutS = r.etapes[0].d;
+    r.finS = sec(r.fin);
+    return r;
+  }
+
+  // Liste des routines {id, r}. La routine École d'origine reste présente tant qu'elle n'est pas supprimée.
+  function routines(stock) {
+    var enregistrees = stock.lire("routines") || {};
+    var liste = [];
+    if (!enregistrees.ecole) {
+      var defaut = copie(ROUTINE_ECOLE);
+      // anciens réglages de la version précédente
+      var ancien = stock.lire("reglages") || {};
+      if (ancien.joursEcole) for (var j in ancien.joursEcole) defaut.jours[j] = !!ancien.joursEcole[j];
+      if (ancien.vacances === false) defaut.ecole = false;
+      liste.push({ id: "ecole", r: normaliserRoutine(defaut) });
+    }
+    Object.keys(enregistrees).forEach(function (id) {
+      var r = normaliserRoutine(enregistrees[id]);
+      if (r) liste.push({ id: id, r: r });
+    });
+    return liste.sort(function (a, b) { return a.r.debutS - b.r.debutS; });
+  }
+
+  // Routines prévues ce jour-là, en tenant compte des vacances pour les routines « école »
+  function programme(stock, d, options) {
+    options = options || {};
+    var raisonVac = options.forcer ? null : Calendrier.raisonVacances(d);
+    var out = { routines: [], raison: null };
+    routines(stock).forEach(function (x) {
+      if (options.routine && x.id !== options.routine) return;
+      if (!options.forcer && !x.r.jours[d.getDay()]) return;
+      if (x.r.ecole && raisonVac) { out.raison = raisonVac; return; }
+      out.routines.push(x);
+    });
+    return out;
+  }
+
+  // ---------- Étoiles ----------
+  function cleNote(jour, routineId) { return !routineId || routineId === "ecole" ? jour : jour + "~" + routineId; }
   function total(stock, nom) {
     var notes = stock.lire("notes") || {}, t = 0;
-    for (var jour in notes) if (notes[jour] && notes[jour][nom]) t += notes[jour][nom];
+    for (var cle in notes) if (notes[cle] && notes[cle][nom]) t += notes[cle][nom];
     return t;
   }
+  function totalTous(stock) {
+    return FILLES.reduce(function (s, f) { return s + total(stock, f.nom); }, 0);
+  }
+  function cagnotte(stock) {
+    var c = stock.lire("cagnotte");
+    if (!c || !c.objectif) return null;
+    var progres = Math.max(0, totalTous(stock) - (c.base || 0));
+    return { objectif: +c.objectif, recompense: c.recompense || "", base: c.base || 0,
+             progres: progres, pleine: progres >= +c.objectif };
+  }
+
   function rappelsDuJour(stock, d) {
     var out = [];
     [stock.lire("rappels/hebdo/" + d.getDay()), stock.lire("rappels/dates/" + cleJour(d))].forEach(function (o) {
@@ -138,6 +263,25 @@ var MATIN = (function () {
       Object.keys(o).sort().forEach(function (k) { if (o[k]) out.push(o[k]); });
     });
     return out;
+  }
+
+  // ---------- Décor du jour : saisons, fêtes, anniversaires ----------
+  function decorDuJour(d, regl) {
+    var md = pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    var fete = null;
+    FILLES.forEach(function (f) {
+      var nais = regl.anniversaires[f.nom];
+      if (!fete && nais && nais.slice(5) === md) fete = { nom: f.nom, age: d.getFullYear() - (+nais.slice(0, 4)) };
+    });
+    var particules;
+    if (fete) particules = ["🎈", "🎉", "🎂", "✨", "🎁"];
+    else if (md >= "10-24" && md <= "10-31") particules = ["🎃", "👻", "🦇", "🍬"];
+    else if (md >= "12-01" && md <= "12-25") particules = ["❄️", "⭐", "❄️", "🎄"];
+    else if (md >= "12-26" || md <= "03-19") particules = ["❄️", "❄️", "❄️"];
+    else if (md <= "06-20") particules = ["🌸", "🌷", "🦋"];
+    else if (md <= "09-21") particules = ["🌻", "🐝", "☀️"];
+    else particules = ["🍂", "🍁", "🍂"];
+    return { particules: regl.decor ? particules : [], fete: fete };
   }
 
   // ---------- Calendrier officiel : vacances zone A (Bordeaux) et jours fériés ----------
@@ -169,11 +313,9 @@ var MATIN = (function () {
       }).catch(function () {});
     }
 
-    // Renvoie null si c'est un jour d'école, sinon la raison
-    function raisonSansEcole(d, regl) {
-      var j = d.getDay();
-      if (!regl.joursEcole[j]) return "pas-ecole";
-      if (!regl.vacances || !cache) return null;
+    // Renvoie null si ce n'est ni un jour férié ni un jour de vacances, sinon la raison
+    function raisonVacances(d) {
+      if (!cache) return null;
       var k = cleJour(d);
       if (cache.feries && cache.feries[k]) return "Jour férié : " + cache.feries[k];
       for (var i = 0; i < cache.vacances.length; i++) {
@@ -197,13 +339,17 @@ var MATIN = (function () {
       return null;
     }
 
-    return { charger: charger, raisonSansEcole: raisonSansEcole, prochaines: prochaines };
+    return { charger: charger, raisonVacances: raisonVacances, prochaines: prochaines };
   })();
 
   return {
-    DB_URL: DB_URL, FILLES: FILLES, JOURS: JOURS,
-    pad: pad, cleJour: cleJour, sansEmoji: sansEmoji,
-    creerStock: creerStock, reglages: reglages, total: total, rappelsDuJour: rappelsDuJour,
+    DB_URL: DB_URL, FILLES: FILLES, JOURS: JOURS, COULEURS: COULEURS,
+    ROUTINE_ECOLE: ROUTINE_ECOLE, MODELE_SOIR: MODELE_SOIR,
+    pad: pad, sec: sec, copie: copie, cleJour: cleJour, sansEmoji: sansEmoji, esc: esc, enTableau: enTableau,
+    creerStock: creerStock, reglages: reglages,
+    routines: routines, normaliserRoutine: normaliserRoutine, programme: programme,
+    cleNote: cleNote, total: total, totalTous: totalTous, cagnotte: cagnotte,
+    rappelsDuJour: rappelsDuJour, decorDuJour: decorDuJour,
     Calendrier: Calendrier
   };
 })();
