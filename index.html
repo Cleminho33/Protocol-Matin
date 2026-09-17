@@ -93,8 +93,42 @@
   .compteur.bocal.pleine { animation: battement 1s ease-in-out infinite; background: rgba(255,217,61,.25); }
 
   /* ---------- Étape en cours ---------- */
-  .scene { flex: 1; display: flex; align-items: center; gap: 5vw; min-height: 0; }
-  .anneau { position: relative; width: calc(var(--u) * 56); height: calc(var(--u) * 56); flex-shrink: 0; }
+  .scene { flex: 1; display: flex; align-items: center; gap: 4vw; min-height: 0; }
+  .zone-anneau { position: relative; width: calc(var(--u) * 78); height: calc(var(--u) * 60); flex-shrink: 0; }
+  #sceneCanvas {
+    position: absolute; left: 50%; top: calc(var(--u) * 25);
+    width: calc(var(--u) * 100); height: calc(var(--u) * 100);
+    transform: translate(-50%, -50%); pointer-events: none;
+  }
+  .anneau { position: absolute; left: calc(var(--u) * 14); top: 0; width: calc(var(--u) * 50); height: calc(var(--u) * 50); }
+
+  /* ---------- Avatars de Lou et Alba ---------- */
+  .duo {
+    position: absolute; left: calc(var(--u) * -2); right: calc(var(--u) * -2); bottom: calc(var(--u) * -3);
+    display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none;
+  }
+  .avatar { width: calc(var(--u) * 21); text-align: center; }
+  .avatar svg { display: block; width: 100%; height: calc(var(--u) * 31.5); overflow: visible; transform-origin: 50% 100%; animation: souffle 2.6s ease-in-out infinite; }
+  .avatar:nth-child(2) svg { animation-delay: -1.3s; }
+  .duo.fort .avatar svg { animation: sautille .55s ease-in-out infinite alternate; }
+  .duo.fort .avatar:nth-child(2) svg { animation-delay: -.27s; }
+  .avatar .prenom {
+    display: inline-block; margin-top: calc(var(--u) * -.5); font-size: calc(var(--u) * 3.4); font-weight: 700;
+    color: var(--f); background: rgba(20,24,51,.75); padding: 0 calc(var(--u) * 1.6); border-radius: 99px;
+  }
+  @keyframes souffle { 50% { transform: scaleY(1.02) translateY(calc(var(--u) * -.3)); } }
+  @keyframes sautille { from { transform: translateY(0) scaleY(.98); } to { transform: translateY(calc(var(--u) * -2.2)) scaleY(1.02); } }
+  .avatar-svg .frotte { animation: frotte .25s ease-in-out infinite alternate; }
+  @keyframes frotte { from { transform: translateX(-2px); } to { transform: translateX(3px); } }
+  .avatar-svg .coiffe { animation: coiffe .9s ease-in-out infinite alternate; }
+  @keyframes coiffe { from { transform: translateY(-3px); } to { transform: translateY(6px); } }
+  .avatar-svg .coucou { transform-box: fill-box; transform-origin: 0% 100%; animation: coucou .6s ease-in-out infinite alternate; }
+  @keyframes coucou { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } }
+  .avatar-svg .flotte { animation: flotte 2s ease-in-out infinite alternate; }
+  @keyframes flotte { from { transform: translate(-2px, 0); } to { transform: translate(3px, -5px); } }
+  .avatar-svg .zzz-avatar { animation: flotte 1.6s ease-in-out infinite alternate; }
+  .avatar-svg .couette, .avatar-svg .queue { transform-box: fill-box; transform-origin: 50% 0%; animation: balance 1.8s ease-in-out infinite alternate; }
+  @keyframes balance { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
   .anneau svg { width: 100%; height: 100%; }
   .anneau .fond { fill: rgba(255,255,255,.06); stroke: rgba(255,255,255,.14); stroke-width: 18; }
   .anneau .reste {
@@ -110,7 +144,7 @@
 
   .texte { min-width: 0; }
   .etape-num { font-size: calc(var(--u) * 4); opacity: .7; font-weight: 500; }
-  .texte h1 { font-size: calc(var(--u) * 11); line-height: 1.05; margin: calc(var(--u) * 1) 0 calc(var(--u) * 3); }
+  .texte h1 { font-size: calc(var(--u) * 9.5); line-height: 1.05; margin: calc(var(--u) * 1) 0 calc(var(--u) * 3); }
   .details { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 2); margin-bottom: calc(var(--u) * 3); }
   .puce {
     font-size: calc(var(--u) * 4.5); font-weight: 600; background: rgba(255,255,255,.12);
@@ -201,6 +235,8 @@
   #bravo { display: none; }
   .bravo-contenu { display: flex; align-items: center; gap: 6vw; }
   .bravo-titre { font-size: calc(var(--u) * 11); font-weight: 700; margin-bottom: calc(var(--u) * 3); }
+  .bravo-filles { display: flex; gap: 5vw; }
+  .avatar-bravo svg { width: calc(var(--u) * 22); height: calc(var(--u) * 33); overflow: visible; animation: sautille .5s ease-in-out infinite alternate; transform-origin: 50% 100%; }
   .bravo-fille { margin-bottom: calc(var(--u) * 3); animation: pop .9s cubic-bezier(.2,1.6,.4,1) backwards; }
   .bravo-fille + .bravo-fille { animation-delay: .4s; }
   .bravo-fille .nom { font-size: calc(var(--u) * 8); font-weight: 700; color: var(--f); }
@@ -244,12 +280,16 @@
     <div class="bus"><span id="finEmoji">🚌</span> dans <b id="busMin">43</b> min</div>
   </div>
   <div class="scene">
-    <div class="anneau" id="anneau">
-      <svg viewBox="0 0 200 200">
-        <circle class="fond" cx="100" cy="100" r="88"></circle>
-        <circle class="reste" id="arc" cx="100" cy="100" r="88" transform="rotate(-90 100 100)"></circle>
-      </svg>
-      <div class="emoji-centre" id="emojiTache"></div>
+    <div class="zone-anneau">
+      <canvas id="sceneCanvas"></canvas>
+      <div class="anneau" id="anneau">
+        <svg viewBox="0 0 200 200">
+          <circle class="fond" cx="100" cy="100" r="88"></circle>
+          <circle class="reste" id="arc" cx="100" cy="100" r="88" transform="rotate(-90 100 100)"></circle>
+        </svg>
+        <div class="emoji-centre" id="emojiTache"></div>
+      </div>
+      <div class="duo" id="duo"></div>
     </div>
     <div class="texte">
       <div class="etape-num" id="etapeNum"></div>
@@ -406,6 +446,7 @@
     for (var k = 0; k < masc.length; k++) masc[k].textContent = regl.mascotte || "👧👧";
     var cle = decor.particules.join("");
     if (cle !== decorCle) { decorCle = cle; construireDecor(decor.particules); }
+    if (etatCourant) afficherDecor(etatCourant.split(":")[0]);
   }
   function construireDecor(liste) {
     var html = "";
@@ -476,6 +517,212 @@
     }, delai === undefined ? 1100 : delai);
   }
 
+  // =====================================================================
+  // Scènes animées par étape (même dessin que l'app Apple TV).
+  // Elles jouent en grand aux temps forts (juste après l'annonce, dernière minute)
+  // et restent discrètes le reste du temps.
+  // =====================================================================
+  var Scene = (function () {
+    var type = null, debutEtape = 0, reste = 999, force = 0.25, actif = false;
+    var cv = $("sceneCanvas"), ctx = cv.getContext("2d");
+    var POLICE = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    var COULEURS = ["#FF6B9D", "#54A0FF", "#FFD93D", "#10AC84", "#A55EEA", "#FF9F43"];
+
+    function alea(i, k) { var x = Math.sin((i * 127 + k * 311) * 12.9898) * 43758.5453; return x - Math.floor(x); }
+    function cycle(t, p, ph) { var v = t / p + ph; return v - Math.floor(v); }
+    function fondu(p) { return Math.max(0, Math.min(1, p / 0.12) * Math.min(1, (1 - p) / 0.2)); }
+    function nb(m, f) { return Math.max(1, Math.round(m * f)); }
+    function emo(e, x, y, taille, o, rot, ech) {
+      if (o === undefined) o = 1;
+      if (o <= 0.01) return;
+      ctx.save();
+      ctx.globalAlpha = o;
+      ctx.translate(x, y);
+      if (rot) ctx.rotate(rot * Math.PI / 180);
+      if (ech && ech !== 1) ctx.scale(ech, ech);
+      ctx.font = Math.round(taille) + "px " + POLICE;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(e, 0, 0);
+      ctx.restore();
+    }
+    function rond(x, y, s, remplissage, trait, epaisseur) {
+      ctx.beginPath();
+      ctx.arc(x, y, s / 2, 0, Math.PI * 2);
+      if (remplissage) { ctx.fillStyle = remplissage; ctx.fill(); }
+      if (trait) { ctx.strokeStyle = trait; ctx.lineWidth = epaisseur; ctx.stroke(); }
+    }
+
+    // c = centre, r = rayon de l'anneau, k = échelle (dessins pensés pour 1000 px)
+    var dessins = {
+      reveil: function (cx, cy, r, t, f, k) {
+        ctx.save();
+        ctx.globalAlpha = 0.25 + 0.55 * f;
+        ctx.strokeStyle = "#FFD93D"; ctx.lineWidth = 14 * k; ctx.lineCap = "round";
+        for (var i = 0; i < 14; i++) {
+          var a = (t * 12 + i * 360 / 14) * Math.PI / 180, l = r * (0.22 + 0.12 * Math.sin(t * 2.5 + i));
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a) * r * 1.14, cy + Math.sin(a) * r * 1.14);
+          ctx.lineTo(cx + Math.cos(a) * (r * 1.14 + l), cy + Math.sin(a) * (r * 1.14 + l));
+          ctx.stroke();
+        }
+        ctx.restore();
+        var coeurs = ["💛", "❤️", "🧡"];
+        for (var j = 0; j < nb(7, f); j++) {
+          var p = cycle(t, 3.5, alea(j, 1));
+          emo(coeurs[j % 3], cx + (alea(j, 2) - 0.5) * r * 1.4 + Math.sin(p * 6 + j) * 25 * k, cy - p * r * 1.8, (46 + p * 22) * k, fondu(p));
+        }
+      },
+      repas: function (cx, cy, r, t, f, k) {
+        for (var i = 0; i < nb(9, f); i++) {
+          var p = cycle(t, 3.4, alea(i, 1)), s = (40 + p * 90) * k;
+          ctx.save();
+          ctx.globalAlpha = fondu(p) * 0.28;
+          ctx.fillStyle = "#FFFFFF";
+          ctx.beginPath();
+          ctx.ellipse(cx + (alea(i, 2) - 0.5) * r * 0.7 + Math.sin(p * 6 + i) * 22 * k, cy - r * 0.25 - p * r * 1.5, s / 2, s * 0.4, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        var aliments = ["🥐", "🍓", "🥛", "🍞", "🍌", "🧃"];
+        for (var j = 0; j < nb(5, f); j++) {
+          var q = cycle(t, 4.2, alea(j, 3)), sens = alea(j, 4) < 0.5 ? -1 : 1, portee = r * (0.9 + alea(j, 5) * 0.7);
+          emo(aliments[j % aliments.length], cx + sens * q * portee, cy - r * 0.15 - 3.6 * r * q * (1 - q) + q * r * 0.6, 64 * k, fondu(q), sens * q * 300);
+        }
+      },
+      habits: function (cx, cy, r, t, f, k) {
+        var v = ["👕", "👗", "🧦", "👖", "🧢", "🧥"];
+        for (var i = 0; i < nb(6, f); i++) {
+          var p = cycle(t, 3.6, alea(i, 1)), a = alea(i, 2) * Math.PI * 2;
+          var dx = cx + Math.cos(a) * r * 1.9, dy = cy + Math.sin(a) * r * 1.9;
+          var e = p * p * (3 - 2 * p), courbe = Math.sin(p * Math.PI) * r * 0.5;
+          var o = Math.min(1, p / 0.1) * (p > 0.8 ? (1 - p) / 0.2 : 1);
+          emo(v[i % v.length], dx + (cx - dx) * e - Math.sin(a) * courbe, dy + (cy - dy) * e + Math.cos(a) * courbe, 76 * k, o, (1 - p) * 360, 1 - p * 0.6);
+        }
+      },
+      bulles: function (cx, cy, r, t, f, k, maxi, teinte) {
+        for (var i = 0; i < nb(maxi, f); i++) {
+          var p = cycle(t, 3 + alea(i, 1) * 2, alea(i, 2));
+          var x = cx + (alea(i, 3) - 0.5) * r * 2.6 + Math.sin(p * 8 + i) * 18 * k, y = cy + r * 1.2 - p * r * 3;
+          var s = (24 + alea(i, 4) * 40 + p * 20) * k, o = fondu(p);
+          ctx.save();
+          ctx.globalAlpha = 0.18 * o; rond(x, y, s, teinte);
+          ctx.globalAlpha = 0.75 * o; rond(x, y, s, null, "#FFFFFF", 3 * k);
+          ctx.globalAlpha = 0.8 * o;
+          ctx.fillStyle = "#FFFFFF";
+          ctx.beginPath(); ctx.ellipse(x - s * 0.15, y - s * 0.23, s * 0.1, s * 0.07, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+      },
+      etincelles: function (cx, cy, r, t, f, k, maxi) {
+        for (var i = 0; i < nb(maxi, f); i++) {
+          var periode = 1.8 + alea(i, 1), p = cycle(t, periode, alea(i, 2));
+          var a = alea(i, 3) * Math.PI * 2 + Math.floor(t / periode + alea(i, 2)) * 1.3, d = r * (1.05 + alea(i, 4) * 0.6);
+          var o = Math.sin(p * Math.PI);
+          emo("✨", cx + Math.cos(a) * d, cy + Math.sin(a) * d, (34 + alea(i, 5) * 24) * k, o, 0, 0.6 + 0.4 * o);
+        }
+      },
+      coiffure: function (cx, cy, r, t, f, k) {
+        for (var i = 0; i < 3; i++) {
+          var a = (t * 35 + i * 120) * Math.PI / 180;
+          emo("🎀", cx + Math.cos(a) * r * 1.2, cy + Math.sin(a) * r * 1.2, 60 * k, 0.45 + 0.55 * f, Math.sin(t * 2 + i) * 15);
+        }
+        dessins.etincelles(cx, cy, r, t, f, k, 14);
+      },
+      rangement: function (cx, cy, r, t, f, k) {
+        var j = ["🧸", "🧦", "🥣", "🚗", "🧩", "📚", "💡"];
+        for (var i = 0; i < nb(6, f); i++) {
+          var p = cycle(t, 2.8, alea(i, 1)), x0 = (alea(i, 2) - 0.5) * r * 1.6, haut = -r * 1.7, bas = r * 0.25, dx = 0, dy;
+          if (p < 0.7) { var q = p / 0.7; dy = haut + (bas - haut) * q * q; dx = x0 * (1 - q); }
+          else { dy = bas - Math.sin((p - 0.7) / 0.3 * Math.PI) * 30 * k; }
+          var o = Math.min(1, p / 0.08) * (p > 0.85 ? (1 - p) / 0.15 : 1);
+          emo(j[i % j.length], cx + dx, cy + dy, 64 * k, o, p < 0.7 ? p * 200 : 0, p > 0.7 ? 0.8 : 1);
+        }
+      },
+      chaussures: function (cx, cy, r, t, f, k) {
+        var q = cycle(t, 5, 0);
+        for (var i = 0; i < 12; i++) {
+          var apparition = i / 12 * 0.8;
+          if (q < apparition) continue;
+          var age = (q - apparition) * 5;
+          emo("👣", cx - r * 1.6 + i * (r * 3.2 / 11), cy + r * 1.15 + (i % 2 === 0 ? -22 : 22) * k, 50 * k,
+              Math.max(0, 1 - age / 2.5) * (0.4 + 0.6 * f), 90);
+        }
+        for (var n = 0; n < 2; n++) {
+          var rebond = Math.abs(Math.sin(t * 4 + n * 1.6)) * 40 * k * f;
+          emo("👟", cx + (n === 0 ? -1 : 1) * r * 1.25, cy - r * 0.9 - rebond, 70 * k, 0.4 + 0.6 * f);
+        }
+      },
+      jeu: function (cx, cy, r, t, f, k) {
+        for (var i = 0; i < nb(9, f); i++) {
+          var p = cycle(t, 5 + alea(i, 1) * 2, alea(i, 2));
+          var x = cx + (alea(i, 3) - 0.5) * r * 3.2 + Math.sin(p * 5 + i) * 30 * k, y = cy + r * 1.6 - p * r * 3.6;
+          var w = 58 * k, h = 70 * k;
+          ctx.save();
+          ctx.globalAlpha = fondu(p);
+          ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.lineWidth = 2 * k;
+          ctx.beginPath(); ctx.moveTo(x, y + h / 2);
+          ctx.quadraticCurveTo(x - 14 * k, y + h / 2 + 35 * k, x + Math.sin(t * 3 + i) * 10 * k, y + h / 2 + 70 * k);
+          ctx.stroke();
+          ctx.fillStyle = COULEURS[i % COULEURS.length];
+          ctx.beginPath(); ctx.ellipse(x, y, w / 2, h / 2, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,.5)";
+          ctx.beginPath(); ctx.ellipse(x - w * 0.14, y - h * 0.21, w * 0.11, h * 0.09, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+      },
+      bain: function (cx, cy, r, t, f, k) {
+        dessins.bulles(cx, cy, r, t, f, k, 18, "#FFFFFF");
+        emo("🦆", cx + Math.sin(t * 0.6) * r * 1.2, cy + r * 1.25 + Math.sin(t * 2.2) * 10 * k, 80 * k, 0.5 + 0.5 * f, Math.sin(t * 2.2) * 8);
+      },
+      pyjama: function (cx, cy, r, t, f, k) {
+        var a = t * 0.35;
+        emo("🌙", cx + Math.cos(a) * r * 1.3, cy + Math.sin(a) * r * 1.3, 80 * k, 0.5 + 0.5 * f);
+        for (var i = 0; i < nb(14, f); i++) {
+          var p = cycle(t, 2.4 + alea(i, 1), alea(i, 2)), an = alea(i, 3) * Math.PI * 2, d = r * (1.1 + alea(i, 4) * 0.6);
+          emo("⭐", cx + Math.cos(an) * d, cy + Math.sin(an) * d, (28 + alea(i, 5) * 20) * k, Math.sin(p * Math.PI) * 0.9);
+        }
+      },
+      histoire: function (cx, cy, r, t, f, k) {
+        var m = ["✨", "🐉", "🧚", "🏰", "⭐", "🦄"];
+        for (var i = 0; i < nb(7, f); i++) {
+          var p = cycle(t, 4, alea(i, 1)), a = (-90 + (alea(i, 2) - 0.5) * 120) * Math.PI / 180, d = r * 0.2 + p * r * 1.6;
+          emo(m[i % m.length], cx + Math.cos(a) * d, cy + Math.sin(a) * d, (40 + p * 34) * k, fondu(p), Math.sin(p * 6) * 15);
+        }
+      },
+      etoiles: function (cx, cy, r, t, f, k) { dessins.etincelles(cx, cy, r, t, f, k, 16); },
+      dents: function (cx, cy, r, t, f, k) {
+        dessins.bulles(cx, cy, r, t, f, k, 16, "#9BE7FF");
+        dessins.etincelles(cx, cy, r, t, f, k, 5);
+      }
+    };
+
+    function image(ts) {
+      if (!actif) return;
+      var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+      if (w && (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr))) {
+        cv.width = Math.round(w * dpr);
+        cv.height = Math.round(h * dpr);
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      var depuis = (performance.now() - debutEtape) / 1000;
+      var cibleForce = ((depuis > 4.5 && depuis < 16) || reste <= 60) ? 1 : 0.25;
+      force += (cibleForce - force) * 0.04;
+      $("duo").classList.toggle("fort", cibleForce === 1);
+      var k = w / 1000;
+      if (type && dessins[type] && w) dessins[type](w / 2, h / 2, Math.min(w, h) * 0.28, ts / 1000, force, k);
+      requestAnimationFrame(image);
+    }
+
+    return {
+      etape: function (nouveauType) { type = nouveauType; debutEtape = performance.now(); },
+      reste: function (s) { reste = s; },
+      demarrer: function () { if (!actif) { actif = true; requestAnimationFrame(image); } },
+      arreter: function () { actif = false; $("duo").classList.remove("fort"); }
+    };
+  })();
+
   // ---------- Affichage d'une routine ----------
   var etatCourant = null, cible = null, cleEtape = null, pisteSig = null, idxCourant = 0;
   var alerteFaite = false, demarre = false, timerAnnonce = null;
@@ -485,6 +732,21 @@
       $(id).classList.toggle("actif", id === nom);
     });
     $("halo").style.display = nom === "routine" ? "block" : "none";
+    afficherDecor(nom);
+    if (nom === "routine") Scene.demarrer(); else Scene.arreter();
+  }
+
+  // Saisons seulement hors routine ; ballons d'anniversaire partout
+  function afficherDecor(nom) {
+    $("decor").style.display = (nom !== "routine" || decor.fete) ? "block" : "none";
+  }
+
+  function dessinerAvatars(r, i) {
+    var etat = MATIN.etatAvatar(r, i);
+    $("duo").innerHTML = FILLES.map(function (f) {
+      return '<div class="avatar" style="--f:' + f.couleur + '">' + MATIN.avatarSVG(f.nom, regl.avatars[f.nom], etat) +
+             '<div class="prenom">' + f.nom + '</div></div>';
+    }).join("");
   }
 
   function construirePiste(r) {
@@ -515,6 +777,7 @@
     for (var k = 0; k < segs.length; k++) {
       segs[k].className = "seg" + (k < i ? " fait" : k === i ? " encours" : "");
     }
+    dessinerAvatars(r, i);
   }
 
   function annoncer(r, i) {
@@ -547,10 +810,12 @@
     if (cle !== cleEtape) {
       cleEtape = cle;
       afficherEtape(r, i);
+      Scene.etape(MATIN.sceneDe(e));
       alerteFaite = (e.f - s) <= 60;
       if (demarre) annoncer(r, i);
     }
     var dur = Math.max(1, e.f - e.d), reste = Math.max(0, e.f - s);
+    Scene.reste(reste);
     $("arc").style.strokeDashoffset = C * (1 - reste / dur);
     $("restant").innerHTML = reste > 60
       ? "encore <b>" + Math.ceil(reste / 60) + "</b> min"
@@ -653,9 +918,13 @@
     }
     $("bravo").innerHTML =
       '<div class="bravo-titre">Bravo les filles !</div>' +
-      '<div class="bravo-contenu"><div>' + FILLES.map(function (f) {
+      '<div class="bravo-contenu"><div class="bravo-filles">' + FILLES.map(function (f) {
         var n = notes[f.nom] || 0;
-        return '<div class="bravo-fille" style="--f:' + f.couleur + '"><div class="nom">' + f.nom + '</div>' +
+        var etat = MATIN.etatAvatar(cible && cible.r, cible ? cible.r.etapes.length - 1 : 0);
+        etat.pose = "coucou"; etat.objet = ""; etat.expression = "rire";
+        return '<div class="bravo-fille" style="--f:' + f.couleur + '">' +
+               '<div class="avatar-bravo">' + MATIN.avatarSVG(f.nom, regl.avatars[f.nom], etat) + '</div>' +
+               '<div class="nom">' + f.nom + '</div>' +
                '<div class="gagne">' + new Array(n + 1).join("★") + '</div>' +
                '<div class="total">Total : ' + MATIN.total(stock, f.nom) + ' ⭐</div></div>';
       }).join("") + '</div>' + htmlBocal + '</div>' +

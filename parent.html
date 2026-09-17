@@ -141,6 +141,16 @@
   .choix button .e { display: block; font-size: 30px; }
   .choix button.actif { border-color: var(--or); background: rgba(255,217,61,.1); }
 
+  .avatar-reglage { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .avatar-reglage:last-child { border: none; }
+  .apercu { width: 92px; flex-shrink: 0; text-align: center; }
+  .apercu svg { width: 92px; height: 138px; overflow: visible; }
+  .apercu .nom { font-weight: 700; color: var(--f); font-size: 18px; }
+  .options-avatar { flex: 1; min-width: 0; }
+  .options-avatar > * + * { margin-top: 8px; }
+  .nuancier { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nuancier button { width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; }
+  .nuancier button.choisie { border-color: #fff; }
   .toast {
     position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 10;
     max-width: 528px; margin: 0 auto; background: #7CFFB2; color: var(--nuit); font-weight: 600;
@@ -219,6 +229,11 @@
 
 <!-- Réglages -->
 <section class="onglet" id="o-reglages">
+  <div class="carte">
+    <h2>👧 Les avatars</h2>
+    <small>Ils accompagnent chaque étape à côté de la minuterie : pyjama au réveil, bol au petit déjeuner, tenue d'école, brosse à dents, cartable…</small>
+    <div id="avatars" class="espace"></div>
+  </div>
   <div class="carte">
     <h2>🐈 La mascotte</h2>
     <small>Elle marche sur la route, dort avant le réveil et saute de joie au bravo.</small>
@@ -814,8 +829,39 @@
     { v: "🐈‍⬛", nom: "Sundae (noir)" },
     { v: "", e: "👧👧", nom: "Les filles" }
   ];
+  function dessinerAvatars(regl) {
+    var apercu = { tenue: "ecole", chaussures: true, pose: "coucou", expression: "sourire" };
+    $("avatars").innerHTML = FILLES.map(function (f) {
+      var a = regl.avatars[f.nom];
+      var nuancier = Object.keys(MATIN.CHEVEUX).map(function (c) {
+        return '<button type="button" data-avatar="' + f.nom + '" data-champ="cheveux" data-valeur="' + c + '" style="background:' +
+               MATIN.CHEVEUX[c] + '" class="' + (a.cheveux === c ? "choisie" : "") + '" aria-label="' + MATIN.CHEVEUX_NOMS[c] + '"></button>';
+      }).join("");
+      function liste(champ, options) {
+        return '<select data-avatar="' + f.nom + '" data-champ="' + champ + '">' + Object.keys(options).map(function (v) {
+          return '<option value="' + v + '"' + (a[champ] === v ? " selected" : "") + '>' + options[v] + '</option>';
+        }).join("") + '</select>';
+      }
+      return '<div class="avatar-reglage" style="--f:' + f.couleur + '">' +
+        '<div class="apercu">' + MATIN.avatarSVG(f.nom, a, apercu) + '<div class="nom">' + f.nom + '</div></div>' +
+        '<div class="options-avatar"><small>Cheveux</small><div class="nuancier">' + nuancier + '</div>' +
+        liste("coiffure", MATIN.COIFFURES) + liste("accessoire", MATIN.ACCESSOIRES) + '</div></div>';
+    }).join("");
+  }
+  $("avatars").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button[data-avatar]");
+    if (b) sauver("reglages/avatars/" + b.getAttribute("data-avatar") + "/cheveux", b.getAttribute("data-valeur"), "Avatar de " + b.getAttribute("data-avatar") + " mis à jour");
+  });
+  $("avatars").addEventListener("change", function (ev) {
+    var s = ev.target;
+    if (s.tagName === "SELECT") {
+      sauver("reglages/avatars/" + s.getAttribute("data-avatar") + "/" + s.getAttribute("data-champ"), s.value, "Avatar de " + s.getAttribute("data-avatar") + " mis à jour");
+    }
+  });
+
   function dessinerReglages() {
     var regl = MATIN.reglages(stock);
+    dessinerAvatars(regl);
     $("choixMascotte").innerHTML = MASCOTTES.map(function (m, i) {
       return '<button type="button" data-mascotte="' + i + '" class="' + (regl.mascotte === m.v ? "actif" : "") + '"><span class="e">' +
              (m.e || m.v) + '</span>' + m.nom + '</button>';
