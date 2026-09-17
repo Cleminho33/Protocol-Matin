@@ -227,9 +227,9 @@ var MATIN = (function () {
   var COIFFURES = { longs: "Longs", carre: "Carré", courts: "Courts", queue: "Queue-de-cheval", couettes: "Couettes" };
   var ACCESSOIRES = { "": "Aucun", lunettes: "Lunettes", noeud: "Nœud", serretete: "Serre-tête", taches: "Taches de rousseur" };
 
-  // Ce que porte et tient l'avatar à l'étape i : il évolue au fil de la routine
+  // Ce que porte l'avatar à l'étape i (il évolue au fil de la routine) et ce qu'il fait
   function etatAvatar(r, i) {
-    var etat = { tenue: "ecole", bataille: false, chaussures: false, cartable: false, pose: "bas", objet: "", expression: "sourire", scene: "etoiles" };
+    var etat = { tenue: "ecole", bataille: false, chaussures: false, cartable: false, expression: "sourire", animation: "etoiles" };
     if (!r || !r.etapes || !r.etapes.length) return etat;
     i = Math.max(0, Math.min(i, r.etapes.length - 1));
     for (var k = 0; k <= i; k++) {
@@ -241,19 +241,13 @@ var MATIN = (function () {
       if (sc === "coiffure" || /coiff|cheveu/i.test(e.titre || "")) etat.bataille = false;
       if (sc === "chaussures") { etat.chaussures = true; etat.cartable = r.finEmoji === "🚌"; }
     }
-    var sc2 = sceneDe(r.etapes[i]);
-    etat.scene = sc2;
-    var poses = {
-      reveil: ["tenir", "🧸"], repas: ["tenir", "🥣"], dents: ["bouche", "🪥"], coiffure: ["tete", "🪮"],
-      rangement: ["tenir", "🧺"], jeu: ["ballon", "🎈"], bain: ["tenir", "🦆"], pyjama: ["tenir", "🧸"],
-      histoire: ["tenir", "📖"], habits: ["bas", ""], chaussures: ["bas", ""], etoiles: ["bas", ""]
-    };
-    etat.pose = poses[sc2][0];
-    etat.objet = poses[sc2][1];
-    if (sc2 === "reveil") etat.expression = "sommeil";
+    etat.animation = sceneDe(r.etapes[i]);
+    if (etat.animation === "reveil" || etat.animation === "pyjama") etat.expression = "sommeil";
     return etat;
   }
 
+  // Dessin de l'avatar. Les gestes (bras avec coudes, jambes, tête) sont animés par l'écran du matin
+  // grâce aux classes act-<animation>, bras-g/d, avant-bras-g/d, jambe-g/d, tete, haut, tout.
   function avatarSVG(nom, apparence, etat) {
     apparence = apparence || {};
     etat = etat || {};
@@ -263,125 +257,132 @@ var MATIN = (function () {
     var acc = apparence.accessoire || "";
     var tc = fille.couleur;
     var peau = "#FFD7B5", peauOmbre = "#F0B993", encre = "#2D2D3A", bouche = "#8E3B46";
-    var tenue = etat.tenue || "ecole", pose = etat.pose || "bas";
-    var s = ['<svg viewBox="0 0 160 240" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">'];
+    var tenue = etat.tenue || "ecole";
+    var act = etat.animation || "etoiles";
+    var manche = tenue === "bain" ? peau : tc;
+    var avantBras = tenue === "pyjama" ? tc : peau;
 
-    s.push('<ellipse cx="80" cy="232" rx="42" ry="6" fill="rgba(0,0,0,.28)"/>');
+    function emoji(e, x, y, taille, classe) {
+      return '<text x="' + x + '" y="' + y + '" font-size="' + taille + '" text-anchor="middle" dominant-baseline="central"' +
+             (classe ? ' class="' + classe + '"' : '') + '>' + e + '</text>';
+    }
 
-    // Cheveux de derrière
-    if (coiffure === "longs") s.push('<path d="M44 74 Q40 38 80 36 Q120 38 116 74 L122 142 Q100 152 80 147 Q60 152 38 142 Z" fill="' + ch + '"/>');
-    if (coiffure === "carre") s.push('<path d="M44 74 Q40 38 80 36 Q120 38 116 74 L119 110 Q80 120 41 110 Z" fill="' + ch + '"/>');
-    if (coiffure === "courts") s.push('<path d="M46 74 Q44 38 80 38 Q116 38 114 74 L112 94 Q80 98 48 94 Z" fill="' + ch + '"/>');
+    var objetMain = { repas: "🥄", dents: "🪥", coiffure: "🪮", rangement: "🧸" }[act] || "";
+    var devant = { repas: emoji("🥣", 80, 150, 30), histoire: emoji("📖", 80, 150, 34) }[act] || "";
+
+    var s = ['<svg viewBox="0 0 160 240" xmlns="http://www.w3.org/2000/svg" class="avatar-svg act-' + act + '">'];
+    s.push('<ellipse class="ombre" cx="80" cy="232" rx="42" ry="6" fill="rgba(0,0,0,.28)"/>');
+    s.push('<g class="tout">');
+
+    // ----- Jambes et pieds -----
+    function jambe(x, cote) {
+      var out = '<g class="jambe jambe-' + cote + '">';
+      if (tenue === "pyjama") out += '<rect x="' + (x - 8) + '" y="170" width="16" height="52" rx="7" fill="' + tc + '"/>';
+      else {
+        out += '<rect x="' + (x - 6) + '" y="176" width="12" height="46" rx="5" fill="' + peau + '"/>';
+        if (tenue === "ecole") out += '<rect x="' + (x - 7) + '" y="208" width="14" height="14" rx="4" fill="#FFFFFF"/>';
+      }
+      var sens = cote === "g" ? -1 : 1;
+      if (etat.chaussures) {
+        out += '<path d="M' + (x + sens * 16) + ' 226 Q' + (x + sens * 16) + ' 214 ' + x + ' 216 Q' + (x - sens * 10) + ' 217 ' + (x - sens * 12) +
+               ' 226 Z" fill="#FFFFFF" stroke="' + tc + '" stroke-width="3"/>';
+      } else if (tenue === "pyjama") {
+        out += '<ellipse cx="' + (x + sens * 2) + '" cy="224" rx="14" ry="7" fill="#FFC9DE"/>';
+      } else {
+        out += '<ellipse cx="' + x + '" cy="224" rx="9" ry="5" fill="' + (tenue === "ecole" ? "#FFFFFF" : peau) + '"/>';
+      }
+      return out + '</g>';
+    }
+    s.push(jambe(70, "g"), jambe(90, "d"));
+
+    s.push('<g class="haut">');
+
+    // ----- Cheveux de derrière -----
+    var arriere = "";
+    if (coiffure === "longs") arriere = '<path d="M44 74 Q40 38 80 36 Q120 38 116 74 L122 142 Q100 152 80 147 Q60 152 38 142 Z" fill="' + ch + '"/>';
+    if (coiffure === "carre") arriere = '<path d="M44 74 Q40 38 80 36 Q120 38 116 74 L119 110 Q80 120 41 110 Z" fill="' + ch + '"/>';
+    if (coiffure === "courts") arriere = '<path d="M46 74 Q44 38 80 38 Q116 38 114 74 L112 94 Q80 98 48 94 Z" fill="' + ch + '"/>';
     if (coiffure === "queue") {
-      s.push('<path d="M46 74 Q44 38 80 38 Q116 38 114 74 L112 94 Q80 98 48 94 Z" fill="' + ch + '"/>');
-      s.push('<path d="M110 52 Q146 52 140 100 Q136 130 118 136 Q128 104 108 74 Z" fill="' + ch + '" class="queue"/>');
+      arriere = '<path d="M46 74 Q44 38 80 38 Q116 38 114 74 L112 94 Q80 98 48 94 Z" fill="' + ch + '"/>' +
+                '<path class="queue" d="M110 52 Q146 52 140 100 Q136 130 118 136 Q128 104 108 74 Z" fill="' + ch + '"/>';
     }
     if (coiffure === "couettes") {
-      s.push('<path d="M46 74 Q44 38 80 38 Q116 38 114 74 L112 94 Q80 98 48 94 Z" fill="' + ch + '"/>');
-      s.push('<ellipse cx="34" cy="100" rx="13" ry="24" fill="' + ch + '" class="couette"/>');
-      s.push('<ellipse cx="126" cy="100" rx="13" ry="24" fill="' + ch + '" class="couette"/>');
+      arriere = '<path d="M46 74 Q44 38 80 38 Q116 38 114 74 L112 94 Q80 98 48 94 Z" fill="' + ch + '"/>' +
+                '<ellipse class="couette couette-g" cx="34" cy="100" rx="13" ry="24" fill="' + ch + '"/>' +
+                '<ellipse class="couette couette-d" cx="126" cy="100" rx="13" ry="24" fill="' + ch + '"/>';
     }
+    s.push('<g class="tete">' + arriere + '</g>');
 
-    // Cartable (derrière le corps)
+    // ----- Cartable, corps, bretelles -----
     if (etat.cartable) s.push('<rect x="44" y="118" width="72" height="58" rx="12" fill="#D35400"/><rect x="50" y="150" width="60" height="16" rx="5" fill="#E67E22"/>');
-
-    // Jambes
-    if (tenue === "pyjama") {
-      s.push('<rect x="62" y="170" width="16" height="52" rx="7" fill="' + tc + '"/><rect x="82" y="170" width="16" height="52" rx="7" fill="' + tc + '"/>');
-    } else {
-      s.push('<rect x="64" y="176" width="12" height="46" rx="5" fill="' + peau + '"/><rect x="84" y="176" width="12" height="46" rx="5" fill="' + peau + '"/>');
-      if (tenue === "ecole") s.push('<rect x="63" y="208" width="14" height="14" rx="4" fill="#FFFFFF"/><rect x="83" y="208" width="14" height="14" rx="4" fill="#FFFFFF"/>');
-    }
-
-    // Pieds : baskets, chaussons ou pieds nus
-    if (etat.chaussures) {
-      s.push('<path d="M54 226 Q54 214 70 216 Q80 217 82 226 Z" fill="#FFFFFF" stroke="' + tc + '" stroke-width="3"/>');
-      s.push('<path d="M78 226 Q80 217 90 216 Q106 214 106 226 Z" fill="#FFFFFF" stroke="' + tc + '" stroke-width="3"/>');
-    } else if (tenue === "pyjama") {
-      s.push('<ellipse cx="69" cy="224" rx="14" ry="7" fill="#FFC9DE"/><ellipse cx="91" cy="224" rx="14" ry="7" fill="#FFC9DE"/>');
-    } else {
-      s.push('<ellipse cx="70" cy="224" rx="9" ry="5" fill="' + (tenue === "ecole" ? "#FFFFFF" : peau) + '"/><ellipse cx="90" cy="224" rx="9" ry="5" fill="' + (tenue === "ecole" ? "#FFFFFF" : peau) + '"/>');
-    }
-
-    // Corps
-    var manche = tc;
     if (tenue === "pyjama") {
       s.push('<rect x="52" y="114" width="56" height="66" rx="18" fill="' + tc + '"/>');
       s.push('<g fill="#FFFFFF" opacity=".55"><circle cx="66" cy="134" r="3"/><circle cx="92" cy="128" r="3"/><circle cx="80" cy="152" r="3"/><circle cx="96" cy="164" r="3"/><circle cx="64" cy="166" r="3"/></g>');
     } else if (tenue === "bain") {
-      manche = peau;
       s.push('<path d="M50 122 Q80 114 110 122 L112 184 Q80 192 48 184 Z" fill="#FFFFFF"/>');
       s.push('<path d="M50 140 Q80 134 110 140 M49 160 Q80 154 111 160" stroke="' + tc + '" stroke-width="4" fill="none"/>');
     } else {
-      s.push('<path d="M58 116 Q80 108 102 116 L116 186 Q80 196 44 186 Z" fill="' + tc + '"/>');
+      s.push('<path class="robe" d="M58 116 Q80 108 102 116 L116 186 Q80 196 44 186 Z" fill="' + tc + '"/>');
       s.push('<path d="M68 116 L80 130 L92 116 Z" fill="#FFFFFF"/>');
     }
-    if (etat.cartable) {
-      s.push('<path d="M64 118 L68 168" stroke="#A04000" stroke-width="6" stroke-linecap="round"/><path d="M96 118 L92 168" stroke="#A04000" stroke-width="6" stroke-linecap="round"/>');
-    }
+    if (etat.cartable) s.push('<path d="M64 118 L68 168" stroke="#A04000" stroke-width="6" stroke-linecap="round"/><path d="M96 118 L92 168" stroke="#A04000" stroke-width="6" stroke-linecap="round"/>');
 
-    // Bras et objet tenu
-    function bras(x1, y1, x2, y2, classe) {
-      return '<g' + (classe ? ' class="' + classe + '"' : '') + '><path d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" stroke="' + manche +
-             '" stroke-width="13" stroke-linecap="round"/><circle cx="' + x2 + '" cy="' + y2 + '" r="7" fill="' + peau + '"/></g>';
-    }
-    function objet(e, x, y, taille, classe) {
-      return e ? '<text x="' + x + '" y="' + y + '" font-size="' + taille + '" text-anchor="middle" dominant-baseline="central"' +
-                 (classe ? ' class="' + classe + '"' : '') + '>' + e + '</text>' : "";
-    }
-    var gauche = bras(58, 122, 46, 168), droite = "", devant = "";
-    if (pose === "tenir") {
-      gauche = bras(58, 122, 70, 156);
-      droite = bras(102, 122, 90, 156);
-      devant = objet(etat.objet, 80, 160, 34, "objet-tenu");
-    } else if (pose === "bouche") {
-      droite = bras(102, 122, 96, 104, "frotte") + objet(etat.objet, 99, 99, 26, "frotte");
-    } else if (pose === "tete") {
-      droite = bras(102, 122, 118, 78, "coiffe") + objet(etat.objet, 124, 64, 28, "coiffe");
-    } else if (pose === "ballon") {
-      droite = bras(102, 122, 120, 98) + '<path d="M120 98 Q128 70 134 42" stroke="#FFFFFF" stroke-width="1.5" fill="none"/>' + objet(etat.objet, 136, 26, 36, "flotte");
-    } else if (pose === "coucou") {
-      droite = bras(102, 122, 126, 82, "coucou");
-    } else {
-      droite = bras(102, 122, 114, 168);
-    }
-
-    // Tête
-    s.push('<circle cx="46" cy="80" r="7" fill="' + peauOmbre + '"/><circle cx="114" cy="80" r="7" fill="' + peauOmbre + '"/>');
-    s.push('<circle cx="80" cy="78" r="34" fill="' + peau + '"/>');
-
-    // Frange : en bataille au réveil, bien coiffée ensuite
+    // ----- Tête -----
+    var tete = '<circle cx="46" cy="80" r="7" fill="' + peauOmbre + '"/><circle cx="114" cy="80" r="7" fill="' + peauOmbre + '"/>' +
+               '<circle cx="80" cy="78" r="34" fill="' + peau + '"/>';
     if (etat.bataille) {
-      s.push('<path d="M46 72 Q48 40 80 40 Q112 40 114 72 Q106 58 98 64 Q92 52 82 60 Q72 50 66 62 Q56 56 46 72 Z" fill="' + ch + '"/>');
-      s.push('<path d="M66 46 L60 26 L74 40 L80 20 L88 40 L102 28 L96 48 Z" fill="' + ch + '"/>');
+      tete += '<path d="M46 72 Q48 40 80 40 Q112 40 114 72 Q106 58 98 64 Q92 52 82 60 Q72 50 66 62 Q56 56 46 72 Z" fill="' + ch + '"/>' +
+              '<path class="epis" d="M66 46 L60 26 L74 40 L80 20 L88 40 L102 28 L96 48 Z" fill="' + ch + '"/>';
     } else {
-      s.push('<path d="M46 74 Q46 40 80 40 Q114 40 114 74 Q100 56 80 58 Q62 56 46 74 Z" fill="' + ch + '"/>');
-      if (coiffure === "couettes") s.push('<circle cx="42" cy="78" r="5" fill="' + tc + '"/><circle cx="118" cy="78" r="5" fill="' + tc + '"/>');
-      if (coiffure === "queue") s.push('<circle cx="112" cy="56" r="5" fill="' + tc + '"/>');
+      tete += '<path d="M46 74 Q46 40 80 40 Q114 40 114 74 Q100 56 80 58 Q62 56 46 74 Z" fill="' + ch + '"/>';
+      if (coiffure === "couettes") tete += '<circle cx="42" cy="78" r="5" fill="' + tc + '"/><circle cx="118" cy="78" r="5" fill="' + tc + '"/>';
+      if (coiffure === "queue") tete += '<circle cx="112" cy="56" r="5" fill="' + tc + '"/>';
     }
-
-    // Visage
     if (etat.expression === "sommeil") {
-      s.push('<path d="M61 83 Q67 88 73 83 M87 83 Q93 88 99 83" stroke="' + encre + '" stroke-width="3" fill="none" stroke-linecap="round"/>');
+      tete += '<path d="M61 83 Q67 88 73 83 M87 83 Q93 88 99 83" stroke="' + encre + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
     } else {
-      s.push('<ellipse cx="67" cy="82" rx="4.2" ry="5.2" fill="' + encre + '"/><ellipse cx="93" cy="82" rx="4.2" ry="5.2" fill="' + encre + '"/>');
-      s.push('<circle cx="68.6" cy="80" r="1.6" fill="#FFFFFF"/><circle cx="94.6" cy="80" r="1.6" fill="#FFFFFF"/>');
+      tete += '<g class="yeux"><ellipse cx="67" cy="82" rx="4.2" ry="5.2" fill="' + encre + '"/><ellipse cx="93" cy="82" rx="4.2" ry="5.2" fill="' + encre + '"/>' +
+              '<circle cx="68.6" cy="80" r="1.6" fill="#FFFFFF"/><circle cx="94.6" cy="80" r="1.6" fill="#FFFFFF"/></g>';
     }
-    s.push('<circle cx="59" cy="94" r="5" fill="#FF8FA8" opacity=".55"/><circle cx="101" cy="94" r="5" fill="#FF8FA8" opacity=".55"/>');
-    if (acc === "taches") s.push('<g fill="#C98358"><circle cx="62" cy="90" r="1.4"/><circle cx="57" cy="93" r="1.4"/><circle cx="64" cy="95" r="1.4"/><circle cx="98" cy="90" r="1.4"/><circle cx="103" cy="93" r="1.4"/><circle cx="96" cy="95" r="1.4"/></g>');
-    if (etat.expression === "sommeil") s.push('<ellipse cx="80" cy="101" rx="5" ry="6" fill="' + bouche + '"/>');
-    else if (etat.expression === "rire") s.push('<path d="M70 96 Q80 112 90 96 Z" fill="' + bouche + '"/>');
-    else s.push('<path d="M73 97 Q80 104 87 97" stroke="' + bouche + '" stroke-width="3" fill="none" stroke-linecap="round"/>');
-    if (pose === "bouche") s.push('<g fill="#FFFFFF" class="mousse"><circle cx="89" cy="104" r="3.5"/><circle cx="84" cy="108" r="2.5"/><circle cx="93" cy="109" r="2"/></g>');
+    tete += '<circle cx="59" cy="94" r="5" fill="#FF8FA8" opacity=".55"/><circle cx="101" cy="94" r="5" fill="#FF8FA8" opacity=".55"/>';
+    if (acc === "taches") tete += '<g fill="#C98358"><circle cx="62" cy="90" r="1.4"/><circle cx="57" cy="93" r="1.4"/><circle cx="64" cy="95" r="1.4"/><circle cx="98" cy="90" r="1.4"/><circle cx="103" cy="93" r="1.4"/><circle cx="96" cy="95" r="1.4"/></g>';
+    if (etat.expression === "rire") {
+      tete += '<path d="M70 96 Q80 112 90 96 Z" fill="' + bouche + '"/>';
+    } else {
+      tete += '<path class="bouche-fermee" d="M73 97 Q80 104 87 97" stroke="' + bouche + '" stroke-width="3" fill="none" stroke-linecap="round"' +
+              (etat.expression === "sommeil" ? ' opacity="0"' : '') + '/>' +
+              '<ellipse class="bouche-ouverte" cx="80" cy="101" rx="5" ry="6" fill="' + bouche + '"' +
+              (etat.expression === "sommeil" ? '' : ' opacity="0"') + '/>';
+    }
+    if (act === "dents") tete += '<g class="mousse" fill="#FFFFFF"><circle cx="88" cy="104" r="4"/><circle cx="82" cy="109" r="3"/><circle cx="93" cy="110" r="2.5"/><circle cx="76" cy="106" r="2"/></g>';
+    if (acc === "lunettes") tete += '<g fill="none" stroke="' + encre + '" stroke-width="3"><circle cx="67" cy="82" r="10"/><circle cx="93" cy="82" r="10"/><path d="M77 81 H83"/></g>';
+    if (acc === "serretete" && !etat.bataille) tete += '<path d="M49 62 Q80 30 111 62" fill="none" stroke="' + tc + '" stroke-width="7" stroke-linecap="round"/>';
+    if (acc === "noeud" && !etat.bataille) tete += '<g transform="translate(104 46)"><path d="M0 0 L-15 -10 L-15 10 Z M0 0 L15 -10 L15 10 Z" fill="' + tc + '"/><circle r="4.5" fill="' + tc + '"/></g>';
+    s.push('<g class="tete">' + tete + '</g>');
 
-    // Accessoires
-    if (acc === "lunettes") s.push('<g fill="none" stroke="' + encre + '" stroke-width="3"><circle cx="67" cy="82" r="10"/><circle cx="93" cy="82" r="10"/><path d="M77 81 H83"/></g>');
-    if (acc === "serretete" && !etat.bataille) s.push('<path d="M49 62 Q80 30 111 62" fill="none" stroke="' + tc + '" stroke-width="7" stroke-linecap="round"/>');
-    if (acc === "noeud" && !etat.bataille) s.push('<g transform="translate(104 46)"><path d="M0 0 L-15 -10 L-15 10 Z M0 0 L15 -10 L15 10 Z" fill="' + tc + '"/><circle r="4.5" fill="' + tc + '"/></g>');
-    if (etat.expression === "sommeil") s.push(objet("💤", 124, 40, 22, "zzz-avatar"));
+    // ----- Bras avec coude : épaule → coude → main -----
+    function bras(cote) {
+      var g = cote === "g", sx = g ? 58 : 102, ex = g ? 56 : 104, hx = g ? 54 : 106;
+      return '<g class="bras bras-' + cote + '">' +
+             '<path d="M' + sx + ' 122 L' + ex + ' 146" stroke="' + manche + '" stroke-width="13" stroke-linecap="round"/>' +
+             '<g class="avant-bras avant-bras-' + cote + '">' +
+             '<path d="M' + ex + ' 146 L' + hx + ' 170" stroke="' + avantBras + '" stroke-width="12" stroke-linecap="round"/>' +
+             '<circle cx="' + hx + '" cy="170" r="7" fill="' + peau + '"/>' +
+             (!g && objetMain ? emoji(objetMain, hx + 1, 184, 22, "objet-main") : "") +
+             '</g></g>';
+    }
+    s.push(bras("g"), bras("d"), devant);
+    s.push('</g>'); // fin .haut
 
-    s.push(gauche, droite, devant);
-    s.push('</svg>');
+    // ----- Décor autour de l'avatar selon l'activité -----
+    if (act === "reveil" || act === "pyjama") s.push(emoji("🧸", 30, 214, 24), emoji("💤", 126, 36, 22, "zzz-avatar"));
+    if (act === "habits") s.push(emoji("✨", 22, 110, 18, "etincelle e1"), emoji("✨", 140, 84, 22, "etincelle e2"), emoji("✨", 136, 172, 16, "etincelle e3"));
+    if (act === "rangement") s.push(emoji("🧺", 140, 212, 30));
+    if (act === "jeu") s.push('<path class="fil" d="M132 44 Q128 70 120 92" stroke="#FFFFFF" stroke-width="1.5" fill="none"/>', emoji("🎈", 134, 28, 34, "ballon-avatar"));
+    if (act === "bain") s.push(emoji("🫧", 24, 120, 20, "bulle-av b1"), emoji("🫧", 140, 100, 16, "bulle-av b2"), emoji("🫧", 132, 160, 22, "bulle-av b3"), emoji("🦆", 30, 216, 24));
+    if (act === "chaussures") s.push(emoji("👣", 136, 218, 18, "etincelle e2"));
+
+    s.push('</g></svg>');
     return s.join("");
   }
 
