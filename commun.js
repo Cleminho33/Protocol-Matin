@@ -6,7 +6,7 @@ var MATIN = (function () {
   var DB_URL = "https://protocol-matin-default-rtdb.europe-west1.firebasedatabase.app";
 
   var FILLES = [
-    { nom: "Lou",  couleur: "#FF6B9D" },
+    { nom: "Lou",  couleur: "#4FD1B5" },
     { nom: "Alba", couleur: "#54A0FF" }
   ];
   var JOURS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -178,7 +178,7 @@ var MATIN = (function () {
 
   // ---------- Réglages ----------
   var AVATARS_DEFAUT = {
-    Lou:  { cheveux: "chatain", coiffure: "queue", accessoire: "" },
+    Lou:  { cheveux: "blondChatain", coiffure: "queue", accessoire: "" },
     Alba: { cheveux: "blond", coiffure: "couettes", accessoire: "" }
   };
   function reglages(stock) {
@@ -222,8 +222,8 @@ var MATIN = (function () {
   }
 
   // ---------- Avatars de Lou et Alba ----------
-  var CHEVEUX = { blond: "#E6B656", chatain: "#8B5A2B", brun: "#4A2E1C", roux: "#C65A2E", noir: "#262020" };
-  var CHEVEUX_NOMS = { blond: "Blonds", chatain: "Châtains", brun: "Bruns", roux: "Roux", noir: "Noirs" };
+  var CHEVEUX = { blond: "#E6B656", blondChatain: "#B98A4E", chatain: "#8B5A2B", brun: "#4A2E1C", roux: "#C65A2E", noir: "#262020" };
+  var CHEVEUX_NOMS = { blond: "Blonds", blondChatain: "Blond châtain", chatain: "Châtains", brun: "Bruns", roux: "Roux", noir: "Noirs" };
   var COIFFURES = { longs: "Longs", carre: "Carré", courts: "Courts", queue: "Queue-de-cheval", couettes: "Couettes" };
   var ACCESSOIRES = { "": "Aucun", lunettes: "Lunettes", noeud: "Nœud", serretete: "Serre-tête", taches: "Taches de rousseur" };
 
@@ -412,8 +412,8 @@ var MATIN = (function () {
     else if (md >= "12-01" && md <= "12-25") particules = ["❄️", "⭐", "❄️", "🎄"];
     else if (md >= "12-26" || md <= "03-19") particules = ["❄️", "❄️", "❄️"];
     else if (md <= "06-20") particules = ["🌸", "🌷", "🦋"];
-    else if (md <= "09-21") particules = ["🌻", "🦄", "☀️"];
-    else particules = ["🍂", "🍁", "🍂"];
+    else if (md <= "09-21") particules = ["🌻", "🎀", "🦋", "💖"];
+    else particules = ["🍂", "🎀", "🍁", "💖"];
     return { particules: regl.decor ? particules : [], fete: fete };
   }
 

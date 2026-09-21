@@ -6,7 +6,7 @@ var AVATARS = (function () {
 
   var NS = "http://www.w3.org/2000/svg";
   var PEAU = "#FFD7B5", PEAU_OMBRE = "#F0B993", ENCRE = "#2D2D3A", BOUCHE = "#8E3B46";
-  var CHEVEUX = { blond: "#E6B656", chatain: "#8B5A2B", brun: "#4A2E1C", roux: "#C65A2E", noir: "#262020" };
+  var CHEVEUX = { blond: "#E6B656", blondChatain: "#B98A4E", chatain: "#8B5A2B", brun: "#4A2E1C", roux: "#C65A2E", noir: "#262020" };
   var BRAS1 = 30, BRAS2 = 30, JAMBE1 = 31, JAMBE2 = 31;
 
   // ---------- Outils ----------
