@@ -698,5 +698,71 @@ var AVATARS = (function () {
     return { svg: svg, maj: maj };
   }
 
-  return { creer: creer, creerParent: creerParent };
+
+  // =====================================================================
+  // Sundae, le chat de la maison : tigré brun, « M » sur le front, grands yeux vert-jaune,
+  // museau et menton blancs, nez rose. Dessiné de profil, tourné vers la gauche (comme l'emoji 🐈).
+  // pose : "marche" (pattes animées) ou "dort" (en boule, yeux fermés). pelage : "tigre" ou "noir".
+  // =====================================================================
+  function chat(pose, pelage) {
+    var noir = pelage === "noir";
+    var C = noir
+      ? { base: "#2B2A30", fonce: "#141418", clair: "#3A3940", blanc: "#3A3940", oeil: "#E8D14A", nez: "#6B4B55", oreille: "#5A4650" }
+      : { base: "#806B55", fonce: "#30251B", clair: "#AE9679", blanc: "#F6F0E8", oeil: "#C9C64F", nez: "#D98E8A", oreille: "#E3AFA6" };
+    var rayure = ' stroke="' + C.fonce + '" stroke-width="3.2" stroke-linecap="round" fill="none"';
+    function tete(cx, cy, dort) {
+      var h = '';
+      h += '<path d="M' + (cx - 17) + ' ' + (cy - 8) + ' L' + (cx - 15) + ' ' + (cy - 29) + ' L' + (cx - 3) + ' ' + (cy - 17) + ' Z" fill="' + C.base + '"/>';
+      h += '<path d="M' + (cx + 17) + ' ' + (cy - 8) + ' L' + (cx + 15) + ' ' + (cy - 29) + ' L' + (cx + 3) + ' ' + (cy - 17) + ' Z" fill="' + C.base + '"/>';
+      h += '<path d="M' + (cx - 14) + ' ' + (cy - 12) + ' L' + (cx - 13) + ' ' + (cy - 24) + ' L' + (cx - 6) + ' ' + (cy - 17) + ' Z" fill="' + C.oreille + '"/>';
+      h += '<path d="M' + (cx + 14) + ' ' + (cy - 12) + ' L' + (cx + 13) + ' ' + (cy - 24) + ' L' + (cx + 6) + ' ' + (cy - 17) + ' Z" fill="' + C.oreille + '"/>';
+      h += '<ellipse cx="' + cx + '" cy="' + cy + '" rx="20" ry="18" fill="' + C.base + '"/>';
+      // le « M » du front et les rayures des joues
+      h += '<path d="M' + (cx - 7) + ' ' + (cy - 9) + ' L' + (cx - 4) + ' ' + (cy - 16) + ' L' + cx + ' ' + (cy - 10) + ' L' + (cx + 4) + ' ' + (cy - 16) + ' L' + (cx + 7) + ' ' + (cy - 9) + '"' + rayure.replace("3.2", "2.2") + '/>';
+      h += '<path d="M' + cx + ' ' + (cy - 17) + ' V' + (cy - 11) + '"' + rayure.replace("3.2", "2") + '/>';
+      h += '<path d="M' + (cx - 19) + ' ' + (cy + 1) + ' h6 M' + (cx - 19) + ' ' + (cy + 5) + ' h5 M' + (cx + 19) + ' ' + (cy + 1) + ' h-6 M' + (cx + 19) + ' ' + (cy + 5) + ' h-5"' + rayure.replace("3.2", "1.8") + '/>';
+      // museau et menton blancs
+      h += '<ellipse cx="' + cx + '" cy="' + (cy + 9) + '" rx="9" ry="6.5" fill="' + C.blanc + '"/>';
+      h += '<ellipse cx="' + cx + '" cy="' + (cy + 14) + '" rx="5.5" ry="3.5" fill="' + C.blanc + '"/>';
+      if (dort) {
+        h += '<path d="M' + (cx - 11) + ' ' + (cy - 1) + ' q4 4 8 0 M' + (cx + 3) + ' ' + (cy - 1) + ' q4 4 8 0" stroke="' + C.fonce + '" stroke-width="2" stroke-linecap="round" fill="none"/>';
+      } else {
+        [cx - 8, cx + 8].forEach(function (x) {
+          h += '<ellipse cx="' + x + '" cy="' + (cy - 1) + '" rx="5.6" ry="6" fill="' + C.oeil + '" stroke="' + C.fonce + '" stroke-width="1"/>';
+          h += '<ellipse cx="' + x + '" cy="' + (cy - 1) + '" rx="1.9" ry="4.6" fill="#15110D"/>';
+          h += '<circle cx="' + (x + 1.8) + '" cy="' + (cy - 3.2) + '" r="1.3" fill="#FFFFFF"/>';
+        });
+      }
+      h += '<path d="M' + (cx - 3) + ' ' + (cy + 6) + ' H' + (cx + 3) + ' L' + cx + ' ' + (cy + 9) + ' Z" fill="' + C.nez + '"/>';
+      h += '<path d="M' + cx + ' ' + (cy + 9) + ' q-2.5 3 -5 1 M' + cx + ' ' + (cy + 9) + ' q2.5 3 5 1" stroke="' + C.fonce + '" stroke-width="1.2" fill="none" stroke-linecap="round"/>';
+      h += '<path d="M' + (cx - 7) + ' ' + (cy + 9) + ' l-13 -2 M' + (cx - 7) + ' ' + (cy + 11) + ' l-13 2 M' + (cx + 7) + ' ' + (cy + 9) + ' l13 -2 M' + (cx + 7) + ' ' + (cy + 11) + ' l13 2" stroke="#FFFFFF" stroke-width="0.9" opacity=".8"/>';
+      return h;
+    }
+    function patte(x, y, classe) {
+      return '<g class="' + classe + '"><rect x="' + x + '" y="' + y + '" width="9" height="24" rx="4.5" fill="' + C.base + '"/>' +
+             '<path d="M' + (x + 1) + ' ' + (y + 8) + ' h7 M' + (x + 1) + ' ' + (y + 14) + ' h7"' + rayure.replace("3.2", "2") + '/>' +
+             '<ellipse cx="' + (x + 4.5) + '" cy="' + (y + 23) + '" rx="5.5" ry="3" fill="' + C.clair + '"/></g>';
+    }
+    var h = '<svg class="chat-svg ' + pose + '" viewBox="0 0 124 100" aria-hidden="true">';
+    if (pose === "dort") {
+      h += '<path d="M104 80 Q120 62 104 52" stroke="' + C.base + '" stroke-width="10" stroke-linecap="round" fill="none"/>';
+      h += '<ellipse cx="68" cy="72" rx="44" ry="21" fill="' + C.base + '"/>';
+      h += '<path d="M60 54 q-4 9 0 18 M72 52 q-4 10 0 20 M84 54 q-4 9 0 18 M96 58 q-3 7 0 14"' + rayure + '/>';
+      h += '<path d="M28 88 Q70 100 110 84" stroke="' + C.base + '" stroke-width="10" stroke-linecap="round" fill="none"/>';
+      h += '<path d="M48 93 l0 -6 M64 95 l0 -6 M80 94 l0 -6 M96 90 l0 -6"' + rayure.replace("3.2", "2.4") + '/>';
+      h += '<ellipse cx="40" cy="86" rx="9" ry="5" fill="' + C.clair + '"/>';
+      h += tete(34, 66, true);
+    } else {
+      h += '<path d="M94 52 Q110 44 108 26 Q107 16 114 12" stroke="' + C.base + '" stroke-width="9" stroke-linecap="round" fill="none"/>';
+      h += '<path d="M94 52 Q110 44 108 26 Q107 16 114 12" stroke="' + C.fonce + '" stroke-width="9" stroke-dasharray="4 6" fill="none"/>';
+      h += patte(80, 60, "pb") + patte(40, 60, "pa");
+      h += '<ellipse cx="66" cy="56" rx="32" ry="16" fill="' + C.base + '"/>';
+      h += '<path d="M56 42 q-3 8 0 15 M67 41 q-3 9 0 17 M78 42 q-3 8 0 15 M88 46 q-2 6 0 11"' + rayure + '/>';
+      h += patte(86, 62, "pa") + patte(46, 62, "pb");
+      h += tete(36, 38, false);
+    }
+    return h + '</svg>';
+  }
+
+  return { creer: creer, creerParent: creerParent, chat: chat };
 })();

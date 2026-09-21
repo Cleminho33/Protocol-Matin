@@ -53,6 +53,10 @@
   /* ---------- Sundae ---------- */
   .miroir { display: inline-block; transform: scaleX(-1); }
   .sans-chat .miroir.mascotte { transform: none; }
+  .mascotte svg.chat-svg { width: 1.3em; height: 1.05em; vertical-align: bottom; overflow: visible; }
+  .chat-svg.marche .pa, .chat-svg.marche .pb { transform-box: fill-box; transform-origin: 50% 0; animation: patte .4s ease-in-out infinite alternate; }
+  .chat-svg.marche .pb { animation-delay: -.4s; }
+  @keyframes patte { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
   .trot { display: inline-block; animation: trot .4s ease-in-out infinite alternate; }
   @keyframes trot { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(calc(var(--u) * -1.2)) rotate(3deg); } }
   .sundae-dodo { position: relative; display: inline-block; font-size: calc(var(--u) * 12); margin-top: calc(var(--u) * 3); }
@@ -181,10 +185,21 @@
   }
   .seg.encours .seg-emoji { font-size: calc(var(--u) * 6.5); }
   .seg.encours .seg-barre { box-shadow: 0 0 calc(var(--u) * 2.5) var(--c); }
+  .seg { transition: flex-grow .9s ease; position: relative; }
+  .seg-gain {
+    position: absolute; top: calc(var(--u) * -5.5); left: 50%; transform: translateX(-50%) scale(.5); opacity: 0;
+    font-size: calc(var(--u) * 3.4); font-weight: 700; color: var(--nuit); background: #7CFFB2; white-space: nowrap;
+    border-radius: 99px; padding: calc(var(--u) * .3) calc(var(--u) * 1.4); transition: transform .5s cubic-bezier(.2,1.6,.4,1), opacity .3s;
+  }
+  .seg-gain.visible { opacity: 1; transform: translateX(-50%) scale(1); }
   .perso {
     position: absolute; bottom: calc(var(--u) * 3.6); font-size: calc(var(--u) * 7); transform: translateX(-50%);
     transition: left .3s linear; white-space: nowrap;
   }
+  /* Quand les filles avancent : Sundae bondit jusqu'à l'étape suivante */
+  .perso.saute { transition: left .8s cubic-bezier(.4,0,.3,1); }
+  .perso.saute .trot { animation: bond .8s ease-in-out; }
+  @keyframes bond { 0% { transform: translateY(0); } 45% { transform: translateY(calc(var(--u) * -9)) rotate(-12deg); } 80% { transform: translateY(0) scaleY(.85); } 100% { transform: translateY(0); } }
   .arret { font-size: calc(var(--u) * 9); line-height: 1; }
 
   /* ---------- Écrans calmes ---------- */
@@ -333,7 +348,7 @@
   <div class="route">
     <div class="piste-zone">
       <div class="piste" id="piste"></div>
-      <div class="perso" id="perso"><span class="trot"><span class="miroir mascotte">🐈</span></span></div>
+      <div class="perso" id="perso"><span class="trot"><span class="miroir mascotte" data-pose="marche">🐈</span></span></div>
     </div>
     <div class="arret" id="arret">🚏</div>
   </div>
@@ -346,7 +361,7 @@
   <h2 id="dodoTitre">Chut… tout le monde dort</h2>
   <p id="dodoReste"></p>
   <div class="crit-legende" id="dodoCriteres"></div>
-  <div class="sundae-dodo"><span class="corps miroir mascotte">🐈</span><span class="zzz">💤</span></div>
+  <div class="sundae-dodo"><span class="corps miroir mascotte" data-pose="dort">🐈</span><span class="zzz">💤</span></div>
 </section>
 
 <!-- Avant une routine de la journée -->
@@ -362,7 +377,7 @@
 <section id="fin" class="ecran calme">
   <div class="horloge">8h08</div>
   <button class="compteurs" aria-label="Donner les étoiles"></button>
-  <div class="grand"><span class="bus-roule"><span class="miroir"><span id="finAnim">🚌</span> <span class="trot"><span class="mascotte">🐈</span></span></span></span></div>
+  <div class="grand"><span class="bus-roule"><span class="miroir"><span id="finAnim">🚌</span> <span class="trot"><span class="mascotte" data-pose="marche">🐈</span></span></span></span></div>
   <h2 id="finMessage">Bonne journée les filles !</h2>
   <p id="finSous">❤️ À ce soir</p>
   <p class="bocal-ligne" id="finBocal"></p>
@@ -474,12 +489,17 @@
     return prog;
   }
   var decorCle = null, decor = { particules: [], fete: null }, regl = MATIN.reglages(stock);
+  // Sundae dessinée (🐈 = tigrée comme la vraie, 🐈‍⬛ = noire), ou les filles si pas de mascotte
+  function dessinMascotte(pose) {
+    if (!regl.mascotte) return "👧👧";
+    return AVATARS.chat(pose || "marche", regl.mascotte === "🐈" ? "tigre" : "noir");
+  }
   function majReglages(d) {
     regl = MATIN.reglages(stock);
     decor = MATIN.decorDuJour(d, regl);
     document.body.classList.toggle("sans-chat", !regl.mascotte);
     var masc = document.querySelectorAll(".mascotte");
-    for (var k = 0; k < masc.length; k++) masc[k].textContent = regl.mascotte || "👧👧";
+    for (var k = 0; k < masc.length; k++) masc[k].innerHTML = dessinMascotte(masc[k].getAttribute("data-pose"));
     var cle = decor.particules.join("");
     if (cle !== decorCle) { decorCle = cle; construireDecor(decor.particules); }
     if (etatCourant) afficherDecor(etatCourant.split(":")[0]);
@@ -774,10 +794,32 @@
   var alerteFaite = false, demarre = false, timerAnnonce = null;
 
   // ---------- Avance manuelle : les filles valident ensemble pour passer à l'étape suivante ----------
-  // Une fois validée, l'étape suivante démarre avec sa durée complète (le temps gagné profite aux étapes d'après),
-  // le bus reste à l'heure réelle. okEtape : {Lou: bool, Alba: bool} pour l'étape affichée.
-  var okEtape = {}, ancre = null; // ancre : {id, sig, jour, index, base}
-  function segondesDepuisMinuit(d) { return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000; }
+  // Philosophie : le temps gagné n'est jamais perdu. L'étape suivante démarre tout de suite avec sa durée complète,
+  // toutes les étapes d'après avancent d'autant, et le temps gagné s'ajoute au temps libre de la fin (le bus reste
+  // à l'heure réelle). avance.debuts[k] = heure réelle (secondes depuis minuit) où l'étape k a démarré en avance.
+  var okEtape = {}, avance = null; // avance : {cle: id|sig|jour, debuts: {k: secondes}}
+  function secondesDepuisMinuit(d) { return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000; }
+  function cleAvance(x) { return x.id + "|" + x.sig + "|" + cleJour(maintenant()); }
+  function avanceDe(x) {
+    var cle = cleAvance(x);
+    if (avance && avance.cle === cle) return avance;
+    avance = { cle: cle, debuts: {} };
+    if (!SIM) try {
+      var sauve = JSON.parse(localStorage.getItem("matin.avance") || "null");
+      if (sauve && sauve.cle === cle) avance = sauve;
+    } catch (err) {}
+    return avance;
+  }
+  // Horaires réels de chaque étape, avances comprises : [{d, f}] ; la dernière étape va toujours jusqu'au départ
+  function planning(x) {
+    var r = x.r, deb = avanceDe(x).debuts, out = [];
+    r.etapes.forEach(function (e, i) {
+      var d = i === 0 ? e.d : (deb[i] != null ? deb[i] : out[i - 1].d + (r.etapes[i - 1].f - r.etapes[i - 1].d));
+      out.push({ d: d });
+    });
+    out.forEach(function (p, i) { p.f = i < out.length - 1 ? out[i + 1].d : r.finS; });
+    return out;
+  }
   function majBoutonsOk() {
     var btns = document.querySelectorAll(".ok-btn");
     for (var k = 0; k < btns.length; k++) {
@@ -809,8 +851,16 @@
   }
   function avancerManuel() {
     if (!cible || idxCourant >= cible.r.etapes.length - 1) return;
-    ancre = { id: cible.id, sig: cible.sig, jour: cleJour(maintenant()), index: idxCourant + 1, base: segondesDepuisMinuit(maintenant()) };
+    var a = avanceDe(cible), dernier = cible.r.etapes.length - 1;
+    var gainAvant = cible.r.etapes[dernier].d - planning(cible)[dernier].d;
+    a.debuts[idxCourant + 1] = secondesDepuisMinuit(maintenant());
+    if (!SIM) try { localStorage.setItem("matin.avance", JSON.stringify(a)); } catch (err) {}
     okEtape = {};
+    var gain = cible.r.etapes[dernier].d - planning(cible)[dernier].d;
+    var minutes = Math.floor(gain / 60);
+    if (minutes >= 1 && minutes > Math.floor(gainAvant / 60)) {
+      parler("Bravo ! Vous avez gagné " + pluriel(minutes, "minute") + " de temps libre !", 2500);
+    }
   }
   $("routine").addEventListener("click", function (ev) {
     var b = ev.target.closest(".ok-btn");
@@ -850,6 +900,8 @@
       return '<div class="seg" style="flex-grow:' + (e.f - e.d) + '"><div class="seg-emoji">' + esc(e.emoji) + '</div>' +
              '<div class="seg-barre" style="background:' + esc(e.couleur) + '"></div></div>';
     }).join("");
+    var segs = $("piste").children;
+    if (segs.length) segs[segs.length - 1].insertAdjacentHTML("afterbegin", '<div class="seg-gain"></div>');
     $("arret").textContent = r.finEmoji || "🏁";
     $("finEmoji").textContent = r.finEmoji || "🏁";
   }
@@ -898,38 +950,31 @@
     parler(phrase);
   }
 
-  // Index de l'étape courante : au temps réel, sauf si les filles ont validé une avance manuelle
-  // (ancre), auquel cas chaque étape suivante reçoit sa durée complète à partir du moment validé.
-  function indexRoutine(r, x, s, jour) {
-    if (ancre && ancre.id === x.id && ancre.sig === x.sig && ancre.jour === jour) {
-      var i = ancre.index;
-      while (i < r.etapes.length - 1 && (s - ancre.base) >= (r.etapes[i].f - r.etapes[i].d)) {
-        ancre.base += (r.etapes[i].f - r.etapes[i].d);
-        i++;
-      }
-      ancre.index = i;
-      return { i: i, base: ancre.base };
-    }
-    var i = 0;
-    for (var k = 0; k < r.etapes.length; k++) if (s >= r.etapes[k].d) i = k;
-    return { i: i, base: null };
+  // Les barres de la route prennent la durée réelle de chaque étape, et le temps libre gagné s'affiche
+  var pisteDurees = null;
+  function majPiste(r, pl) {
+    var sig = pl.map(function (p) { return Math.round(p.f - p.d); }).join(",");
+    if (sig === pisteDurees) return;
+    pisteDurees = sig;
+    var segs = $("piste").children, dernier = r.etapes.length - 1;
+    for (var k = 0; k < segs.length && k < pl.length; k++) segs[k].style.flexGrow = Math.max(60, pl[k].f - pl[k].d); // une étape finie très vite reste visible
+    var gain = Math.floor((r.etapes[dernier].d - pl[dernier].d) / 60), badge = $("piste").querySelector(".seg-gain");
+    if (badge) { badge.textContent = gain >= 1 ? "+" + gain + " min" : ""; badge.classList.toggle("visible", gain >= 1); }
   }
 
   function majRoutine(x, s) {
-    var r = x.r, jour = cleJour(maintenant());
-    var pos = indexRoutine(r, x, s, jour), i = pos.i;
+    var r = x.r, pl = planning(x), i = 0;
+    for (var k = 0; k < pl.length; k++) if (s >= pl[k].d) i = k;
     var e = r.etapes[i];
-    if (x.sig !== pisteSig) { pisteSig = x.sig; construirePiste(r); afficherEtape(r, i); }
-    var dur = Math.max(1, e.f - e.d);
-    var reste = pos.base != null ? Math.max(0, dur - (s - pos.base)) : Math.max(0, e.f - s);
-    // Dernière étape atteinte en avance : le temps gagné s'ajoute, elle dure jusqu'au départ réel
-    if (pos.base != null && i === r.etapes.length - 1) {
-      dur = Math.max(1, r.finS - pos.base);
-      reste = Math.max(0, r.finS - s);
-    }
+    if (x.sig !== pisteSig) { pisteSig = x.sig; pisteDurees = null; construirePiste(r); afficherEtape(r, i); }
+    majPiste(r, pl);
+    var dur = Math.max(1, pl[i].f - pl[i].d);
+    var reste = Math.max(0, pl[i].f - s);
     var cle = x.id + "|" + i + "|" + e.debut;
+    var change = cleEtape !== null && cle !== cleEtape;
     idxCourant = i;
     if (cle !== cleEtape) {
+      if (change && demarre) sauterChat();
       cleEtape = cle;
       afficherEtape(r, i);
       Scene.etape(MATIN.activiteDe(e));
@@ -953,7 +998,15 @@
       parler(perso(e.alerte) || "Plus qu'une minute !");
     }
     $("busMin").textContent = Math.ceil((r.finS - s) / 60);
-    $("perso").style.left = ((s - r.debutS) / (r.finS - r.debutS) * 100) + "%";
+    // Sundae avance sur la barre de l'étape en cours, au rythme de l'étape
+    var seg = $("piste").children[i];
+    if (seg) $("perso").style.left = (seg.offsetLeft + seg.offsetWidth * progressionEtape).toFixed(1) + "px";
+  }
+  function sauterChat() {
+    var p = $("perso");
+    p.classList.remove("saute"); void p.offsetWidth; p.classList.add("saute");
+    clearTimeout(p._t);
+    p._t = setTimeout(function () { p.classList.remove("saute"); }, 900);
   }
 
   // ---------- Les étoiles ----------
@@ -1066,8 +1119,8 @@
                '<div class="criteres-gagnes">' + gagnes + '</div>' +
                '<div class="total">' + MATIN.solde(stock, f.nom) + ' ⭐ à dépenser</div>' + boutique + '</div>';
       }).join("") + '</div>' + htmlBocal + '</div>' +
-      '<div class="sundae-saut gauche"><span class="mascotte">' + esc(regl.mascotte) + '</span></div>' +
-      '<div class="sundae-saut droite"><span class="miroir mascotte">' + esc(regl.mascotte) + '</span></div>';
+      '<div class="sundae-saut gauche"><span class="mascotte">' + dessinMascotte("marche") + '</span></div>' +
+      '<div class="sundae-saut droite"><span class="miroir mascotte">' + dessinMascotte("marche") + '</span></div>';
     $("notesBoite").style.display = "none";
     $("bravo").style.display = "block";
     $("notes").classList.add("visible");

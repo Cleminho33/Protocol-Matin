@@ -151,6 +151,7 @@
     background: none; color: #fff; font-size: 14px;
   }
   .choix button .e { display: block; font-size: 30px; }
+  .choix button .e svg { width: 44px; height: 36px; transform: scaleX(-1); }
   .choix button.actif { border-color: var(--or); background: rgba(255,217,61,.1); }
 
   .avatar-reglage { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
@@ -882,8 +883,8 @@
   // Réglages
   // =====================================================================
   var MASCOTTES = [
-    { v: "🐈", nom: "Sundae" },
-    { v: "🐈‍⬛", nom: "Sundae (noir)" },
+    { v: "🐈", nom: "Sundae", dessin: "tigre" },
+    { v: "🐈‍⬛", nom: "Sundae (noir)", dessin: "noir" },
     { v: "", e: "👧👧", nom: "Les filles" }
   ];
   function dessinerAvatars(regl) {
@@ -924,7 +925,7 @@
     dessinerAvatars(regl);
     $("choixMascotte").innerHTML = MASCOTTES.map(function (m, i) {
       return '<button type="button" data-mascotte="' + i + '" class="' + (regl.mascotte === m.v ? "actif" : "") + '"><span class="e">' +
-             (m.e || m.v) + '</span>' + m.nom + '</button>';
+             (m.dessin ? AVATARS.chat("marche", m.dessin) : m.e || m.v) + '</span>' + m.nom + '</button>';
     }).join("");
     $("decor").checked = regl.decor;
     var focus = document.activeElement && document.activeElement.getAttribute("data-anniv");
