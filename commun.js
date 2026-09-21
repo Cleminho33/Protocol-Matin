@@ -24,7 +24,7 @@ var MATIN = (function () {
     etapes: [
       { debut: "07:25", titre: "Réveil + câlins à {parent}", emoji: "🤗", couleur: "#FF9F43",
         voix: "Debout les filles ! C'est l'heure des câlins à {parent} !", rappels: "voix" },
-      { debut: "07:30", titre: "Petit déjeuner", emoji: "🥣", couleur: "#EE5A52",
+      { debut: "07:33", titre: "Petit déjeuner", emoji: "🥣", couleur: "#EE5A52",
         voix: "À table ! C'est l'heure du petit déjeuner." },
       { debut: "07:45", titre: "On s'habille", emoji: "👕", couleur: "#2E86DE",
         voix: "C'est l'heure de s'habiller !" },
@@ -332,6 +332,55 @@ var MATIN = (function () {
   function totalTous(stock) {
     return FILLES.reduce(function (s, f) { return s + total(stock, f.nom); }, 0);
   }
+  // ---------- Les 3 critères des étoiles : une étoile par critère, affichés aux filles avant et après ----------
+  // criteres/<cleNote> = {<prénom>: {heure, repeter, seule}} ; ok/<cleNote>/<prénom> = {ok, sur} (boutons OK de l'écran)
+  var CRITERES = [
+    { cle: "heure",   emoji: "⏰", texte: "Prête à l'heure", court: "À l'heure" },
+    { cle: "repeter", emoji: "👂", texte: "Sans qu'on répète", court: "Sans qu'on répète" },
+    { cle: "seule",   emoji: "💪", texte: "Toute seule, avec ses OK", court: "Toute seule" }
+  ];
+  function criteresDe(stock, cle, nom) {
+    var c = stock.lire("criteres/" + cle + "/" + nom);
+    if (c) return c;
+    // Pas encore de critères cochés : « toute seule » proposé si elle a validé toutes ses étapes avec OK
+    var ok = stock.lire("ok/" + cle + "/" + nom);
+    return { heure: false, repeter: false, seule: !!(ok && ok.sur && ok.ok >= ok.sur) };
+  }
+  function compterCriteres(c) {
+    return CRITERES.reduce(function (n, k) { return n + (c && c[k.cle] ? 1 : 0); }, 0);
+  }
+
+  // ---------- Boutique : le catalogue est fourni par les parents, les achats se paient en étoiles ----------
+  // boutique/articles/<id> = {nom, emoji, cout} ; boutique/achats/<prénom>/<id> = {nom, emoji, cout, le}
+  // Les étoiles dépensées ne touchent pas aux notes : le bocal commun continue de compter toutes les étoiles gagnées.
+  function articles(stock) {
+    var a = stock.lire("boutique/articles") || {};
+    return Object.keys(a).filter(function (id) { return a[id] && a[id].nom; }).map(function (id) {
+      return { id: id, nom: a[id].nom, emoji: a[id].emoji || "🎁", cout: +a[id].cout || 1 };
+    }).sort(function (x, y) { return x.cout - y.cout || x.nom.localeCompare(y.nom); });
+  }
+  function achats(stock, nom) {
+    var a = stock.lire("boutique/achats/" + nom) || {};
+    return Object.keys(a).filter(function (id) { return a[id]; }).sort().map(function (id) {
+      var v = a[id];
+      return { id: id, nom: v.nom, emoji: v.emoji || "🎁", cout: +v.cout || 0, le: v.le };
+    });
+  }
+  function depense(stock, nom) {
+    return achats(stock, nom).reduce(function (s, a) { return s + a.cout; }, 0);
+  }
+  function solde(stock, nom) { return total(stock, nom) - depense(stock, nom); }
+  // Le prochain objectif en boutique pour une fille : ce qu'elle peut déjà s'offrir, sinon l'article pas encore acheté le moins cher
+  function vitrine(stock, nom) {
+    var s = solde(stock, nom), deja = {};
+    achats(stock, nom).forEach(function (a) { deja[a.nom] = true; });
+    var neufs = articles(stock).filter(function (a) { return !deja[a.nom]; });
+    if (!neufs.length) return null;
+    var possibles = neufs.filter(function (a) { return a.cout <= s; });
+    if (possibles.length) return { solde: s, article: possibles[possibles.length - 1], manque: 0 };
+    return { solde: s, article: neufs[0], manque: neufs[0].cout - s };
+  }
+
   function cagnotte(stock) {
     var c = stock.lire("cagnotte");
     if (!c || !c.objectif) return null;
@@ -363,7 +412,7 @@ var MATIN = (function () {
     else if (md >= "12-01" && md <= "12-25") particules = ["❄️", "⭐", "❄️", "🎄"];
     else if (md >= "12-26" || md <= "03-19") particules = ["❄️", "❄️", "❄️"];
     else if (md <= "06-20") particules = ["🌸", "🌷", "🦋"];
-    else if (md <= "09-21") particules = ["🌻", "🐝", "☀️"];
+    else if (md <= "09-21") particules = ["🌻", "🦄", "☀️"];
     else particules = ["🍂", "🍁", "🍂"];
     return { particules: regl.decor ? particules : [], fete: fete };
   }
@@ -435,6 +484,8 @@ var MATIN = (function () {
     CHEVEUX: CHEVEUX, CHEVEUX_NOMS: CHEVEUX_NOMS, COIFFURES: COIFFURES, ACCESSOIRES: ACCESSOIRES,
     routines: routines, normaliserRoutine: normaliserRoutine, programme: programme,
     cleNote: cleNote, total: total, totalTous: totalTous, cagnotte: cagnotte,
+    articles: articles, achats: achats, depense: depense, solde: solde, vitrine: vitrine,
+    CRITERES: CRITERES, criteresDe: criteresDe, compterCriteres: compterCriteres,
     rappelsDuJour: rappelsDuJour, decorDuJour: decorDuJour,
     Calendrier: Calendrier
   };

@@ -75,6 +75,8 @@ var AVATARS = (function () {
     return corps;
   }
   function dessinerVerre(g) {
+    // tenu par la droite : l'origine (0,0) est au point de prise, le verre part vers la gauche
+    g = el("g", { transform: "translate(-9 -2)" }, g);
     el("path", { d: "M-10 -16 L10 -16 L8 16 Q0 19 -8 16 Z", fill: "rgba(220,240,255,.35)", stroke: "#FFFFFF", "stroke-width": 2 }, g);
     var jus = el("rect", { x: -9, y: -14, width: 18, height: 29, fill: "#FF9F1A" }, g);
     var clip = el("clipPath", { id: "verre" + Math.random().toString(36).slice(2) }, g);
@@ -200,9 +202,10 @@ var AVATARS = (function () {
     R.jambesPyjama = el("g", {}, R.tout);
     R.pantalon = [el("path", { stroke: tc, "stroke-width": 16, "stroke-linecap": "round", "stroke-linejoin": "round", fill: "none" }, R.jambesPyjama),
                   el("path", { stroke: tc, "stroke-width": 16, "stroke-linecap": "round", "stroke-linejoin": "round", fill: "none" }, R.jambesPyjama)];
+    R.piedsArriere = el("g", {}, R.tout);
     R.pieds = [98, 122].map(function (fx, n) {
       var sens = n === 0 ? -1 : 1;
-      var g = el("g", {}, R.tout);
+      var g = el("g", {}, R.piedsArriere);
       var chaussons = el("ellipse", { cx: fx + sens * 3, cy: 242, rx: 14, ry: 7, fill: "#FFC9DE" }, g);
       var chaussettes = el("ellipse", { cx: fx + sens * 2, cy: 242, rx: 10, ry: 5, fill: "#FFFFFF" }, g);
       var basket = el("g", {}, g);
@@ -212,7 +215,7 @@ var AVATARS = (function () {
       var scratch = el("g", {}, basket);
       el("rect", { x: fx - 9, y: 236, width: 18, height: 6, rx: 2.5, fill: tc }, scratch);
       el("rect", { x: fx - 7, y: 237.5, width: 14, height: 3, rx: 1.5, fill: "rgba(255,255,255,.45)" }, scratch);
-      return { fx: fx, sens: sens, chaussons: chaussons, chaussettes: chaussettes, basket: basket, scratch: scratch };
+      return { g: g, fx: fx, sens: sens, chaussons: chaussons, chaussettes: chaussettes, basket: basket, scratch: scratch };
     });
 
     // Tête
@@ -269,6 +272,9 @@ var AVATARS = (function () {
 
     // Vêtements (dessinés après la tête : le haut du pyjama passe par-dessus)
     R.buste = el("g", {}, R.tout);
+    // Maillot de corps (toujours là, sous les vêtements) : jamais de trou ni de buste nu pendant l'habillage
+    el("rect", { x: 86, y: 114, width: 48, height: 68, rx: 20, fill: "#F4F4F8" }, R.buste);
+    el("path", { d: "M100 116 Q110 124 120 116", stroke: "#DADAE6", "stroke-width": 2, fill: "none" }, R.buste);
     R.robe = el("g", {}, R.buste);
     el("path", { d: "M88 116 Q110 108 132 116 L146 188 Q110 198 74 188 Z", fill: tc }, R.robe);
     el("path", { d: "M98 116 L110 130 L122 116 Z", fill: "#FFFFFF" }, R.robe);
@@ -278,6 +284,9 @@ var AVATARS = (function () {
     var pois = el("g", { fill: "#FFFFFF", opacity: .55 }, R.hautPyjama);
     [[96, 134], [122, 128], [110, 152], [126, 164], [94, 166]].forEach(function (p) { el("circle", { cx: p[0], cy: p[1], r: 3 }, pois); });
     R.bretelles = el("path", { d: "M94 118 L98 170 M126 118 L122 170", stroke: "#A04000", "stroke-width": 6, "stroke-linecap": "round" }, R.buste);
+
+    // Assise en tailleur pour les chaussures : les pieds passent devant la robe
+    R.piedsAvant = el("g", {}, R.tout);
 
     // Bras (calculés à chaque image)
     function brasTrait(largeur, couleur) {
@@ -318,7 +327,7 @@ var AVATARS = (function () {
         bataille: etat.bataille ? 1 : 0, mousse: 0,
         chaussures: !!etat.chaussures, cartable: !!etat.cartable,
         litReveil: 0, couverture: 0, table: 0, chambre: 0, lampe: 1,
-        objets: {}, zzz: 0, scratchTexte: null, scratch: [0, 0]
+        objets: {}, zzz: 0, scratchTexte: null, scratch: [0, 0], leve: [0, 0]
       };
       var c, u;
 
@@ -351,23 +360,27 @@ var AVATARS = (function () {
         case "repas":
           P.table = 1;
           c = cycle(t, 7);
-          var assiette = pt(90, 176), boucheTartine = pt(138, 106);
-          var verreTable = pt(152, 164), boucheVerre = pt(128, 104);
+          // La tartine part de la main vers la gauche : la main se place à droite de la bouche,
+          // à une longueur de tartine (qui raccourcit à mesure qu'on la mange)
+          var reste = 1 - 0.65 * clamp(p, 0, 1);
+          var assiette = pt(106, 176), boucheTartine = pt(111 + 32 * reste, 106 + 11 * reste);
+          var boucheVerre = pt(144, 101);
           P.mains[0] = pt(80, 180);
           P.mains[1] = trajet([[0, pt(140, 180)], [0.07, assiette], [0.17, boucheTartine], [0.42, boucheTartine],
-                              [0.52, assiette], [0.57, pt(140, 180)], [0.62, pt(158, 168)], [0.72, boucheVerre],
-                              [0.86, boucheVerre], [0.94, pt(158, 168)], [1, pt(140, 180)]], c);
+                              [0.52, assiette], [0.57, pt(140, 180)], [0.62, pt(161, 166)], [0.72, boucheVerre],
+                              [0.86, boucheVerre], [0.94, pt(161, 166)], [1, pt(140, 180)]], c);
           var mangeTartine = c > 0.19 && c < 0.42;
-          if (mangeTartine) P.mains[1].y += Math.sin(t * 13) * 2.5;
+          if (mangeTartine) { P.mains[1].x += Math.sin(t * 13) * 2; P.mains[1].y += Math.sin(t * 13) * 1; }
           P.bouche = mangeTartine ? (Math.sin(t * 13) > 0 ? "ouverte" : "mache") : (c > 0.72 && c < 0.86 ? "ouverte" : "sourire");
-          var reste = 1 - 0.65 * clamp(p, 0, 1);
-          if (c >= 0.07 && c < 0.52) P.objets.tartine = { x: P.mains[1].x, y: P.mains[1].y, r: 0, e: reste };
-          else P.objets.tartine = { x: 92, y: 172, r: 0, e: reste };
+          if (c >= 0.07 && c < 0.52) {
+            var leve = trajet([[0.07, 0], [0.17, 19], [0.42, 19], [0.52, 0]], c);
+            P.objets.tartine = { main: 1, r: leve, e: reste };
+          } else P.objets.tartine = { x: 106, y: 172, r: 0, e: reste };
           if (c >= 0.62 && c < 0.94) {
             var incline = trajet([[0.62, 0], [0.72, -45], [0.86, -45], [0.94, 0]], c);
-            P.objets.verre = { x: P.mains[1].x - 9, y: P.mains[1].y - 2, r: incline, niveau: 1 - 0.8 * clamp(p, 0, 1) };
+            P.objets.verre = { main: 1, r: incline, niveau: 1 - 0.8 * clamp(p, 0, 1) };
           } else {
-            P.objets.verre = { x: 152, y: 162, r: 0, niveau: 1 - 0.8 * clamp(p, 0, 1) };
+            P.objets.verre = { x: 161, y: 164, r: 0, niveau: 1 - 0.8 * clamp(p, 0, 1) };
           }
           break;
 
@@ -421,18 +434,19 @@ var AVATARS = (function () {
           break;
 
         case "chaussures":
-          P.chaussures = true;
+          P.chaussures = true; P.piedsDevant = true;
           c = cycle(t, 3.4);
-          P.dy = 50;
+          P.dy = 44;
           var pied = c < 0.5 ? 1 : 0;
           var cc = c < 0.5 ? c / 0.5 : (c - 0.5) / 0.5;
           var ouvre = trajet([[0, 0], [0.12, 1], [0.34, 1], [0.46, 0], [1, 0]], cc);
           P.scratch[pied] = ouvre;
           var f = R.pieds[pied];
-          var pivot = pt(f.fx - f.sens * 9, 239), bout = tourne(pt(f.fx + f.sens * 9, 239), -f.sens * 65 * ouvre, pivot.x, pivot.y);
+          P.leve[pied] = -22 * trajet([[0, 0], [0.06, 1], [0.6, 1], [0.7, 0], [1, 0]], cc);
+          var pivot = pt(f.fx - f.sens * 9, 239 + P.leve[pied]), bout = tourne(pt(f.fx + f.sens * 9, 239), -f.sens * 65 * ouvre, pivot.x, pivot.y);
           var mainQuiTire = pied === 1 ? 1 : 0;
           P.mains[mainQuiTire] = pt(bout.x + f.sens * 3, bout.y - 3);
-          P.mains[1 - mainQuiTire] = pt(f.fx - f.sens * 6, 236);
+          P.mains[1 - mainQuiTire] = pt(f.fx - f.sens * 6, 236 + P.leve[pied]);
           P.tete = pied === 1 ? 6 : -6;
           if (cc > 0.44 && cc < 0.7) P.scratchTexte = { x: f.fx + f.sens * 26, y: 214 - (cc - 0.44) * 30, o: 1 - entre(cc, 0.6, 0.7) };
           break;
@@ -488,8 +502,9 @@ var AVATARS = (function () {
         P.bouche = "dents";
         P.mousse = clamp(pd * 4, 0, 1);
         var va = Math.sin(t * 16);
-        P.mains = [pt(92, 170), pt(162 + va * 4, 106 + Math.sin(t * 32) * 1.2)];
-        P.objets.brosseDents = { x: P.mains[1].x, y: P.mains[1].y, r: 0 };
+        // la tête de la brosse est à 40 unités à gauche de la main : main à droite de la bouche
+        P.mains = [pt(92, 170), pt(150 + va * 4, 103 + Math.sin(t * 32) * 1.2)];
+        P.objets.brosseDents = { main: 1, r: 0 };
         P.tete = Math.sin(t * 2.5) * 2;
       }
 
@@ -497,8 +512,10 @@ var AVATARS = (function () {
         c = cycle(t, 1.7);
         var descente = c < 0.7 ? douce(c / 0.7) : 1 - douce((c - 0.7) / 0.3);
         P.dy = -6;
-        P.mains = [pt(86, 166), vers(pt(160, 74), pt(178, 112), descente)];
-        P.objets.brosseCheveux = { x: P.mains[1].x, y: P.mains[1].y, r: 40 - 30 * descente };
+        // la brosse (tête à 30 unités à gauche de la main) descend le long des cheveux, du haut du crâne vers l'épaule
+        var teteBrosse = trajet([[0, pt(118, 44)], [0.35, pt(147, 66)], [1, pt(154, 120)]], descente);
+        P.mains = [pt(86, 166), pt(teteBrosse.x + 28, teteBrosse.y + 10)];
+        P.objets.brosseCheveux = { main: 1, r: 20 };
         P.tete = -7;
         P.yeux = "joie";
         if (etat.bataille) P.bataille = 1 - clamp(pc * 1.6, 0, 1);
@@ -542,7 +559,7 @@ var AVATARS = (function () {
 
       // Jambes : hanches suivent le buste, pieds au sol
       [0, 1].forEach(function (n) {
-        var hanche = monde(n === 0 ? 100 : 120, 176), pied = pt(n === 0 ? 98 : 122, 238);
+        var hanche = monde(n === 0 ? 100 : 120, 176), pied = pt(n === 0 ? 98 : 122, 238 + P.leve[n]);
         var j = membre(hanche, pied, JAMBE1, JAMBE2, n === 0 ? -1 : 1);
         var d = trace(hanche, j.milieu, j.bout);
         R.jambesPeau[n].setAttribute("d", d);
@@ -551,10 +568,13 @@ var AVATARS = (function () {
       voir(R.jambesPyjama, P.pyjama);
 
       // Pieds
+      var parentPieds = P.piedsDevant ? R.piedsAvant : R.piedsArriere;
       R.pieds.forEach(function (f, n) {
+        if (f.g.parentNode !== parentPieds) parentPieds.appendChild(f.g);
         f.basket.setAttribute("display", P.chaussures ? "inline" : "none");
         f.chaussons.setAttribute("display", !P.chaussures && P.pyjama > 0.5 ? "inline" : "none");
         f.chaussettes.setAttribute("display", !P.chaussures && P.pyjama <= 0.5 ? "inline" : "none");
+        f.g.setAttribute("transform", "translate(0 " + P.leve[n].toFixed(1) + ")");
         f.scratch.setAttribute("transform", "rotate(" + (-f.sens * 65 * P.scratch[n]).toFixed(1) + " " + (f.fx - f.sens * 9) + " 239)");
       });
 
@@ -577,6 +597,7 @@ var AVATARS = (function () {
       // Bras
       var couleurHaut = (P.pyjama > 0.5 || P.robeO > 0.5) ? tc : PEAU;
       var couleurBas = P.pyjama > 0.5 ? tc : PEAU;
+      var mainsReelles = [];
       [0, 1].forEach(function (n) {
         var epaule = monde(n === 0 ? 88 : 132, 122);
         var bras = membre(epaule, P.mains[n], BRAS1, BRAS2, n === 0 ? -1 : 1);
@@ -586,12 +607,17 @@ var AVATARS = (function () {
         R.bras[n].bas.setAttribute("stroke", couleurBas);
         R.bras[n].main.setAttribute("cx", bras.bout.x.toFixed(1));
         R.bras[n].main.setAttribute("cy", bras.bout.y.toFixed(1));
+        mainsReelles[n] = bras.bout;
       });
 
-      // Objets
+      // Objets : ceux qui sont tenus ({main: n}) se posent exactement dans la main dessinée
       var O = P.objets;
+      for (var nomObjet in O) {
+        var ob = O[nomObjet];
+        if (ob && ob.main !== undefined) { ob.x = mainsReelles[ob.main].x; ob.y = mainsReelles[ob.main].y; }
+      }
       R.tartine.setAttribute("display", O.tartine ? "inline" : "none");
-      if (O.tartine) { place(R.tartine, O.tartine.x, O.tartine.y, O.tartine.r, 1.35); R.tartineCorps.setAttribute("transform", "scale(" + O.tartine.e.toFixed(3) + " 1)"); }
+      if (O.tartine) { place(R.tartine, O.tartine.x, O.tartine.y, O.tartine.r, 0.95); R.tartineCorps.setAttribute("transform", "scale(" + O.tartine.e.toFixed(3) + " 1)"); }
       R.verre.setAttribute("display", O.verre ? "inline" : "none");
       if (O.verre) {
         place(R.verre, O.verre.x, O.verre.y, O.verre.r, 1.3);

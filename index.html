@@ -140,6 +140,19 @@
     font-size: calc(var(--u) * 4.2); font-weight: 700; color: var(--f);
     background: rgba(20,24,51,.75); padding: 0 calc(var(--u) * 2); border-radius: 99px; margin-top: calc(var(--u) * -1);
   }
+  .ok-btn {
+    margin-top: calc(var(--u) * 1.5); font-size: calc(var(--u) * 3.6); font-weight: 700; color: #fff;
+    background: rgba(255,255,255,.12); border: calc(var(--u) * .5) solid rgba(255,255,255,.35);
+    border-radius: 99px; padding: calc(var(--u) * 1.2) calc(var(--u) * 3.2); white-space: nowrap;
+  }
+  .ok-btn.valide { background: #7CFFB2; border-color: #7CFFB2; color: var(--nuit); }
+  /* Les 3 critères des étoiles, rappelés sous chaque fille pendant la routine */
+  .crit-rappel { display: flex; gap: calc(var(--u) * .8); margin-top: calc(var(--u) * 1.2); font-size: calc(var(--u) * 3.4); }
+  .crit-rappel span { background: rgba(255,255,255,.1); border-radius: 99px; padding: calc(var(--u) * .3) calc(var(--u) * 1.1); opacity: .75; white-space: nowrap; }
+  .crit-rappel .n { font-size: calc(var(--u) * 2.6); font-weight: 700; margin-left: calc(var(--u) * .4); }
+  .crit-rappel span.fait { background: rgba(124,255,178,.25); opacity: 1; }
+  .crit-legende { font-size: calc(var(--u) * 3.6); opacity: .85; margin-top: calc(var(--u) * 2); }
+  .crit-legende b { color: var(--or); }
   .avatar-svg .couette, .avatar-svg .queue { transform-box: fill-box; transform-origin: 50% 0%; animation: balance 1.8s ease-in-out infinite alternate; }
   @keyframes balance { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
 
@@ -218,11 +231,18 @@
     width: calc(var(--u) * 30); text-align: right; font-size: calc(var(--u) * 9); font-weight: 700; color: var(--f);
   }
   .etoiles { display: flex; gap: calc(var(--u) * 1.5); }
-  .etoile-btn {
-    background: none; border: none; line-height: 1;
-    font-size: calc(var(--u) * 15); color: rgba(255,255,255,.18); transition: color .2s, transform .2s;
+  .crit-choix { display: flex; gap: calc(var(--u) * 1.5); }
+  .crit-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: calc(var(--u) * 22); padding: calc(var(--u) * 1.2) calc(var(--u) * .8); border-radius: calc(var(--u) * 3);
+    background: rgba(255,255,255,.07); border: calc(var(--u) * .5) solid rgba(255,255,255,.15); color: #fff;
+    font-size: calc(var(--u) * 2.9); font-weight: 600; line-height: 1.15; transition: background .2s, transform .2s;
   }
-  .etoile-btn.pleine { color: var(--or); text-shadow: 0 0 calc(var(--u) * 3) rgba(255,217,61,.6); transform: scale(1.08); }
+  .crit-btn .e { font-size: calc(var(--u) * 6.5); line-height: 1.1; }
+  .crit-btn .etoile { font-size: calc(var(--u) * 4.5); color: rgba(255,255,255,.2); }
+  .crit-btn.coche { background: rgba(255,217,61,.2); border-color: var(--or); transform: scale(1.04); }
+  .crit-btn.coche .etoile { color: var(--or); }
+  .ligne-fille .compte { width: calc(var(--u) * 12); font-size: calc(var(--u) * 7); font-weight: 700; color: var(--or); text-align: left; }
   .notes-actions { display: flex; gap: calc(var(--u) * 3); justify-content: center; margin-top: calc(var(--u) * 3); }
   .btn {
     font-size: calc(var(--u) * 5.5); font-weight: 700; border: none; border-radius: 99px;
@@ -235,12 +255,15 @@
   .bravo-contenu { display: flex; align-items: center; gap: 6vw; }
   .bravo-titre { font-size: calc(var(--u) * 11); font-weight: 700; margin-bottom: calc(var(--u) * 3); }
   .bravo-filles { display: flex; gap: 5vw; }
-  .avatar-bravo svg { width: calc(var(--u) * 26); height: calc(var(--u) * 31); overflow: visible; }
+  .avatar-bravo svg { width: calc(var(--u) * 21); height: calc(var(--u) * 25); overflow: visible; }
   .bravo-fille { margin-bottom: calc(var(--u) * 3); animation: pop .9s cubic-bezier(.2,1.6,.4,1) backwards; }
   .bravo-fille + .bravo-fille { animation-delay: .4s; }
   .bravo-fille .nom { font-size: calc(var(--u) * 8); font-weight: 700; color: var(--f); }
-  .bravo-fille .gagne { font-size: calc(var(--u) * 10); color: var(--or); letter-spacing: .1em; line-height: 1.1; }
+  .bravo-fille .gagne { font-size: calc(var(--u) * 8); color: var(--or); letter-spacing: .1em; line-height: 1.1; }
   .bravo-fille .total { font-size: calc(var(--u) * 4.5); opacity: .85; }
+  .bravo-fille .criteres-gagnes { font-size: calc(var(--u) * 4.2); letter-spacing: .15em; min-height: calc(var(--u) * 5); }
+  .bravo-fille .boutique { font-size: calc(var(--u) * 3.6); font-weight: 700; color: var(--or); margin-top: calc(var(--u) * .8); max-width: calc(var(--u) * 42); }
+  .bravo-fille .boutique.peut { animation: battement 1s ease-in-out infinite; }
   .bocal { width: calc(var(--u) * 30); text-align: center; }
   .bocal svg { width: calc(var(--u) * 26); height: calc(var(--u) * 31); overflow: visible; }
   .bocal .niveau {
@@ -261,6 +284,11 @@
   #demarrer p { font-size: calc(var(--u) * 5); opacity: .8; margin: calc(var(--u) * 2) 0 calc(var(--u) * 5); }
   .choix-parent { display: flex; gap: calc(var(--u) * 4); }
   .etat-sync { font-size: calc(var(--u) * 3); opacity: .6; margin-top: calc(var(--u) * 6); }
+  #btnMusique {
+    position: fixed; bottom: calc(var(--u) * 1); left: 1vw; z-index: 12; display: none;
+    font-size: calc(var(--u) * 3.2); color: #fff; background: rgba(255,255,255,.14); border: none;
+    border-radius: 99px; padding: calc(var(--u) * .6) calc(var(--u) * 1.6);
+  }
   #modeTest {
     position: fixed; bottom: calc(var(--u) * 1); right: 1vw; z-index: 30; font-size: calc(var(--u) * 2.2);
     background: #EE5A52; padding: calc(var(--u) * .5) calc(var(--u) * 1.5); border-radius: 99px; display: none;
@@ -317,6 +345,7 @@
   <div class="grand">🌙</div>
   <h2 id="dodoTitre">Chut… tout le monde dort</h2>
   <p id="dodoReste"></p>
+  <div class="crit-legende" id="dodoCriteres"></div>
   <div class="sundae-dodo"><span class="corps miroir mascotte">🐈</span><span class="zzz">💤</span></div>
 </section>
 
@@ -337,6 +366,7 @@
   <h2 id="finMessage">Bonne journée les filles !</h2>
   <p id="finSous">❤️ À ce soir</p>
   <p class="bocal-ligne" id="finBocal"></p>
+  <p class="bocal-ligne" id="finBoutique"></p>
   <div class="fin-duo"><div id="finGauche"></div><div id="finDroite"></div></div>
 </section>
 
@@ -379,6 +409,7 @@
   <div class="etat-sync" id="etatSync"></div>
 </div>
 
+<button id="btnMusique" aria-label="Musique">🎵</button>
 <div id="modeTest">MODE TEST</div>
 
 <script src="commun.js"></script>
@@ -469,7 +500,7 @@
   function majCompteurs() {
     var html = FILLES.map(function (f) {
       return '<span class="compteur" style="--f:' + f.couleur + '">' + f.nom +
-             ' <span class="n">⭐ ' + MATIN.total(stock, f.nom) + '</span></span>';
+             ' <span class="n">⭐ ' + MATIN.solde(stock, f.nom) + '</span></span>';
     }).join("");
     var c = MATIN.cagnotte(stock);
     if (c) {
@@ -482,6 +513,15 @@
       : "🫙 Encore " + pluriel(c.objectif - c.progres, "étoile") + " pour " + c.recompense;
     $("finBocal").textContent = texte;
     $("reposBocal").textContent = texte;
+    $("finBoutique").textContent = FILLES.map(function (f) {
+      var v = MATIN.vitrine(stock, f.nom);
+      if (!v) return "";
+      return v.manque ? f.nom + " : encore " + pluriel(v.manque, "étoile") + " pour " + v.article.emoji
+                      : f.nom + " peut s'offrir " + v.article.emoji + " !";
+    }).filter(Boolean).join("   ·   ");
+    $("dodoCriteres").innerHTML = "⭐ Les 3 étoiles : " + MATIN.CRITERES.map(function (k) {
+      return "<b>" + k.emoji + "</b> " + esc(k.court);
+    }).join(" · ");
   }
 
   // ---------- Son (généré, aucun fichier) ----------
@@ -509,9 +549,67 @@
     SONS[nom].forEach(function (n) { note(n[0], t + n[1], n[2] || .4, .3); });
   }
 
+  // ---------- Musique de fond : nappes douces et petits carillons, générés (aucun fichier) ----------
+  var musiqueVoulue = true;
+  try { musiqueVoulue = localStorage.getItem("matin.musique") !== "0"; } catch (err) {}
+  if (q.musique === "0") musiqueVoulue = false;
+  var Musique = (function () {
+    var bus = null, minuteur = null, prochainAccord = 0, prochaineNote = 0, indexAccord = 0, baisseJusqua = 0, niveau = 0;
+    // Do maj7, La m7, Fa maj7, Sol 6 : calme, sans tension
+    var ACCORDS = [[130.81, 164.81, 196.00, 246.94], [110.00, 130.81, 164.81, 196.00], [87.31, 110.00, 130.81, 164.81], [98.00, 123.47, 146.83, 164.81]];
+    var GAMME = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+    function nappe(freq, t0, dur) {
+      [["sine", 0], ["triangle", 5]].forEach(function (v) {
+        var o = audio.createOscillator(), g = audio.createGain();
+        o.type = v[0]; o.frequency.value = freq; o.detune.value = v[1];
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.linearRampToValueAtTime(0.03, t0 + 2.5);
+        g.gain.setValueAtTime(0.03, t0 + dur - 2.5);
+        g.gain.linearRampToValueAtTime(0.0001, t0 + dur + 1.5);
+        o.connect(g); g.connect(bus);
+        o.start(t0); o.stop(t0 + dur + 1.6);
+      });
+    }
+    function carillon(freq, t0) {
+      var o = audio.createOscillator(), g = audio.createGain();
+      o.type = "sine"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.1, t0 + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.4);
+      o.connect(g); g.connect(bus);
+      o.start(t0); o.stop(t0 + 2.5);
+    }
+    function planifier() {
+      var now = audio.currentTime;
+      if (prochainAccord < now) prochainAccord = now + 0.1;
+      if (prochaineNote < now) prochaineNote = now + 1.5;
+      while (prochainAccord < now + 6) {
+        ACCORDS[indexAccord % ACCORDS.length].forEach(function (f) { nappe(f, prochainAccord, 8); });
+        indexAccord++; prochainAccord += 8;
+      }
+      while (prochaineNote < now + 6) {
+        carillon(GAMME[Math.floor(Math.random() * GAMME.length)], prochaineNote);
+        prochaineNote += 1.6 + Math.random() * 2.4;
+      }
+    }
+    return {
+      // voulu : la musique doit-elle jouer maintenant ? Appelée en boucle.
+      maj: function (voulu) {
+        if (!audio) return;
+        if (!bus) { bus = audio.createGain(); bus.gain.value = 0; bus.connect(audio.destination); }
+        var vise = !voulu ? 0 : Date.now() < baisseJusqua ? 0.12 : 0.35;
+        if (vise !== niveau) { niveau = vise; bus.gain.setTargetAtTime(vise, audio.currentTime, vise === 0 ? 1.5 : 0.4); }
+        if (voulu && !minuteur) { planifier(); minuteur = setInterval(planifier, 1000); }
+        if (!voulu && minuteur && bus.gain.value < 0.005) { clearInterval(minuteur); minuteur = null; prochainAccord = 0; prochaineNote = 0; }
+      },
+      baisser: function () { baisseJusqua = Date.now() + 7000; }
+    };
+  })();
+
   // ---------- Voix ----------
   function parler(txt, delai) {
     if (!VOIX_ACTIVE || !demarre || !window.speechSynthesis || !txt) return;
+    Musique.baisser();
     setTimeout(function () {
       var u = new SpeechSynthesisUtterance(txt);
       u.lang = "fr-FR"; u.rate = .95; u.pitch = 1.1;
@@ -651,12 +749,16 @@
     requestAnimationFrame(animerAvatars);
   }
 
-  function poserAvatars(zone, ids, etat, avecPrenom) {
+  function poserAvatars(zone, ids, etat, avecPrenom, avecOk) {
     animes = animes.filter(function (a) { return a.zone !== zone; });
     ids.forEach(function (id, n) {
       var f = FILLES[n], boite = $(id);
       if (!f || !boite) return;
-      boite.innerHTML = avecPrenom ? '<div class="avatar" style="--f:' + f.couleur + '"><div class="prenom">' + f.nom + '</div></div>' : "";
+      var okHtml = avecOk ? '<button type="button" class="ok-btn" data-nom="' + f.nom + '">✅ OK</button>' : "";
+      if (avecOk && cible && cible.r.etoiles) okHtml += '<div class="crit-rappel" data-crit="' + f.nom + '">' + MATIN.CRITERES.map(function (k) {
+        return '<span data-k="' + k.cle + '">' + k.emoji + (k.cle === "seule" ? '<span class="n"></span>' : "") + '</span>';
+      }).join("") + '</div>';
+      boite.innerHTML = avecPrenom ? '<div class="avatar" style="--f:' + f.couleur + '"><div class="prenom">' + f.nom + '</div>' + okHtml + '</div>' : "";
       var hote = avecPrenom ? boite.firstChild : boite;
       var objet = AVATARS.creer(hote, f, regl.avatars[f.nom]);
       if (avecPrenom) hote.insertBefore(objet.svg, hote.firstChild);
@@ -664,11 +766,62 @@
       objet.maj(e, e.activite, performance.now() / 1000, 0, n === 0 ? 1 : -1);
       animes.push({ objet: objet, etat: e, zone: zone, sens: n === 0 ? 1 : -1 });
     });
+    majBoutonsOk();
   }
 
   // ---------- Affichage d'une routine ----------
   var etatCourant = null, cible = null, cleEtape = null, pisteSig = null, idxCourant = 0;
   var alerteFaite = false, demarre = false, timerAnnonce = null;
+
+  // ---------- Avance manuelle : les filles valident ensemble pour passer à l'étape suivante ----------
+  // Une fois validée, l'étape suivante démarre avec sa durée complète (le temps gagné profite aux étapes d'après),
+  // le bus reste à l'heure réelle. okEtape : {Lou: bool, Alba: bool} pour l'étape affichée.
+  var okEtape = {}, ancre = null; // ancre : {id, sig, jour, index, base}
+  function segondesDepuisMinuit(d) { return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000; }
+  function majBoutonsOk() {
+    var btns = document.querySelectorAll(".ok-btn");
+    for (var k = 0; k < btns.length; k++) {
+      var b = btns[k];
+      b.classList.toggle("valide", !!okEtape[b.getAttribute("data-nom")]);
+    }
+    if (!cible) return;
+    var cle = MATIN.cleNote(cleJour(maintenant()), cible.id), sur = cible.r.etapes.length - 1;
+    var rappels = document.querySelectorAll(".crit-rappel");
+    for (var j = 0; j < rappels.length; j++) {
+      var nom = rappels[j].getAttribute("data-crit"), suivi = okFaits(cle, nom);
+      var n = rappels[j].querySelector("[data-k=seule] .n");
+      if (n) n.textContent = suivi.length + "/" + sur;
+      rappels[j].querySelector("[data-k=seule]").classList.toggle("fait", suivi.length >= sur);
+    }
+  }
+  // Étapes validées avec OK par chaque fille, pour le critère « toute seule » : ok/<cleNote>/<prénom> = {ok, sur, etapes}
+  function okFaits(cle, nom) {
+    var o = stock.lire("ok/" + cle + "/" + nom);
+    return o && o.etapes ? String(o.etapes).split(",").filter(Boolean) : [];
+  }
+  function noterOk(nom, oui) {
+    if (!cible || !cible.r.etoiles) return;
+    var cle = MATIN.cleNote(cleJour(maintenant()), cible.id), liste = okFaits(cle, nom), i = String(idxCourant);
+    var pos = liste.indexOf(i);
+    if (oui && pos < 0) liste.push(i);
+    if (!oui && pos >= 0) liste.splice(pos, 1);
+    stock.ecrire("ok/" + cle + "/" + nom, { ok: liste.length, sur: cible.r.etapes.length - 1, etapes: liste.join(",") }).catch(function () {});
+  }
+  function avancerManuel() {
+    if (!cible || idxCourant >= cible.r.etapes.length - 1) return;
+    ancre = { id: cible.id, sig: cible.sig, jour: cleJour(maintenant()), index: idxCourant + 1, base: segondesDepuisMinuit(maintenant()) };
+    okEtape = {};
+  }
+  $("routine").addEventListener("click", function (ev) {
+    var b = ev.target.closest(".ok-btn");
+    if (!b || !demarre) return;
+    var nom = b.getAttribute("data-nom");
+    okEtape[nom] = !okEtape[nom];
+    noterOk(nom, okEtape[nom]);
+    majBoutonsOk();
+    jouer("etoile");
+    if (FILLES.every(function (f) { return okEtape[f.nom]; })) avancerManuel();
+  });
 
   function montrerEcran(nom) {
     ["routine", "dodo", "attente", "fin", "repos"].forEach(function (id) {
@@ -686,7 +839,8 @@
 
   function dessinerAvatars(r, i) {
     var etat = MATIN.etatAvatar(r, i);
-    poserAvatars("routine", ["coteGauche", "coteDroit"], etat, true);
+    var avecOk = demarre && i < r.etapes.length - 1;
+    poserAvatars("routine", ["coteGauche", "coteDroit"], etat, true, avecOk);
     $("parentAnneau").innerHTML = "";
     parentAnime = etat.calin ? AVATARS.creerParent($("parentAnneau"), PARENT) : null;
   }
@@ -744,23 +898,47 @@
     parler(phrase);
   }
 
-  function majRoutine(x, s) {
-    var r = x.r, i = 0;
+  // Index de l'étape courante : au temps réel, sauf si les filles ont validé une avance manuelle
+  // (ancre), auquel cas chaque étape suivante reçoit sa durée complète à partir du moment validé.
+  function indexRoutine(r, x, s, jour) {
+    if (ancre && ancre.id === x.id && ancre.sig === x.sig && ancre.jour === jour) {
+      var i = ancre.index;
+      while (i < r.etapes.length - 1 && (s - ancre.base) >= (r.etapes[i].f - r.etapes[i].d)) {
+        ancre.base += (r.etapes[i].f - r.etapes[i].d);
+        i++;
+      }
+      ancre.index = i;
+      return { i: i, base: ancre.base };
+    }
+    var i = 0;
     for (var k = 0; k < r.etapes.length; k++) if (s >= r.etapes[k].d) i = k;
+    return { i: i, base: null };
+  }
+
+  function majRoutine(x, s) {
+    var r = x.r, jour = cleJour(maintenant());
+    var pos = indexRoutine(r, x, s, jour), i = pos.i;
     var e = r.etapes[i];
     if (x.sig !== pisteSig) { pisteSig = x.sig; construirePiste(r); afficherEtape(r, i); }
-    var cle = x.id + "|" + e.debut + "|" + e.titre;
+    var dur = Math.max(1, e.f - e.d);
+    var reste = pos.base != null ? Math.max(0, dur - (s - pos.base)) : Math.max(0, e.f - s);
+    // Dernière étape atteinte en avance : le temps gagné s'ajoute, elle dure jusqu'au départ réel
+    if (pos.base != null && i === r.etapes.length - 1) {
+      dur = Math.max(1, r.finS - pos.base);
+      reste = Math.max(0, r.finS - s);
+    }
+    var cle = x.id + "|" + i + "|" + e.debut;
     idxCourant = i;
     if (cle !== cleEtape) {
       cleEtape = cle;
       afficherEtape(r, i);
       Scene.etape(MATIN.activiteDe(e));
-      alerteFaite = (e.f - s) <= 60;
+      alerteFaite = reste <= 60;
+      okEtape = {};
       if (demarre) annoncer(r, i);
     }
-    var dur = Math.max(1, e.f - e.d), reste = Math.max(0, e.f - s);
     Scene.reste(reste);
-    progressionEtape = Math.max(0, Math.min(1, (s - e.d) / dur));
+    progressionEtape = Math.max(0, Math.min(1, (dur - reste) / dur));
     var enCalin = !!parentAnime && progressionEtape >= 0.5;
     $("anneau").classList.toggle("calin", enCalin);
     Scene.calin(enCalin);
@@ -792,17 +970,21 @@
   function ouvrirNotes(x) {
     x = x && x.r ? x : routinePourNotes();
     cleNotesOuvertes = MATIN.cleNote(cleJour(maintenant()), x.id);
-    var deja = stock.lire("notes/" + cleNotesOuvertes) || {};
+    // Une étoile par critère rempli. « Toute seule » est proposé d'office si elle a validé toutes ses étapes avec OK.
     notesEnCours = {};
-    FILLES.forEach(function (f) { notesEnCours[f.nom] = deja[f.nom] || 0; });
+    FILLES.forEach(function (f) {
+      var c = MATIN.criteresDe(stock, cleNotesOuvertes, f.nom), o = {};
+      MATIN.CRITERES.forEach(function (k) { o[k.cle] = !!c[k.cle]; });
+      notesEnCours[f.nom] = o;
+    });
     $("notesTitre").textContent = "⭐ Les étoiles " + (x.id === "ecole" ? "du matin" : "· " + x.r.nom);
     $("notesFilles").innerHTML = FILLES.map(function (f) {
-      var btns = "";
-      for (var n = 1; n <= 3; n++) {
-        btns += '<button class="etoile-btn" data-nom="' + f.nom + '" data-n="' + n + '" aria-label="' + n + ' étoile">★</button>';
-      }
+      var btns = MATIN.CRITERES.map(function (k) {
+        return '<button class="crit-btn" data-nom="' + f.nom + '" data-k="' + k.cle + '"><span class="e">' + k.emoji +
+               '</span>' + esc(k.texte) + '<span class="etoile">★</span></button>';
+      }).join("");
       return '<div class="ligne-fille" style="--f:' + f.couleur + '"><div class="nom">' + f.nom +
-             '</div><div class="etoiles">' + btns + '</div></div>';
+             '</div><div class="crit-choix">' + btns + '</div><div class="compte" data-compte="' + f.nom + '"></div></div>';
     }).join("");
     $("notesBoite").style.display = "block";
     $("bravo").style.display = "none";
@@ -811,13 +993,16 @@
   }
 
   function majEtoiles() {
-    var btns = document.querySelectorAll(".etoile-btn"), complet = true;
+    var btns = document.querySelectorAll(".crit-btn");
     for (var k = 0; k < btns.length; k++) {
       var b = btns[k];
-      b.classList.toggle("pleine", +b.getAttribute("data-n") <= notesEnCours[b.getAttribute("data-nom")]);
+      b.classList.toggle("coche", !!notesEnCours[b.getAttribute("data-nom")][b.getAttribute("data-k")]);
     }
-    FILLES.forEach(function (f) { if (!notesEnCours[f.nom]) complet = false; });
-    $("notesValider").disabled = !complet;
+    FILLES.forEach(function (f) {
+      var el = document.querySelector('[data-compte="' + f.nom + '"]');
+      if (el) el.textContent = MATIN.compterCriteres(notesEnCours[f.nom]) + " ⭐";
+    });
+    $("notesValider").disabled = false;
   }
 
   function fermerNotes() {
@@ -827,8 +1012,9 @@
 
   function validerNotes() {
     var valeur = {};
-    FILLES.forEach(function (f) { valeur[f.nom] = notesEnCours[f.nom]; });
-    // L'écriture déclenche verifierNouvellesNotes, qui affiche le bravo
+    FILLES.forEach(function (f) { valeur[f.nom] = MATIN.compterCriteres(notesEnCours[f.nom]); });
+    // Les critères d'abord : le bravo, déclenché par l'écriture des notes, les affiche
+    stock.ecrire("criteres/" + cleNotesOuvertes, notesEnCours).catch(function () {});
     stock.ecrire("notes/" + cleNotesOuvertes, valeur).catch(function () {});
   }
 
@@ -838,7 +1024,7 @@
 
   var BOCAL_FORME = "M22 34 Q12 40 12 54 V106 Q12 120 28 120 H72 Q88 120 88 106 V54 Q88 40 78 34 Z";
 
-  function montrerBravo(notes, avant) {
+  function montrerBravo(notes, avant, cleN) {
     var gagne = somme(notes) - somme(avant);
     var c = MATIN.cagnotte(stock);
     var htmlBocal = "", bocalRempli = false;
@@ -867,12 +1053,18 @@
     $("bravo").innerHTML =
       '<div class="bravo-titre">Bravo les filles !</div>' +
       '<div class="bravo-contenu"><div class="bravo-filles">' + FILLES.map(function (f) {
-        var n = notes[f.nom] || 0;
+        var n = notes[f.nom] || 0, crit = cleN ? stock.lire("criteres/" + cleN + "/" + f.nom) : null;
+        var gagnes = crit ? MATIN.CRITERES.filter(function (k) { return crit[k.cle]; }).map(function (k) { return k.emoji; }).join(" ") : "";
+        var v = MATIN.vitrine(stock, f.nom);
+        var boutique = !v ? "" : v.manque
+          ? '<div class="boutique">🛍️ Encore ' + pluriel(v.manque, "étoile") + ' pour ' + esc(v.article.emoji) + ' ' + esc(v.article.nom) + '</div>'
+          : '<div class="boutique peut">🛍️ Tu peux t\'offrir ' + esc(v.article.emoji) + ' ' + esc(v.article.nom) + ' !</div>';
         return '<div class="bravo-fille" style="--f:' + f.couleur + '">' +
                '<div class="avatar-bravo" id="bravoAv' + FILLES.indexOf(f) + '"></div>' +
                '<div class="nom">' + f.nom + '</div>' +
-               '<div class="gagne">' + new Array(n + 1).join("★") + '</div>' +
-               '<div class="total">Total : ' + MATIN.total(stock, f.nom) + ' ⭐</div></div>';
+               '<div class="gagne">' + (n ? new Array(n + 1).join("★") : "☆") + '</div>' +
+               '<div class="criteres-gagnes">' + gagnes + '</div>' +
+               '<div class="total">' + MATIN.solde(stock, f.nom) + ' ⭐ à dépenser</div>' + boutique + '</div>';
       }).join("") + '</div>' + htmlBocal + '</div>' +
       '<div class="sundae-saut gauche"><span class="mascotte">' + esc(regl.mascotte) + '</span></div>' +
       '<div class="sundae-saut droite"><span class="miroir mascotte">' + esc(regl.mascotte) + '</span></div>';
@@ -885,7 +1077,9 @@
     poserAvatars("bravo", ["bravoAv0", "bravoAv1"], etatBravo, false);
     jouer("fanfare");
     var phrase = FILLES.filter(function (f) { return notes[f.nom]; }).map(function (f) {
-      return "Bravo " + f.nom + ", " + pluriel(notes[f.nom], "étoile") + " !";
+      var v = MATIN.vitrine(stock, f.nom);
+      return "Bravo " + f.nom + ", " + pluriel(notes[f.nom], "étoile") + " !" +
+             (v && !v.manque ? " Tu peux t'offrir " + MATIN.sansEmoji(v.article.nom) + " !" : "");
     }).join(" ");
     if (bocalRempli) {
       jouer("bocal", 3);
@@ -910,14 +1104,15 @@
       if (n.map[k] !== notesVues.map[k]) change = { cle: k, avant: notesVues.map[k] ? JSON.parse(notesVues.map[k]) : {} };
     }
     notesVues = n;
-    if (change && demarre) montrerBravo(JSON.parse(n.map[change.cle]), change.avant);
+    if (change && demarre) montrerBravo(JSON.parse(n.map[change.cle]), change.avant, change.cle);
   }
 
   $("notesFilles").addEventListener("click", function (ev) {
-    var b = ev.target.closest(".etoile-btn");
+    var b = ev.target.closest(".crit-btn");
     if (!b) return;
-    notesEnCours[b.getAttribute("data-nom")] = +b.getAttribute("data-n");
-    jouer("etoile");
+    var c = notesEnCours[b.getAttribute("data-nom")], k = b.getAttribute("data-k");
+    c[k] = !c[k];
+    if (c[k]) jouer("etoile");
     majEtoiles();
   });
   $("notesValider").addEventListener("click", validerNotes);
@@ -986,6 +1181,7 @@
       if (etat === "fin") poserAvatars("fin", ["finGauche", "finDroite"], MATIN.etatFinAvatar(nouvelle.r), true);
     }
     cible = nouvelle;
+    Musique.maj(demarre && musiqueVoulue && etat === "routine");
     var fete = decor.fete ? "🎂 Joyeux anniversaire " + decor.fete.nom + " !" : null;
 
     if (etat === "routine") majRoutine(cible, s);
@@ -1056,12 +1252,20 @@
       speechSynthesis.speak(u);
     }
     $("demarrer").style.display = "none";
+    $("btnMusique").style.display = "block";
+    majBtnMusique();
     try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (err) {}
     if (etatCourant && etatCourant.indexOf("routine:") === 0 && cible) {
       afficherEtape(cible.r, idxCourant);
       annoncer(cible.r, idxCourant);
     }
   }
+  function majBtnMusique() { $("btnMusique").textContent = musiqueVoulue ? "🎵" : "🔇"; }
+  $("btnMusique").addEventListener("click", function () {
+    musiqueVoulue = !musiqueVoulue;
+    try { localStorage.setItem("matin.musique", musiqueVoulue ? "1" : "0"); } catch (err) {}
+    majBtnMusique();
+  });
   $("demarrer").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-parent]");
     if (b) lancer(b.getAttribute("data-parent"));

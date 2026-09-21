@@ -55,6 +55,7 @@
     -webkit-appearance: none; appearance: none; min-height: 44px;
   }
   input::-webkit-calendar-picker-indicator { filter: invert(1); }
+  [hidden] { display: none !important; }
   .btn {
     display: block; text-align: center; text-decoration: none;
     font-weight: 700; font-size: 17px; border: none; border-radius: 99px;
@@ -78,6 +79,17 @@
     color: rgba(255,255,255,.18); transition: color .15s, transform .15s;
   }
   .etoiles button.pleine { color: var(--or); transform: scale(1.05); }
+  .fille.crit { flex-direction: column; align-items: stretch; gap: 8px; }
+  .fille.crit .entete { display: flex; justify-content: space-between; align-items: baseline; }
+  .fille.crit .compte { font-size: 24px; font-weight: 700; color: var(--or); }
+  .crit-liste { display: flex; gap: 6px; }
+  .crit-liste button {
+    flex: 1; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.12); border-radius: 14px;
+    color: #fff; font-size: 12.5px; font-weight: 600; padding: 8px 4px; line-height: 1.2;
+  }
+  .crit-liste button .e { display: block; font-size: 24px; }
+  .crit-liste button.coche { background: rgba(255,217,61,.18); border-color: var(--or); }
+  .crit-liste small { display: block; color: var(--doux); font-weight: 400; font-size: 11px; }
 
   .jauge { height: 18px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; margin: 8px 0; }
   .jauge div { height: 100%; background: var(--or); border-radius: 99px; transition: width .6s; }
@@ -198,6 +210,38 @@
   </div>
 </section>
 
+<!-- Boutique -->
+<section class="onglet" id="o-boutique">
+  <div class="carte">
+    <h2>🛍️ Les étoiles à dépenser</h2>
+    <small>Étoiles gagnées moins étoiles dépensées. Le bocal commun, lui, compte toujours toutes les étoiles gagnées.</small>
+    <div class="totaux espace" id="soldes"></div>
+  </div>
+  <div class="carte">
+    <h2>🎁 Acheter</h2>
+    <div id="achat"></div>
+  </div>
+  <div class="carte">
+    <h2>🧺 Le rayon</h2>
+    <small>Les éléments de déco que Lou et Alba peuvent acheter. Ajoute-en quand tu en as un nouveau.</small>
+    <div id="rayon" class="espace"></div>
+    <div class="ligne espace">
+      <input class="emoji-in" type="text" id="articleEmoji" value="🦄" maxlength="4">
+      <input type="text" id="articleNom" placeholder="Couronne de princesse" maxlength="30">
+    </div>
+    <div class="ligne espace">
+      <span class="etiquette">Prix</span>
+      <input type="number" id="articleCout" min="1" max="200" inputmode="numeric" value="5">
+      <span class="etiquette">étoiles</span>
+      <button class="btn" id="ajoutArticle">Ajouter</button>
+    </div>
+  </div>
+  <div class="carte">
+    <h2>🎀 Les collections</h2>
+    <div id="collections"></div>
+  </div>
+</section>
+
 <!-- Rappels -->
 <section class="onglet" id="o-rappels">
   <div class="carte">
@@ -268,6 +312,7 @@
 
 <nav>
   <button class="actif" data-onglet="etoiles"><span class="i">⭐</span>Étoiles</button>
+  <button data-onglet="boutique"><span class="i">🛍️</span>Boutique</button>
   <button data-onglet="histo"><span class="i">📖</span>Historique</button>
   <button data-onglet="rappels"><span class="i">📌</span>Rappels</button>
   <button data-onglet="routines"><span class="i">🗓️</span>Routines</button>
@@ -355,44 +400,55 @@
     if (avant && liste.some(function (x) { return x.id === avant; })) sel.value = avant;
     sel.hidden = liste.length <= 1;
   }
+  // Une étoile par critère coché. « Toute seule » est proposé d'office si elle a validé toutes ses étapes avec OK.
   function chargerSaisie() {
-    var n = stock.lire("notes/" + cleSaisie()) || {};
     saisie = {};
-    FILLES.forEach(function (f) { saisie[f.nom] = n[f.nom] || 0; });
+    FILLES.forEach(function (f) {
+      var c = MATIN.criteresDe(stock, cleSaisie(), f.nom), o = {};
+      MATIN.CRITERES.forEach(function (k) { o[k.cle] = !!c[k.cle]; });
+      saisie[f.nom] = o;
+    });
     saisieTouchee = false;
     dessinerSaisie();
   }
   function dessinerSaisie() {
     $("saisie").innerHTML = FILLES.map(function (f) {
-      var b = "";
-      for (var i = 1; i <= 3; i++) {
-        b += '<button data-nom="' + f.nom + '" data-n="' + i + '" class="' + (i <= saisie[f.nom] ? "pleine" : "") + '">★</button>';
-      }
-      return '<div class="fille" style="--f:' + f.couleur + '"><div><div class="nom">' + f.nom +
-             '</div><div class="total">Total : ' + MATIN.total(stock, f.nom) + ' ⭐</div></div>' +
-             '<div class="etoiles">' + b + '</div></div>';
+      var ok = stock.lire("ok/" + cleSaisie() + "/" + f.nom);
+      var b = MATIN.CRITERES.map(function (k) {
+        var detail = k.cle === "seule" && ok && ok.sur ? "<small>" + ok.ok + "/" + ok.sur + " OK</small>" : "";
+        return '<button data-nom="' + f.nom + '" data-k="' + k.cle + '" class="' + (saisie[f.nom][k.cle] ? "coche" : "") + '">' +
+               '<span class="e">' + k.emoji + '</span>' + esc(k.texte) + detail + '</button>';
+      }).join("");
+      return '<div class="fille crit" style="--f:' + f.couleur + '"><div class="entete"><div><div class="nom">' + f.nom +
+             '</div><div class="total">' + MATIN.solde(stock, f.nom) + ' ⭐ à dépenser · ' + MATIN.total(stock, f.nom) + ' gagnées</div></div>' +
+             '<div class="compte">' + MATIN.compterCriteres(saisie[f.nom]) + ' ⭐</div></div>' +
+             '<div class="crit-liste">' + b + '</div></div>';
     }).join("");
-    $("btnNoter").disabled = FILLES.some(function (f) { return !saisie[f.nom]; });
+    $("btnNoter").disabled = false;
     $("btnEffacer").hidden = !stock.lire("notes/" + cleSaisie());
   }
   $("saisie").addEventListener("click", function (ev) {
     var b = ev.target.closest("[data-nom]");
     if (!b) return;
-    saisie[b.getAttribute("data-nom")] = +b.getAttribute("data-n");
+    var c = saisie[b.getAttribute("data-nom")], k = b.getAttribute("data-k");
+    c[k] = !c[k];
     saisieTouchee = true;
     dessinerSaisie();
   });
   $("dateNote").addEventListener("change", chargerSaisie);
   $("routineNote").addEventListener("change", chargerSaisie);
   $("btnNoter").addEventListener("click", function () {
-    var valeur = {};
-    FILLES.forEach(function (f) { valeur[f.nom] = saisie[f.nom]; });
+    var valeur = {}, cle = cleSaisie();
+    FILLES.forEach(function (f) { valeur[f.nom] = MATIN.compterCriteres(saisie[f.nom]); });
     saisieTouchee = false;
-    sauver("notes/" + cleSaisie(), valeur,
+    // Les critères d'abord : la télé les lit au moment du bravo, déclenché par les notes
+    sauver("criteres/" + cle, JSON.parse(JSON.stringify(saisie)), "");
+    sauver("notes/" + cle, valeur,
       $("dateNote").value === aujourdhui() ? "Enregistré ✓ Le bravo s'affiche à la télé" : "Enregistré ✓");
   });
   $("btnEffacer").addEventListener("click", function () {
     if (!confirm("Effacer les étoiles du " + dateLisible($("dateNote").value) + " ?")) return;
+    sauver("criteres/" + cleSaisie(), null, "");
     sauver("notes/" + cleSaisie(), null, "Note effacée").then(chargerSaisie);
   });
 
@@ -906,9 +962,77 @@
     else prompt("Copie ce lien :", texte);
   });
 
+  // =====================================================================
+  // Boutique : les parents fournissent le catalogue, les étoiles se dépensent ici
+  // =====================================================================
+  function dessinerBoutique() {
+    var catalogue = MATIN.articles(stock);
+    $("soldes").innerHTML = FILLES.map(function (f) {
+      return '<div style="--f:' + f.couleur + '"><div class="l">' + f.nom + '</div><div class="v">' + MATIN.solde(stock, f.nom) + ' ⭐</div></div>';
+    }).join("");
+
+    $("achat").innerHTML = !catalogue.length
+      ? '<div class="vide">Le rayon est vide. Ajoute un premier article plus bas.</div>'
+      : FILLES.map(function (f) {
+        var solde = MATIN.solde(stock, f.nom);
+        return '<div class="jour-titre" style="color:' + f.couleur + '">' + f.nom + ' · ' + solde + ' ⭐</div>' +
+          '<div class="choix espace">' + catalogue.map(function (a) {
+            var ok = solde >= a.cout;
+            return '<button type="button" data-acheter="' + esc(f.nom) + '|' + esc(a.id) + '"' + (ok ? "" : " disabled") +
+                   ' style="' + (ok ? "" : "opacity:.35") + '"><span class="e">' + esc(a.emoji) + '</span>' + esc(a.nom) + '<br>' + a.cout + ' ⭐</button>';
+          }).join("") + '</div>';
+      }).join("");
+
+    $("rayon").innerHTML = catalogue.length ? catalogue.map(function (a) {
+      return '<div class="histo"><span>' + esc(a.emoji) + ' ' + esc(a.nom) + '</span><span class="n">' + a.cout + ' ⭐ ' +
+             '<button type="button" class="btn danger petit" style="display:inline-block;margin-left:8px" data-suppr-article="' + esc(a.id) + '" aria-label="Retirer">✕</button></span></div>';
+    }).join("") : '<div class="vide">Rien pour l\'instant.</div>';
+
+    $("collections").innerHTML = FILLES.map(function (f) {
+      var liste = MATIN.achats(stock, f.nom);
+      return '<div class="jour-titre" style="color:' + f.couleur + '">' + f.nom + '</div>' +
+        (liste.length ? liste.map(function (a) {
+          return '<div class="histo"><span>' + esc(a.emoji) + ' ' + esc(a.nom) + '<small>' + (a.le ? dateLisible(a.le) + ' · ' : "") + a.cout + ' ⭐</small></span>' +
+                 '<span class="n"><button type="button" class="btn second petit" style="display:inline-block" data-rembourser="' + esc(f.nom) + '|' + esc(a.id) + '">Rembourser</button></span></div>';
+        }).join("") : '<div class="vide">Rien acheté pour l\'instant.</div>');
+    }).join("");
+  }
+
+  $("ajoutArticle").addEventListener("click", function () {
+    var nom = $("articleNom").value.trim(), emoji = $("articleEmoji").value.trim() || "🎁", cout = parseInt($("articleCout").value, 10);
+    if (!nom) return toast("Donne un nom à l'article", true);
+    if (!(cout > 0)) return toast("Indique un prix en étoiles", true);
+    $("articleNom").value = "";
+    sauver("boutique/articles/" + nouvelId(), { nom: nom, emoji: emoji, cout: cout }, "Article ajouté au rayon ✓");
+  });
+  $("o-boutique").addEventListener("click", function (ev) {
+    var acheter = ev.target.closest("[data-acheter]");
+    if (acheter) {
+      var p = acheter.getAttribute("data-acheter").split("|"), art = MATIN.articles(stock).filter(function (a) { return a.id === p[1]; })[0];
+      if (!art || MATIN.solde(stock, p[0]) < art.cout) return;
+      if (!confirm(p[0] + " achète « " + art.nom + " » pour " + art.cout + " ⭐ ?")) return;
+      sauver("boutique/achats/" + p[0] + "/" + nouvelId(), { nom: art.nom, emoji: art.emoji, cout: art.cout, le: aujourdhui() },
+             art.emoji + " " + art.nom + " acheté par " + p[0]);
+      return;
+    }
+    var suppr = ev.target.closest("[data-suppr-article]");
+    if (suppr) {
+      if (!confirm("Retirer cet article du rayon ? Les achats déjà faits sont gardés.")) return;
+      sauver("boutique/articles/" + suppr.getAttribute("data-suppr-article"), null, "Article retiré");
+      return;
+    }
+    var remb = ev.target.closest("[data-rembourser]");
+    if (remb) {
+      var q = remb.getAttribute("data-rembourser").split("|");
+      if (!confirm("Rembourser cet achat ? Les étoiles reviennent à " + q[0] + ".")) return;
+      sauver("boutique/achats/" + q[0] + "/" + q[1], null, "Achat remboursé");
+    }
+  });
+
   // ---------- Tout redessiner quand les données changent ----------
   function toutDessiner() {
     majEtat();
+    dessinerBoutique();
     majChoixRoutine();
     if (!saisieTouchee) chargerSaisie(); else dessinerSaisie();
     if (!bocalEdition) dessinerBocal();
