@@ -350,31 +350,185 @@ var MATIN = (function () {
     return CRITERES.reduce(function (n, k) { return n + (c && c[k.cle] ? 1 : 0); }, 0);
   }
 
-  // ---------- Boutique : le catalogue est fourni par les parents, les achats se paient en étoiles ----------
-  // boutique/articles/<id> = {nom, emoji, cout} ; boutique/achats/<prénom>/<id> = {nom, emoji, cout, le}
+  // ---------- Boutique : un catalogue d'objets dessinés, payés avec les étoiles gagnées ----------
+  // boutique/achats/<prénom>/<idArticle> = {cout, le} ; boutique/portes/<prénom>/<emplacement> = idArticle
   // Les étoiles dépensées ne touchent pas aux notes : le bocal commun continue de compter toutes les étoiles gagnées.
-  function articles(stock) {
-    var a = stock.lire("boutique/articles") || {};
-    return Object.keys(a).filter(function (id) { return a[id] && a[id].nom; }).map(function (id) {
-      return { id: id, nom: a[id].nom, emoji: a[id].emoji || "🎁", cout: +a[id].cout || 1 };
-    }).sort(function (x, y) { return x.cout - y.cout || x.nom.localeCompare(y.nom); });
+  var RAYONS = [
+    { cle: "petits", nom: "Petits plus",        emoji: "🌈", sous: "Un ou deux matins" },
+    { cle: "grands", nom: "Grands changements", emoji: "✨", sous: "Une semaine d'école" },
+    { cle: "coeur",  nom: "Coups de cœur",      emoji: "💎", sous: "Deux semaines, et c'est à toi" },
+    { cle: "saison", nom: "Le rayon du moment", emoji: "🎪", sous: "Il ne reste pas toute l'année" }
+  ];
+  var EMPLACEMENTS = {
+    coiffure: "La coiffure", cheveux: "La couleur des cheveux", tete: "Sur la tête", visage: "Sur le visage",
+    joues: "Sur les joues", cou: "Autour du cou", poignet: "Au poignet", tenue: "La tenue",
+    pieds: "Aux pieds", dos: "Dans le dos", main: "Dans la main", effet: "Autour d'elle", compagnon: "À côté d'elle"
+  };
+  var CATALOGUE = [
+    // 🌈 Petits plus : les détails qui se voient quand même
+    { id: "barrette",       nom: "Barrette cœur",        emoji: "🎀", cout: 2, rayon: "petits", emplacement: "tete" },
+    { id: "serreTete",      nom: "Serre-tête à pois",    emoji: "💖", cout: 3, rayon: "petits", emplacement: "tete" },
+    { id: "fleur",          nom: "Fleur dans les cheveux", emoji: "🌸", cout: 3, rayon: "petits", emplacement: "tete" },
+    { id: "grosNoeud",      nom: "Gros nœud",            emoji: "🎗️", cout: 3, rayon: "petits", emplacement: "tete" },
+    { id: "bandeau",        nom: "Bandeau de sport",     emoji: "🎽", cout: 2, rayon: "petits", emplacement: "tete" },
+    { id: "couronneFleurs", nom: "Couronne de fleurs",   emoji: "🌼", cout: 4, rayon: "petits", emplacement: "tete" },
+    { id: "soleil",         nom: "Lunettes de soleil",   emoji: "😎", cout: 3, rayon: "petits", emplacement: "visage" },
+    { id: "lunettesRondes", nom: "Lunettes rondes",      emoji: "👓", cout: 3, rayon: "petits", emplacement: "visage" },
+    { id: "lunettesCoeur",  nom: "Lunettes en cœur",     emoji: "😍", cout: 4, rayon: "petits", emplacement: "visage" },
+    { id: "taches",         nom: "Taches de rousseur",   emoji: "🤎", cout: 2, rayon: "petits", emplacement: "joues" },
+    { id: "etoileJoue",     nom: "Étoile sur la joue",   emoji: "🌟", cout: 2, rayon: "petits", emplacement: "joues" },
+    { id: "paillettesJoues", nom: "Paillettes sur les joues", emoji: "💫", cout: 3, rayon: "petits", emplacement: "joues" },
+    { id: "collier",        nom: "Collier étoile",       emoji: "⭐", cout: 2, rayon: "petits", emplacement: "cou" },
+    { id: "collierCoeur",   nom: "Collier cœur",         emoji: "💝", cout: 3, rayon: "petits", emplacement: "cou" },
+    { id: "medaille",       nom: "Médaille du matin",    emoji: "🏅", cout: 4, rayon: "petits", emplacement: "cou" },
+    { id: "echarpe",        nom: "Écharpe rayée",        emoji: "🧣", cout: 3, rayon: "petits", emplacement: "cou" },
+    { id: "bracelet",       nom: "Bracelet à perles",    emoji: "📿", cout: 2, rayon: "petits", emplacement: "poignet" },
+    { id: "montre",         nom: "Montre",               emoji: "⌚", cout: 4, rayon: "petits", emplacement: "poignet" },
+    { id: "chaussettes",    nom: "Chaussettes à rayures", emoji: "🧦", cout: 2, rayon: "petits", emplacement: "pieds" },
+    { id: "ballerines",     nom: "Ballerines",           emoji: "👡", cout: 4, rayon: "petits", emplacement: "pieds" },
+    { id: "bottesPluie",    nom: "Bottes de pluie",      emoji: "👢", cout: 4, rayon: "petits", emplacement: "pieds" },
+    { id: "sacDos",         nom: "Petit sac à dos",      emoji: "🎒", cout: 4, rayon: "petits", emplacement: "dos" },
+    { id: "papillonVole",   nom: "Un papillon qui vole autour", emoji: "🦋", cout: 4, rayon: "petits", emplacement: "effet" },
+
+    // ✨ Grands changements : on la reconnaît de loin
+    { id: "demiQueue",      nom: "Demi-queue",           emoji: "💫", cout: 7,  rayon: "grands", emplacement: "coiffure" },
+    { id: "tresse",         nom: "Tresse sur le côté",   emoji: "💇‍♀️", cout: 8, rayon: "grands", emplacement: "coiffure" },
+    { id: "nattes",         nom: "Deux nattes",          emoji: "👧", cout: 8,  rayon: "grands", emplacement: "coiffure" },
+    { id: "couettesHautes", nom: "Couettes hautes",      emoji: "👱‍♀️", cout: 8, rayon: "grands", emplacement: "coiffure" },
+    { id: "chignon",        nom: "Chignon de danseuse",  emoji: "🩰", cout: 9,  rayon: "grands", emplacement: "coiffure" },
+    { id: "macarons",       nom: "Deux macarons",        emoji: "🍡", cout: 9,  rayon: "grands", emplacement: "coiffure" },
+    { id: "ondules",        nom: "Cheveux ondulés",      emoji: "〰️", cout: 9,  rayon: "grands", emplacement: "coiffure" },
+    { id: "boucles",        nom: "Cheveux bouclés",      emoji: "🌀", cout: 10, rayon: "grands", emplacement: "coiffure" },
+    { id: "meche",          nom: "Mèche colorée",        emoji: "🎨", cout: 6,  rayon: "grands", emplacement: "cheveux" },
+    { id: "pointes",        nom: "Pointes colorées",     emoji: "🖌️", cout: 8,  rayon: "grands", emplacement: "cheveux" },
+    { id: "cheveuxArcEnCiel", nom: "Cheveux arc-en-ciel", emoji: "🌈", cout: 12, rayon: "grands", emplacement: "cheveux" },
+    { id: "robePois",       nom: "Robe à pois",          emoji: "👚", cout: 7,  rayon: "grands", emplacement: "tenue" },
+    { id: "robeFleurs",     nom: "Robe à fleurs",        emoji: "👗", cout: 8,  rayon: "grands", emplacement: "tenue" },
+    { id: "salopette",      nom: "Salopette en jean",    emoji: "👖", cout: 8,  rayon: "grands", emplacement: "tenue" },
+    { id: "jeanCoeur",      nom: "Jean et tee-shirt cœur", emoji: "👕", cout: 8, rayon: "grands", emplacement: "tenue" },
+    { id: "survetement",    nom: "Survêtement de sport", emoji: "🏃", cout: 8,  rayon: "grands", emplacement: "tenue" },
+    { id: "manteau",        nom: "Manteau d'hiver",      emoji: "🧥", cout: 9,  rayon: "grands", emplacement: "tenue" },
+    { id: "tutu",           nom: "Tutu de danseuse",     emoji: "💃", cout: 10, rayon: "grands", emplacement: "tenue" },
+    { id: "kimono",         nom: "Kimono à fleurs",      emoji: "🥋", cout: 10, rayon: "grands", emplacement: "tenue" },
+    { id: "robeEtoilee",    nom: "Robe étoilée",         emoji: "🌌", cout: 10, rayon: "grands", emplacement: "tenue" },
+    { id: "baskets",        nom: "Baskets à paillettes", emoji: "👟", cout: 7,  rayon: "grands", emplacement: "pieds" },
+    { id: "basketsMontantes", nom: "Baskets montantes",  emoji: "🥾", cout: 7,  rayon: "grands", emplacement: "pieds" },
+    { id: "bottesCowboy",   nom: "Bottes de cow-boy",    emoji: "🤠", cout: 8,  rayon: "grands", emplacement: "pieds" },
+    { id: "casquette",      nom: "Casquette",            emoji: "🧢", cout: 7,  rayon: "grands", emplacement: "tete" },
+    { id: "chapeauPaille",  nom: "Chapeau de paille",    emoji: "👒", cout: 7,  rayon: "grands", emplacement: "tete" },
+    { id: "bonnet",         nom: "Bonnet à pompon",      emoji: "🧶", cout: 7,  rayon: "grands", emplacement: "tete" },
+    { id: "baguette",       nom: "Baguette magique",     emoji: "🪄", cout: 9,  rayon: "grands", emplacement: "main" },
+    { id: "doudou",         nom: "Doudou dans les bras", emoji: "🧸", cout: 9,  rayon: "grands", emplacement: "main" },
+    { id: "etoilesEffet",   nom: "Des étoiles qui scintillent", emoji: "✨", cout: 10, rayon: "grands", emplacement: "effet" },
+
+    // 💎 Coups de cœur : le truc rare
+    { id: "couronne",   nom: "Couronne de princesse", emoji: "👑", cout: 20, rayon: "coeur", emplacement: "tete" },
+    { id: "paillettes", nom: "Pluie de paillettes",   emoji: "🎇", cout: 20, rayon: "coeur", emplacement: "effet" },
+    { id: "ailes",      nom: "Ailes de fée",          emoji: "🧚", cout: 22, rayon: "coeur", emplacement: "dos" },
+    { id: "ailesAnge",  nom: "Ailes d'ange",          emoji: "😇", cout: 22, rayon: "coeur", emplacement: "dos" },
+    { id: "lapin",      nom: "Oreilles et queue de lapin", emoji: "🐰", cout: 22, rayon: "coeur", emplacement: "dos" },
+    { id: "arcEnCiel",  nom: "Un arc-en-ciel derrière elle", emoji: "🌈", cout: 22, rayon: "coeur", emplacement: "effet" },
+    { id: "cape",       nom: "Cape de super-héroïne", emoji: "🦸", cout: 24, rayon: "coeur", emplacement: "dos" },
+    { id: "ailesPapillon", nom: "Ailes de papillon",  emoji: "🦋", cout: 24, rayon: "coeur", emplacement: "dos" },
+    { id: "renard",     nom: "Oreilles et queue de renard", emoji: "🦊", cout: 24, rayon: "coeur", emplacement: "dos" },
+    { id: "panda",      nom: "Oreilles de panda",     emoji: "🐼", cout: 24, rayon: "coeur", emplacement: "dos" },
+    { id: "sundae",     nom: "Déguisement de Sundae", emoji: "🐈", cout: 26, rayon: "coeur", emplacement: "dos" },
+    { id: "ailesDragon", nom: "Ailes de dragon",      emoji: "🐉", cout: 26, rayon: "coeur", emplacement: "dos" },
+    { id: "dinosaure",  nom: "Capuche de dinosaure",  emoji: "🦕", cout: 26, rayon: "coeur", emplacement: "dos" },
+    { id: "rondoudou",  nom: "Masque de Rondoudou",   emoji: "🎈", cout: 26, rayon: "coeur", emplacement: "visage" },
+    { id: "pikachu",    nom: "Masque de Pikachu",     emoji: "⚡", cout: 28, rayon: "coeur", emplacement: "visage" },
+    { id: "evoli",      nom: "Masque d'Évoli",        emoji: "🤎", cout: 28, rayon: "coeur", emplacement: "visage" },
+    { id: "salameche",  nom: "Masque de Salamèche",   emoji: "🔥", cout: 28, rayon: "coeur", emplacement: "visage" },
+    { id: "carapuce",   nom: "Masque de Carapuce",    emoji: "🐢", cout: 28, rayon: "coeur", emplacement: "visage" },
+    { id: "bulbizarre", nom: "Masque de Bulbizarre",  emoji: "🌱", cout: 28, rayon: "coeur", emplacement: "visage" },
+    { id: "princesse",  nom: "Robe de princesse",     emoji: "👸", cout: 28, rayon: "coeur", emplacement: "tenue" },
+    { id: "sirene",     nom: "Queue de sirène",       emoji: "🧜", cout: 30, rayon: "coeur", emplacement: "tenue" },
+    { id: "sundaeAmi",  nom: "Sundae qui te suit",    emoji: "🐾", cout: 30, rayon: "coeur", emplacement: "compagnon" },
+
+    // 🎪 Le rayon du moment : il n'apparaît qu'à sa période
+    { id: "maquillageChat",  nom: "Maquillage de chat",  emoji: "🐱", cout: 6,  rayon: "saison", saison: "halloween", emplacement: "joues" },
+    { id: "citrouille",      nom: "Petite citrouille",   emoji: "🎃", cout: 8,  rayon: "saison", saison: "halloween", emplacement: "main" },
+    { id: "chapeauSorciere", nom: "Chapeau de sorcière", emoji: "🧙", cout: 10, rayon: "saison", saison: "halloween", emplacement: "tete" },
+    { id: "bonnetNoel",      nom: "Bonnet de Père Noël", emoji: "🎅", cout: 8,  rayon: "saison", saison: "noel", emplacement: "tete" },
+    { id: "boisRenne",       nom: "Bois de renne",       emoji: "🦌", cout: 8,  rayon: "saison", saison: "noel", emplacement: "tete" },
+    { id: "pullNoel",        nom: "Pull de Noël",        emoji: "🎄", cout: 10, rayon: "saison", saison: "noel", emplacement: "tenue" },
+    { id: "couronneAnniv",   nom: "Couronne d'anniversaire", emoji: "🎂", cout: 6, rayon: "saison", saison: "anniv", emplacement: "tete" },
+    { id: "ballons",         nom: "Des ballons",         emoji: "🎈", cout: 8,  rayon: "saison", saison: "anniv", emplacement: "main" },
+    { id: "lunettesPlage",   nom: "Lunettes de plage",   emoji: "🕶️", cout: 6, rayon: "saison", saison: "ete", emplacement: "visage" },
+    { id: "bouee",           nom: "Bouée canard",        emoji: "🛟", cout: 8,  rayon: "saison", saison: "ete", emplacement: "dos" },
+    { id: "maillotBain",     nom: "Maillot de bain",     emoji: "🩱", cout: 8,  rayon: "saison", saison: "ete", emplacement: "tenue" }
+  ];
+  function catalogue() { return CATALOGUE.map(function (a) { return a; }); }
+  function articleDe(id) {
+    for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i];
+    return null;
   }
-  function achats(stock, nom) {
-    var a = stock.lire("boutique/achats/" + nom) || {};
-    return Object.keys(a).filter(function (id) { return a[id]; }).sort().map(function (id) {
-      var v = a[id];
-      return { id: id, nom: v.nom, emoji: v.emoji || "🎁", cout: +v.cout || 0, le: v.le };
+  // Le rayon du moment : Halloween, Noël, l'anniversaire de la fille, l'été
+  function saisonOuverte(saison, d, regl, nom) {
+    var md = pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    if (saison === "halloween") return md >= "10-18" && md <= "11-02";
+    if (saison === "noel") return md >= "12-01" && md <= "12-31";
+    if (saison === "ete") return md >= "07-01" && md <= "08-31";
+    if (saison === "anniv") {
+      var nais = regl && regl.anniversaires ? regl.anniversaires[nom] : null;
+      if (!nais) return false;
+      var jour = new Date(d.getFullYear(), +nais.slice(5, 7) - 1, +nais.slice(8, 10));
+      return Math.abs(jour - d) <= 7 * 864e5;
+    }
+    return false;
+  }
+  // Ce qu'une fille peut voir en rayon aujourd'hui (ce qu'elle possède déjà reste toujours visible)
+  function enRayon(stock, nom, d) {
+    var regl = reglages(stock);
+    d = d || new Date();
+    return articles(stock).filter(function (a) {
+      return !a.saison || possede(stock, nom, a.id) || saisonOuverte(a.saison, d, regl, nom);
     });
   }
+  // Compatibilité : d'anciens articles saisis à la main dans l'espace parent restent achetables
+  function articles(stock) {
+    var maison = stock.lire("boutique/articles") || {}, out = catalogue();
+    Object.keys(maison).forEach(function (id) {
+      var a = maison[id];
+      if (a && a.nom) out.push({ id: id, nom: a.nom, emoji: a.emoji || "🎁", cout: +a.cout || 1, rayon: "maison", emplacement: "" });
+    });
+    return out;
+  }
+  function achats(stock, nom) {
+    var a = stock.lire("boutique/achats/" + nom) || {}, out = [];
+    Object.keys(a).forEach(function (id) {
+      if (!a[id]) return;
+      var art = articleDe(id) || { id: id, nom: a[id].nom || "Article", emoji: a[id].emoji || "🎁", emplacement: "", rayon: "maison" };
+      out.push({ id: id, nom: art.nom, emoji: art.emoji, emplacement: art.emplacement, rayon: art.rayon,
+                 cout: +a[id].cout || art.cout || 0, le: a[id].le });
+    });
+    return out.sort(function (x, y) { return (x.le || "").localeCompare(y.le || "") || x.cout - y.cout; });
+  }
+  function possede(stock, nom, id) { return !!(stock.lire("boutique/achats/" + nom) || {})[id]; }
   function depense(stock, nom) {
     return achats(stock, nom).reduce(function (s, a) { return s + a.cout; }, 0);
   }
   function solde(stock, nom) { return total(stock, nom) - depense(stock, nom); }
-  // Le prochain objectif en boutique pour une fille : ce qu'elle peut déjà s'offrir, sinon l'article pas encore acheté le moins cher
+  // Ce qu'elle porte : {emplacement: idArticle}, nettoyé de ce qui n'est plus acheté
+  function portes(stock, nom) {
+    var p = stock.lire("boutique/portes/" + nom) || {}, out = {};
+    Object.keys(p).forEach(function (e) {
+      if (p[e] && possede(stock, nom, p[e])) out[e] = p[e];
+    });
+    return out;
+  }
+  // L'apparence complète passée au dessin : les réglages parents plus les objets portés
+  function apparence(stock, nom) {
+    var a = copie(reglages(stock).avatars[nom] || {});
+    a.objets = portes(stock, nom);
+    if (a.objets.coiffure) a.coiffure = a.objets.coiffure;
+    return a;
+  }
+  // Le prochain objectif en boutique pour une fille : ce qu'elle peut déjà s'offrir, sinon le moins cher pas encore acheté
   function vitrine(stock, nom) {
-    var s = solde(stock, nom), deja = {};
-    achats(stock, nom).forEach(function (a) { deja[a.nom] = true; });
-    var neufs = articles(stock).filter(function (a) { return !deja[a.nom]; });
+    var s = solde(stock, nom);
+    var neufs = enRayon(stock, nom).filter(function (a) { return !possede(stock, nom, a.id); })
+                                   .sort(function (x, y) { return x.cout - y.cout; });
     if (!neufs.length) return null;
     var possibles = neufs.filter(function (a) { return a.cout <= s; });
     if (possibles.length) return { solde: s, article: possibles[possibles.length - 1], manque: 0 };
@@ -485,6 +639,8 @@ var MATIN = (function () {
     routines: routines, normaliserRoutine: normaliserRoutine, programme: programme,
     cleNote: cleNote, total: total, totalTous: totalTous, cagnotte: cagnotte,
     articles: articles, achats: achats, depense: depense, solde: solde, vitrine: vitrine,
+    RAYONS: RAYONS, EMPLACEMENTS: EMPLACEMENTS, catalogue: catalogue, articleDe: articleDe,
+    possede: possede, portes: portes, apparence: apparence, enRayon: enRayon, saisonOuverte: saisonOuverte,
     CRITERES: CRITERES, criteresDe: criteresDe, compterCriteres: compterCriteres,
     rappelsDuJour: rappelsDuJour, decorDuJour: decorDuJour,
     Calendrier: Calendrier

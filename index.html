@@ -230,6 +230,69 @@
   #annonce .annonce-titre { font-size: calc(var(--u) * 12); font-weight: 700; }
 
   /* ---------- Les étoiles ---------- */
+  [hidden] { display: none !important; }
+
+  /* ---------- La boutique (le soir) ---------- */
+  #ouvrirBoutique {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--u) * 4); z-index: 12;
+    background: linear-gradient(180deg, #FFE27A, var(--or)); color: var(--nuit); border: none;
+    font-size: calc(var(--u) * 5); font-weight: 800; border-radius: 99px;
+    padding: calc(var(--u) * 2) calc(var(--u) * 6); box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(0,0,0,.35);
+    animation: respire 3s ease-in-out infinite;
+  }
+  #boutique {
+    position: fixed; inset: 0; z-index: 18; display: none; flex-direction: column;
+    background: #10132A; text-align: left;
+  }
+  #boutique.visible { display: flex; }
+  .bq-tete { display: flex; align-items: center; gap: calc(var(--u) * 3); padding: calc(var(--u) * 2) calc(var(--u) * 4); }
+  .bq-titre { font-size: calc(var(--u) * 5); font-weight: 800; }
+  .bq-qui { display: flex; gap: calc(var(--u) * 2); margin-left: auto; }
+  .bq-qui button {
+    background: rgba(255,255,255,.08); border: calc(var(--u) * .5) solid transparent; color: #fff;
+    border-radius: 99px; padding: calc(var(--u) * 1.2) calc(var(--u) * 4);
+    font-size: calc(var(--u) * 3.2); font-weight: 700;
+  }
+  .bq-qui button.choisie { background: rgba(255,255,255,.16); border-color: var(--f); color: var(--f); }
+  .bq-fermer { background: rgba(255,255,255,.1); color: #fff; border: none; border-radius: 99px;
+    width: calc(var(--u) * 7); height: calc(var(--u) * 7); font-size: calc(var(--u) * 4); }
+  .bq-corps { flex: 1; display: flex; gap: calc(var(--u) * 3); padding: 0 calc(var(--u) * 4) calc(var(--u) * 3); min-height: 0; }
+  .bq-vitrine { width: calc(var(--u) * 30); display: flex; flex-direction: column; align-items: center; }
+  .bq-vitrine svg { width: 100%; height: calc(var(--u) * 46); }
+  .bq-solde { font-size: calc(var(--u) * 3.6); font-weight: 800; color: var(--or); white-space: nowrap; }
+  .bq-porte { font-size: calc(var(--u) * 2.3); opacity: .7; text-align: center; margin-top: calc(var(--u) * 1); }
+  .bq-droite { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .bq-filtres { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 1.2); padding-bottom: calc(var(--u) * 1.4); }
+  .bq-filtres button {
+    background: rgba(255,255,255,.08); border: calc(var(--u) * .4) solid transparent; color: #fff;
+    border-radius: 99px; padding: calc(var(--u) * .8) calc(var(--u) * 2);
+    font-size: calc(var(--u) * 2.3); font-weight: 700;
+  }
+  .bq-filtres button.choisi { background: var(--or); border-color: var(--or); color: var(--nuit); }
+  .bq-rayons { flex: 1; overflow-y: auto; }
+  .bq-rayon-titre { font-size: calc(var(--u) * 3.4); font-weight: 800; margin: calc(var(--u) * 2) 0 calc(var(--u) * 1.5); }
+  .bq-rayon-titre small { font-weight: 500; opacity: .6; margin-left: calc(var(--u) * 2); font-size: calc(var(--u) * 2.3); }
+  .bq-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 14.5), 1fr)); gap: calc(var(--u) * 1.2); }
+  .bq-article {
+    background: rgba(255,255,255,.07); border: calc(var(--u) * .5) solid rgba(255,255,255,.12); color: #fff;
+    border-radius: calc(var(--u) * 2.4); padding: calc(var(--u) * 1.1) calc(var(--u) * .6); text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * .3);
+    transition: transform .15s, background .2s, border-color .2s;
+  }
+  .bq-article .e { font-size: calc(var(--u) * 4.4); line-height: 1.1; }
+  .bq-article .n { font-size: calc(var(--u) * 1.95); font-weight: 700; line-height: 1.15; }
+  .bq-article .p { font-size: calc(var(--u) * 1.95); font-weight: 700; color: var(--or); }
+  .bq-article.cher { opacity: .45; }
+  .bq-article.cher .p { color: #fff; }
+  .bq-article.a-moi { background: rgba(124,255,178,.12); border-color: rgba(124,255,178,.45); }
+  .bq-article.portee { background: rgba(255,217,61,.18); border-color: var(--or); transform: scale(1.03); }
+  .bq-article.secoue { animation: secousse .4s; }
+  @keyframes secousse { 25% { transform: translateX(calc(var(--u) * -1)); } 75% { transform: translateX(calc(var(--u) * 1)); } }
+  .bq-confirme { position: absolute; inset: 0; background: rgba(16,19,42,.9); display: flex; align-items: center; justify-content: center; }
+  .bq-carte { text-align: center; }
+  .bq-gros { font-size: calc(var(--u) * 16); }
+  .bq-question { font-size: calc(var(--u) * 5); font-weight: 700; margin: calc(var(--u) * 2) 0 calc(var(--u) * 4); }
+  .bq-vide { opacity: .6; font-size: calc(var(--u) * 3.6); }
   #notes {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 15;
     display: none; align-items: center; justify-content: center;
@@ -399,6 +462,37 @@
   <div class="annonce-emoji" id="annonceEmoji"></div>
   <div class="annonce-sur">C'est l'heure !</div>
   <div class="annonce-titre" id="annonceTitre"></div>
+</div>
+
+<button id="ouvrirBoutique" hidden>🛍️ La boutique</button>
+
+<div id="boutique">
+  <div class="bq-tete">
+    <div class="bq-titre">🛍️ La boutique</div>
+    <div class="bq-qui" id="bqQui"></div>
+    <button class="bq-fermer" id="bqFermer" aria-label="Fermer">✕</button>
+  </div>
+  <div class="bq-corps">
+    <div class="bq-vitrine">
+      <div id="bqAvatar"></div>
+      <div class="bq-solde" id="bqSolde"></div>
+      <div class="bq-porte" id="bqPorte"></div>
+    </div>
+    <div class="bq-droite">
+      <div class="bq-filtres" id="bqFiltres"></div>
+      <div class="bq-rayons" id="bqRayons"></div>
+    </div>
+  </div>
+  <div class="bq-confirme" id="bqConfirme" hidden>
+    <div class="bq-carte">
+      <div class="bq-gros" id="bqcEmoji"></div>
+      <div class="bq-question" id="bqcTexte"></div>
+      <div class="notes-actions">
+        <button class="btn btn-secondaire" id="bqcNon">Non, pas encore</button>
+        <button class="btn btn-principal" id="bqcOui">Oui, je l'achète</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="notes">
@@ -780,7 +874,7 @@
       }).join("") + '</div>';
       boite.innerHTML = avecPrenom ? '<div class="avatar" style="--f:' + f.couleur + '"><div class="prenom">' + f.nom + '</div>' + okHtml + '</div>' : "";
       var hote = avecPrenom ? boite.firstChild : boite;
-      var objet = AVATARS.creer(hote, f, regl.avatars[f.nom]);
+      var objet = AVATARS.creer(hote, f, MATIN.apparence(stock, f.nom));
       if (avecPrenom) hote.insertBefore(objet.svg, hote.firstChild);
       var e = MATIN.copie(etat);
       objet.maj(e, e.activite, performance.now() / 1000, 0, n === 0 ? 1 : -1);
@@ -1176,6 +1270,132 @@
     blocsCompteurs[k].addEventListener("click", function () { ouvrirNotes(null); });
   }
 
+  // ---------- La boutique : elles dépensent leurs étoiles le soir ----------
+  // Ouverte de 15h à 22h (dès 9h les jours sans école), jamais pendant la routine.
+  var BQ = { fille: FILLES[0].nom, ouverte: false, enCours: null, filtre: "tout" };
+
+  function boutiqueOuvrable(s, etat) {
+    if (etat === "routine") return false;
+    return s >= (etat === "repos" ? 9 : 15) * 3600 && s < 22 * 3600;
+  }
+  function filleDe(nom) { return FILLES.filter(function (f) { return f.nom === nom; })[0] || FILLES[0]; }
+
+  function ouvrirBoutique(nom) {
+    BQ.fille = nom || BQ.fille;
+    BQ.ouverte = true;
+    $("boutique").classList.add("visible");
+    dessinerBoutique();
+  }
+  function fermerBoutique() {
+    BQ.ouverte = false; BQ.enCours = null;
+    $("boutique").classList.remove("visible");
+    $("bqConfirme").hidden = true;
+    animes = animes.filter(function (a) { return a.zone !== "boutique"; });
+    $("bqAvatar").innerHTML = "";
+  }
+
+  function dessinerBoutique() {
+    if (!BQ.ouverte) return;
+    var f = filleDe(BQ.fille), sou = MATIN.solde(stock, f.nom), portes = MATIN.portes(stock, f.nom);
+    var dispo = MATIN.enRayon(stock, f.nom, maintenant());
+    $("bqQui").innerHTML = FILLES.map(function (g) {
+      return '<button data-fille="' + g.nom + '" style="--f:' + g.couleur + '" class="' + (g.nom === BQ.fille ? "choisie" : "") + '">' +
+             g.nom + " · " + MATIN.solde(stock, g.nom) + " ⭐</button>";
+    }).join("");
+    $("bqSolde").textContent = sou + " ⭐ à dépenser";
+
+    // L'avatar d'essayage, animé comme pendant la routine
+    animes = animes.filter(function (a) { return a.zone !== "boutique"; });
+    $("bqAvatar").innerHTML = "";
+    var objet = AVATARS.creer($("bqAvatar"), f, MATIN.apparence(stock, f.nom));
+    var e = { tenue: "ecole", chaussures: portes.pieds !== "chaussettes", activite: "coucou" };
+    objet.maj(e, "coucou", performance.now() / 1000, 0, 1);
+    animes.push({ objet: objet, etat: e, zone: "boutique", sens: 1 });
+
+    var mis = Object.keys(portes).map(function (k) {
+      var a = MATIN.articleDe(portes[k]);
+      return a ? a.emoji + " " + a.nom : "";
+    }).filter(Boolean);
+    $("bqPorte").textContent = mis.length ? "Elle porte " + mis.join(", ") : "Clique sur ce que tu as acheté pour le porter";
+
+    // Les filtres : tout, un rayon, ou seulement sa garde-robe
+    var aMoiCount = dispo.filter(function (a) { return MATIN.possede(stock, f.nom, a.id); }).length;
+    var choix = [{ cle: "tout", nom: "Tout" }];
+    MATIN.RAYONS.forEach(function (r) {
+      if (dispo.filter(function (a) { return a.rayon === r.cle; }).length) choix.push({ cle: r.cle, nom: r.emoji + " " + r.nom });
+    });
+    choix.push({ cle: "amoi", nom: "🎀 Ma garde-robe (" + aMoiCount + ")" });
+    if (!choix.filter(function (c) { return c.cle === BQ.filtre; }).length) BQ.filtre = "tout";
+    $("bqFiltres").innerHTML = choix.map(function (c) {
+      return '<button data-filtre="' + c.cle + '" class="' + (c.cle === BQ.filtre ? "choisi" : "") + '">' + esc(c.nom) + "</button>";
+    }).join("");
+
+    function carte(a) {
+      var aMoi = MATIN.possede(stock, f.nom, a.id), portee = portes[a.emplacement] === a.id;
+      var cls = portee ? "portee" : aMoi ? "a-moi" : sou >= a.cout ? "" : "cher";
+      var dit = portee ? "Elle le porte ✓" : aMoi ? "Dans la garde-robe" : sou >= a.cout ? a.cout + " ⭐" : "Encore " + (a.cout - sou) + " ⭐";
+      return '<button class="bq-article ' + cls + '" data-article="' + a.id + '">' +
+             '<span class="e">' + a.emoji + '</span><span class="n">' + esc(a.nom) + "</span>" +
+             '<span class="p">' + dit + "</span></button>";
+    }
+    if (BQ.filtre === "amoi") {
+      var aElle = dispo.filter(function (a) { return MATIN.possede(stock, f.nom, a.id); });
+      $("bqRayons").innerHTML = aElle.length
+        ? '<div class="bq-rayon-titre">🎀 Ce que ' + esc(f.nom) + " a déjà<small>Clique pour le mettre ou l'enlever</small></div>" +
+          '<div class="bq-grille">' + aElle.map(carte).join("") + "</div>"
+        : '<div class="bq-vide">Rien encore. Choisis quelque chose dans les rayons !</div>';
+      return;
+    }
+    $("bqRayons").innerHTML = MATIN.RAYONS.map(function (r) {
+      if (BQ.filtre !== "tout" && BQ.filtre !== r.cle) return "";
+      var liste = dispo.filter(function (a) { return a.rayon === r.cle; });
+      if (!liste.length) return "";
+      return '<div class="bq-rayon-titre">' + r.emoji + " " + esc(r.nom) + "<small>" + esc(r.sous) + "</small></div>" +
+        '<div class="bq-grille">' + liste.map(carte).join("") + "</div>";
+    }).join("");
+  }
+
+  $("ouvrirBoutique").addEventListener("click", function () { ouvrirBoutique(null); });
+  $("bqFermer").addEventListener("click", fermerBoutique);
+  $("bqcNon").addEventListener("click", function () { $("bqConfirme").hidden = true; BQ.enCours = null; });
+  $("bqcOui").addEventListener("click", function () {
+    var a = BQ.enCours, nom = BQ.fille;
+    $("bqConfirme").hidden = true; BQ.enCours = null;
+    if (!a || MATIN.solde(stock, nom) < a.cout) return;
+    stock.ecrire("boutique/achats/" + nom + "/" + a.id, { cout: a.cout, le: MATIN.cleJour(maintenant()) });
+    stock.ecrire("boutique/portes/" + nom + "/" + a.emplacement, a.id);
+    jouer("bocal");
+    parler(nom + " a acheté " + MATIN.sansEmoji(a.nom) + " !");
+    dessinerBoutique();
+  });
+  $("boutique").addEventListener("click", function (ev) {
+    var q = ev.target.closest && ev.target.closest("button[data-fille]");
+    if (q) { BQ.fille = q.getAttribute("data-fille"); dessinerBoutique(); return; }
+    var fi = ev.target.closest && ev.target.closest("button[data-filtre]");
+    if (fi) { BQ.filtre = fi.getAttribute("data-filtre"); dessinerBoutique(); return; }
+    var b = ev.target.closest && ev.target.closest("button[data-article]");
+    if (!b) return;
+    var a = MATIN.articleDe(b.getAttribute("data-article")), nom = BQ.fille;
+    if (!a) return;
+    if (MATIN.possede(stock, nom, a.id)) { // déjà à elle : on le met ou on l'enlève
+      var portes = MATIN.portes(stock, nom);
+      stock.ecrire("boutique/portes/" + nom + "/" + a.emplacement, portes[a.emplacement] === a.id ? null : a.id);
+      jouer("etoile");
+      dessinerBoutique();
+      return;
+    }
+    if (MATIN.solde(stock, nom) < a.cout) { // pas encore assez d'étoiles
+      b.classList.remove("secoue");
+      void b.offsetWidth;
+      b.classList.add("secoue");
+      return;
+    }
+    BQ.enCours = a;
+    $("bqcEmoji").textContent = a.emoji;
+    $("bqcTexte").innerHTML = esc(nom) + ", tu achètes <b>" + esc(a.nom) + "</b> pour " + a.cout + " ⭐ ?";
+    $("bqConfirme").hidden = false;
+  });
+
   // Données modifiées (ici ou depuis l'espace parent)
   stock.surChangement(function () {
     majReglages(maintenant());
@@ -1185,6 +1405,7 @@
     }
     verifierNouvellesNotes();
     majEtatSync();
+    if (BQ.ouverte) dessinerBoutique();
   });
 
   function majEtatSync() {
@@ -1234,6 +1455,9 @@
       if (etat === "fin") poserAvatars("fin", ["finGauche", "finDroite"], MATIN.etatFinAvatar(nouvelle.r), true);
     }
     cible = nouvelle;
+    var boutiquePossible = boutiqueOuvrable(s, etat);
+    $("ouvrirBoutique").hidden = !boutiquePossible;
+    if (!boutiquePossible && BQ.ouverte) fermerBoutique();
     Musique.maj(demarre && musiqueVoulue && etat === "routine");
     var fete = decor.fete ? "🎂 Joyeux anniversaire " + decor.fete.nom + " !" : null;
 
