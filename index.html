@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* --u = unité d'échelle : s'adapte à la télé (16:9) comme à l'iPad (4:3) */
+  /* --u = unité d'échelle : s'adapte à la télé (16:9), au Mac et au téléphone (voir le bloc portrait en bas) */
   :root { --c: #FF9F43; --nuit: #141833; --or: #FFD93D; --u: min(1vh, 0.75vw); }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; overflow: hidden; }
@@ -136,6 +136,13 @@
   .puce.rappel { border-color: var(--or); background: rgba(255,217,61,.15); }
   .rappels-ligne { font-size: calc(var(--u) * 3.5); margin-top: calc(var(--u) * 1); color: var(--or); font-weight: 600; }
   .rappels-ligne:empty, .details:empty { display: none; }
+  /* Le coup de pouce quand le bus approche : on montre ce qu'il reste, sans compte à rebours affolant */
+  .coup-pouce {
+    display: inline-flex; align-items: center; gap: calc(var(--u) * 1.2); margin-top: calc(var(--u) * 1);
+    font-size: calc(var(--u) * 3.4); font-weight: 700; color: var(--nuit);
+    background: var(--or); padding: calc(var(--u) * .8) calc(var(--u) * 2.6); border-radius: 99px;
+    animation: battement 1.6s ease-in-out infinite;
+  }
 
   /* ---------- Avatars de Lou et Alba (animés par avatars.js) ---------- */
   .avatar { height: 100%; max-height: calc(var(--u) * 64); min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -232,6 +239,34 @@
 
   /* ---------- Les étoiles ---------- */
   [hidden] { display: none !important; }
+
+  /* ---------- L'album des matins ---------- */
+  #ouvrirAlbum {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--u) * 12); z-index: 12;
+    background: rgba(255,255,255,.14); color: #fff; border: none;
+    font-size: calc(var(--u) * 3.6); font-weight: 700; border-radius: 99px;
+    padding: calc(var(--u) * 1.2) calc(var(--u) * 4);
+  }
+  #album { position: fixed; inset: 0; z-index: 18; display: none; flex-direction: column; background: #10132A; text-align: left; }
+  #album.visible { display: flex; }
+  .al-corps { flex: 1; overflow-y: auto; padding: 0 calc(var(--u) * 4) calc(var(--u) * 3); }
+  .al-mois { display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 3); margin-bottom: calc(var(--u) * 2); }
+  .al-mois button { background: rgba(255,255,255,.1); border: none; color: #fff; border-radius: 99px;
+    width: calc(var(--u) * 6); height: calc(var(--u) * 6); font-size: calc(var(--u) * 3.4); }
+  .al-mois .nom { font-size: calc(var(--u) * 4); font-weight: 800; min-width: calc(var(--u) * 34); text-align: center; }
+  .al-grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: calc(var(--u) * 1); }
+  .al-jour { text-align: center; font-size: calc(var(--u) * 2.4); opacity: .55; font-weight: 700; }
+  .al-case { background: rgba(255,255,255,.05); border-radius: calc(var(--u) * 1.6); padding: calc(var(--u) * .8) 0;
+    text-align: center; min-height: calc(var(--u) * 9); }
+  .al-case.vide { background: none; }
+  .al-case.aujourdhui { outline: calc(var(--u) * .4) solid var(--or); }
+  .al-case b { display: block; font-size: calc(var(--u) * 2.4); opacity: .7; font-weight: 700; }
+  .al-case .et { display: block; font-size: calc(var(--u) * 2.2); color: var(--f); letter-spacing: -.5px; line-height: 1.25; }
+  .al-case .et.rien { opacity: .22; }
+  .al-bilan { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 2); justify-content: center; margin-top: calc(var(--u) * 2.5); }
+  .al-bilan div { background: rgba(255,255,255,.07); border-radius: calc(var(--u) * 2.4); padding: calc(var(--u) * 1.4) calc(var(--u) * 3);
+    font-size: calc(var(--u) * 3); font-weight: 700; color: var(--f); }
+  .al-achats { margin-top: calc(var(--u) * 2); text-align: center; font-size: calc(var(--u) * 2.8); opacity: .8; line-height: 1.7; }
 
   /* ---------- Réglages (roue crantée, code 0313) ---------- */
   #ouvrirAdmin {
@@ -345,6 +380,9 @@
   .bq-gros { font-size: calc(var(--u) * 16); }
   .bq-question { font-size: calc(var(--u) * 5); font-weight: 700; margin: calc(var(--u) * 2) 0 calc(var(--u) * 4); }
   .bq-vide { opacity: .6; font-size: calc(var(--u) * 3.6); }
+  .bq-jauge { height: calc(var(--u) * 1.2); border-radius: 99px; background: rgba(255,255,255,.12); overflow: hidden; margin-top: calc(var(--u) * .8); }
+  .bq-jauge i { display: block; height: 100%; background: var(--or); border-radius: 99px; transition: width .4s; }
+  .bq-rayon-titre.pleine small { color: #7CFFB2; opacity: 1; }
   #notes {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 15;
     display: none; align-items: center; justify-content: center;
@@ -423,6 +461,33 @@
     position: fixed; bottom: calc(var(--u) * 1); right: 1vw; z-index: 30; font-size: calc(var(--u) * 2.2);
     background: #EE5A52; padding: calc(var(--u) * .5) calc(var(--u) * 1.5); border-radius: 99px; display: none;
   }
+
+  /* ---------- Téléphone tenu à la verticale : tout se réempile ---------- */
+  @media (max-aspect-ratio: 9 / 10) {
+    :root { --u: min(.85vh, 2.4vw); }
+    .ecran { padding: calc(var(--u) * 2) 3vw; }
+    .barre { flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * 1.5); }
+    .horloge { font-size: calc(var(--u) * 6); }
+    .scene { grid-template-columns: 1fr 1fr; grid-template-rows: auto minmax(0, 1fr); }
+    .centre { grid-column: 1 / 3; grid-row: 1; height: auto; }
+    #coteGauche { grid-column: 1; grid-row: 2; }
+    #coteDroit { grid-column: 2; grid-row: 2; }
+    .anneau { height: auto; width: min(54vw, calc(var(--u) * 46)); }
+    .avatar { max-height: none; }
+    .avatar svg { width: 100%; height: auto; max-width: 100%; max-height: 100%; }
+    .cote, .centre { min-width: 0; }
+    .compteurs { order: 3; width: 100%; justify-content: center; }
+    .texte { min-height: calc(var(--u) * 16); }
+    .texte h1 { font-size: calc(var(--u) * 6.5); }
+    .route { height: calc(var(--u) * 14); }
+    .seg-emoji { font-size: calc(var(--u) * 4); height: calc(var(--u) * 5.5); }
+    .fin-duo { gap: 2vw; }
+    .bq-corps { flex-direction: column; gap: calc(var(--u) * 1.5); }
+    .bq-vitrine { width: 100%; }
+    .bq-vitrine svg { height: calc(var(--u) * 30); }
+    .bq-grille { grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 19), 1fr)); }
+    .ad-boite { width: 92vw; }
+  }
 </style>
 </head>
 <body>
@@ -459,6 +524,7 @@
     <h1 id="titreTache"></h1>
     <div class="details" id="details"></div>
     <div class="rappels-ligne" id="rappelsLigne"></div>
+    <div class="coup-pouce" id="coupPouce" hidden></div>
   </div>
   <div class="route">
     <div class="piste-zone">
@@ -514,6 +580,21 @@
   <div class="annonce-emoji" id="annonceEmoji"></div>
   <div class="annonce-sur">C'est l'heure !</div>
   <div class="annonce-titre" id="annonceTitre"></div>
+</div>
+
+<button id="ouvrirAlbum" hidden>📅 L'album</button>
+
+<div id="album">
+  <div class="bq-tete">
+    <div class="bq-titre">📅 L'album des matins</div>
+    <button class="bq-fermer" id="alFermer" aria-label="Fermer" style="margin-left:auto">✕</button>
+  </div>
+  <div class="al-corps">
+    <div class="al-mois"><button id="alAvant">‹</button><div class="nom" id="alNom"></div><button id="alApres">›</button></div>
+    <div class="al-grille" id="alGrille"></div>
+    <div class="al-bilan" id="alBilan"></div>
+    <div class="al-achats" id="alAchats"></div>
+  </div>
 </div>
 
 <button id="ouvrirAdmin" aria-label="Réglages">⚙️</button>
@@ -1129,6 +1210,32 @@
     if (badge) { badge.textContent = gain >= 1 ? "+" + gain + " min" : ""; badge.classList.toggle("visible", gain >= 1); }
   }
 
+  // ---------- Coup de pouce : les dernières minutes avant le bus ----------
+  // L'écran ne sait pas si elles traînent (les horaires sont fixes) : le seul signal réel, ce sont les OK.
+  // Dans les 12 dernières minutes, on rappelle ce qui n'est pas encore validé. Un OK et la ligne disparaît.
+  var coupDePouceDit = null;
+  function majCoupDePouce(x, pl, i, s) {
+    var r = x.r, dernier = r.etapes.length - 1, bande = $("coupPouce");
+    var avantBus = r.finS - s;
+    function cacher() { bande.hidden = true; }
+    if (!r.etoiles || i >= dernier || avantBus <= 0 || avantBus > 12 * 60) return cacher();
+    var cle = MATIN.cleNote(cleJour(maintenant()), x.id), faites = {};
+    FILLES.forEach(function (f) {
+      okFaits(cle, f.nom).forEach(function (n) { faites[n] = (faites[n] || 0) + 1; });
+    });
+    var restantes = [];
+    for (var k = i; k < dernier; k++) if ((faites[String(k)] || 0) < FILLES.length) restantes.push(r.etapes[k]);
+    if (!restantes.length) return cacher();
+    var noms = restantes.map(function (e) { return e.emoji + " " + MATIN.sansEmoji(perso(e.titre)); });
+    bande.hidden = false;
+    bande.innerHTML = "⏩ Il reste " + esc(noms.join(", ")) + " · " + Math.max(1, Math.ceil(avantBus / 60)) + " min avant le 🚌";
+    var signature = x.id + "|" + cleJour(maintenant()); // une seule fois par matin, pas à chaque étape
+    if (demarre && coupDePouceDit !== signature) {
+      coupDePouceDit = signature;
+      parler("Allez les filles ! Il reste " + restantes.map(function (e) { return MATIN.sansEmoji(perso(e.titre)); }).join(", ") + ".", 1500);
+    }
+  }
+
   function majRoutine(x, s) {
     var r = x.r, pl = planning(x), i = 0;
     for (var k = 0; k < pl.length; k++) if (s >= pl[k].d) i = k;
@@ -1159,6 +1266,7 @@
       ? "<b>" + Math.ceil(reste / 60) + "</b> min"
       : "<b>" + Math.ceil(reste) + "</b> s";
     $("anneau").classList.toggle("urgent", reste <= 60);
+    majCoupDePouce(x, pl, i, s);
     if (demarre && !alerteFaite && reste <= 60 && dur >= 180) {
       alerteFaite = true;
       jouer("alerte");
@@ -1343,6 +1451,64 @@
     blocsCompteurs[k].addEventListener("click", function () { ouvrirNotes(null); });
   }
 
+  // ---------- L'album des matins : le mois en étoiles, visible le soir comme la boutique ----------
+  var AL = { ouvert: false, mois: null };
+  var MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+
+  function ouvrirAlbum() {
+    AL.ouvert = true;
+    var d = maintenant();
+    if (!AL.mois) AL.mois = new Date(d.getFullYear(), d.getMonth(), 1);
+    $("album").classList.add("visible");
+    dessinerAlbum();
+  }
+  function fermerAlbum() { AL.ouvert = false; $("album").classList.remove("visible"); }
+
+  function dessinerAlbum() {
+    if (!AL.ouvert) return;
+    var m = AL.mois, notes = stock.lire("notes") || {}, aujourd = cleJour(maintenant());
+    $("alNom").textContent = MOIS[m.getMonth()] + " " + m.getFullYear();
+    var premier = new Date(m.getFullYear(), m.getMonth(), 1);
+    var debut = (premier.getDay() + 6) % 7; // lundi en premier
+    var nbJours = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
+    var html = ["L", "M", "M", "J", "V", "S", "D"].map(function (j) { return '<div class="al-jour">' + j + "</div>"; }).join("");
+    var k, totaux = {};
+    FILLES.forEach(function (f) { totaux[f.nom] = 0; });
+    for (k = 0; k < debut; k++) html += '<div class="al-case vide"></div>';
+    for (k = 1; k <= nbJours; k++) {
+      var cle = cleJour(new Date(m.getFullYear(), m.getMonth(), k));
+      var gagne = {};
+      FILLES.forEach(function (f) { gagne[f.nom] = 0; });
+      for (var c in notes) {
+        if (c.slice(0, 10) !== cle || !notes[c]) continue;
+        FILLES.forEach(function (f) { gagne[f.nom] += notes[c][f.nom] || 0; });
+      }
+      html += '<div class="al-case' + (cle === aujourd ? " aujourdhui" : "") + '"><b>' + k + "</b>" +
+        FILLES.map(function (f) {
+          var n = Math.min(3, gagne[f.nom]);
+          totaux[f.nom] += gagne[f.nom];
+          return '<span class="et' + (n ? "" : " rien") + '" style="--f:' + f.couleur + '">' +
+                 new Array(n + 1).join("★") + new Array(4 - n).join("☆") + "</span>";
+        }).join("") + "</div>";
+    }
+    $("alGrille").innerHTML = html;
+    $("alBilan").innerHTML = FILLES.map(function (f) {
+      return '<div style="--f:' + f.couleur + '">' + f.nom + " · " + totaux[f.nom] + " ⭐ ce mois-ci</div>";
+    }).join("");
+    var debutMois = cleJour(premier), finMois = cleJour(new Date(m.getFullYear(), m.getMonth(), nbJours));
+    var achats = FILLES.map(function (f) {
+      var liste = MATIN.achats(stock, f.nom).filter(function (a) { return a.le >= debutMois && a.le <= finMois; });
+      if (!liste.length) return "";
+      return "<div>" + f.nom + " a acheté " + liste.map(function (a) { return a.emoji + " " + esc(a.nom); }).join(", ") + "</div>";
+    }).filter(Boolean).join("");
+    $("alAchats").innerHTML = achats || "<div>Rien acheté ce mois-ci.</div>";
+  }
+
+  $("ouvrirAlbum").addEventListener("click", ouvrirAlbum);
+  $("alFermer").addEventListener("click", fermerAlbum);
+  $("alAvant").addEventListener("click", function () { AL.mois = new Date(AL.mois.getFullYear(), AL.mois.getMonth() - 1, 1); dessinerAlbum(); });
+  $("alApres").addEventListener("click", function () { AL.mois = new Date(AL.mois.getFullYear(), AL.mois.getMonth() + 1, 1); dessinerAlbum(); });
+
   // ---------- Réglages parents : roue crantée, code secret, étoiles à la main et mode test ----------
   var CODE_ADMIN = "0313", adSaisie = "", adOuvert = false;
 
@@ -1438,7 +1604,7 @@
 
   // ---------- La boutique : elles dépensent leurs étoiles le soir ----------
   // Ouverte de 15h à 22h (dès 9h les jours sans école), jamais pendant la routine.
-  var BQ = { fille: FILLES[0].nom, ouverte: false, enCours: null, filtre: "tout", essai: null };
+  var BQ = { fille: FILLES[0].nom, ouverte: false, enCours: null, filtre: "tout", essai: null, fete: null };
 
   function boutiqueOuvrable(s, etat) {
     if (etat === "routine") return false;
@@ -1510,6 +1676,7 @@
     MATIN.RAYONS.forEach(function (r) {
       if (dispo.filter(function (a) { return a.rayon === r.cle; }).length) choix.push({ cle: r.cle, nom: r.emoji + " " + r.nom });
     });
+    choix.push({ cle: "collections", nom: "🏆 Collections" });
     choix.push({ cle: "amoi", nom: "🎀 Ma garde-robe (" + aElle.length + ")" });
     if (!choix.filter(function (c) { return c.cle === BQ.filtre; }).length) BQ.filtre = "tout";
     $("bqFiltres").innerHTML = choix.map(function (c) {
@@ -1524,6 +1691,19 @@
       return '<button class="bq-article ' + cls + '" data-article="' + a.id + '">' +
              '<span class="e">' + a.emoji + '</span><span class="n">' + esc(a.nom) + "</span>" +
              '<span class="p">' + dit + "</span></button>";
+    }
+    // Les collections : une jauge par thème, et des étoiles offertes quand elle est complète
+    if (BQ.filtre === "collections") {
+      $("bqRayons").innerHTML = MATIN.COLLECTIONS.map(function (c) {
+        var e = MATIN.collection(stock, f.nom, c);
+        var liste = c.articles.map(function (id) { return MATIN.articleDe(id); }).filter(Boolean);
+        return '<div class="bq-rayon-titre' + (e.pleine ? " pleine" : "") + '">' + c.emoji + " " + esc(c.nom) +
+          "<small>" + e.a + " sur " + e.sur +
+          (e.pleine ? " · complète, " + c.cadeau + " ⭐ gagnées !" : " · " + c.cadeau + " ⭐ offertes une fois complète") + "</small>" +
+          '<div class="bq-jauge"><i style="width:' + Math.round(e.a / e.sur * 100) + '%"></i></div></div>' +
+          '<div class="bq-grille">' + liste.map(carte).join("") + "</div>";
+      }).join("");
+      return;
     }
     // La garde-robe : rangée par emplacement, avec un « Rien » pour enlever
     if (BQ.filtre === "amoi") {
@@ -1553,7 +1733,37 @@
   $("ouvrirBoutique").addEventListener("click", function () { ouvrirBoutique(null); });
   $("bqFermer").addEventListener("click", fermerBoutique);
   $("bqcNon").addEventListener("click", function () { $("bqConfirme").hidden = true; BQ.enCours = null; });
+  // Une collection complétée offre des étoiles, une seule fois
+  function verifierCollections(nom) {
+    var gagnee = null;
+    MATIN.COLLECTIONS.forEach(function (c) {
+      var e = MATIN.collection(stock, nom, c);
+      if (!e.pleine || e.payee) return;
+      stock.ecrire("collections/" + nom + "/" + c.cle, MATIN.cleJour(maintenant()));
+      stock.ecrire("bonus/" + nom, MATIN.bonus(stock, nom) + c.cadeau);
+      if (!gagnee) gagnee = c;
+    });
+    return gagnee;
+  }
+  function montrerFete(c) {
+    BQ.fete = c;
+    $("bqcEmoji").textContent = c.emoji;
+    $("bqcTexte").innerHTML = "Collection complète !<br><b>" + esc(c.nom) + "</b><br>+" + c.cadeau + " ⭐ pour toi";
+    $("bqcNon").hidden = true;
+    $("bqcOui").textContent = "Youpi !";
+    $("bqConfirme").hidden = false;
+    jouer("fanfare");
+    parler("Bravo ! " + MATIN.sansEmoji(c.nom) + " est complète. Tu gagnes " + c.cadeau + " étoiles !");
+  }
   $("bqcOui").addEventListener("click", function () {
+    if (BQ.fete) { // juste un bravo à refermer
+      BQ.fete = null;
+      $("bqConfirme").hidden = true;
+      $("bqcNon").hidden = false;
+      $("bqcOui").textContent = "Oui, je l'achète";
+      dessinerBoutique();
+      return;
+    }
     var a = BQ.enCours, nom = BQ.fille;
     $("bqConfirme").hidden = true; BQ.enCours = null;
     if (!a || MATIN.solde(stock, nom) < a.cout) return;
@@ -1563,6 +1773,8 @@
     jouer("bocal");
     parler(nom + " a acheté " + MATIN.sansEmoji(a.nom) + " !");
     dessinerBoutique();
+    var pleine = verifierCollections(nom);
+    if (pleine) montrerFete(pleine);
   });
   $("boutique").addEventListener("click", function (ev) {
     var q = ev.target.closest && ev.target.closest("button[data-fille]");
@@ -1616,6 +1828,7 @@
     verifierNouvellesNotes();
     majEtatSync();
     if (BQ.ouverte) dessinerBoutique();
+    if (AL.ouvert) dessinerAlbum();
     if (adOuvert) dessinerAdmin();
   });
 
@@ -1668,7 +1881,9 @@
     cible = nouvelle;
     var boutiquePossible = boutiqueOuvrable(s, etat);
     $("ouvrirBoutique").hidden = !boutiquePossible;
+    $("ouvrirAlbum").hidden = !boutiquePossible;
     if (!boutiquePossible && BQ.ouverte) fermerBoutique();
+    if (!boutiquePossible && AL.ouvert) fermerAlbum();
     Musique.maj(demarre && musiqueVoulue && etat === "routine");
     var fete = decor.fete ? "🎂 Joyeux anniversaire " + decor.fete.nom + " !" : null;
 

@@ -184,6 +184,11 @@
 
 <!-- Étoiles -->
 <section class="onglet actif" id="o-etoiles">
+  <div class="carte" id="carteOublis" hidden>
+    <h2>⏰ Des étoiles à rattraper</h2>
+    <small>Ces matins n'ont jamais été notés. Touche un jour pour le noter maintenant.</small>
+    <div id="oublis" class="espace"></div>
+  </div>
   <div class="carte">
     <h2>Les étoiles du</h2>
     <input type="date" id="dateNote">
@@ -295,7 +300,7 @@
   </div>
   <div class="carte" id="carteLiens">
     <h2>🔗 Liens</h2>
-    <small>Écran du matin, à ouvrir sur l'iPad :</small>
+    <small>Écran du matin, à ouvrir sur le Mac :</small>
     <div class="lien" id="lienTele"></div>
     <button class="btn second" data-copier="lienTele">Copier</button>
     <div class="espace"></div>
@@ -371,7 +376,7 @@
     if (!MATIN.DB_URL) {
       avert = "La base en ligne n'est pas branchée. Tout ce que tu fais ici reste sur ce téléphone.";
     } else if (!stock.code) {
-      avert = "Ouvre cette page avec le lien famille (celui qui se termine par #famille=…) pour la relier à l'iPad.";
+      avert = "Ouvre cette page avec le lien famille (celui qui se termine par #famille=…) pour la relier au Mac.";
     }
     $("avert").innerHTML = avert ? '<div class="avert">' + avert + '</div>' : "";
     $("carteLiens").hidden = !stock.code;
@@ -406,6 +411,40 @@
     saisieTouchee = false;
     dessinerSaisie();
   }
+  // Les matins passés dont les étoiles n'ont jamais été données (on oublie vite, et les étoiles sont tout le système)
+  function joursOublies() {
+    var out = [], d = new Date(), maintenant = d.getHours() * 3600 + d.getMinutes() * 60;
+    for (var i = 0; i < 12 && out.length < 4; i++) {
+      var jour = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i);
+      MATIN.programme(stock, jour).routines.forEach(function (x) {
+        if (!x.r.etoiles) return;
+        if (i === 0 && maintenant < x.r.finS) return; // la routine du jour n'est pas encore finie
+        var cle = MATIN.cleNote(MATIN.cleJour(jour), x.id);
+        if (!stock.lire("notes/" + cle)) out.push({ jour: MATIN.cleJour(jour), routine: x.id, nom: x.r.nom });
+      });
+    }
+    return out;
+  }
+  function dessinerOublis() {
+    var liste = joursOublies();
+    $("carteOublis").hidden = !liste.length;
+    $("oublis").innerHTML = liste.map(function (o) {
+      return '<button type="button" class="btn second" style="display:block;width:100%;text-align:left;margin-bottom:8px" ' +
+             'data-oubli="' + esc(o.jour) + '|' + esc(o.routine) + '">⭐ ' + dateLisible(o.jour) +
+             (o.routine === "ecole" ? "" : " · " + esc(o.nom)) + "</button>";
+    }).join("");
+  }
+  $("oublis").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[data-oubli]");
+    if (!b) return;
+    var p = b.getAttribute("data-oubli").split("|");
+    $("dateNote").value = p[0];
+    majChoixRoutine();
+    $("routineNote").value = p[1];
+    chargerSaisie();
+    $("dateNote").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
   function dessinerSaisie() {
     $("saisie").innerHTML = FILLES.map(function (f) {
       var ok = stock.lire("ok/" + cleSaisie() + "/" + f.nom);
@@ -1025,6 +1064,7 @@
   // ---------- Tout redessiner quand les données changent ----------
   function toutDessiner() {
     majEtat();
+    dessinerOublis();
     dessinerBoutique();
     majChoixRoutine();
     if (!saisieTouchee) chargerSaisie(); else dessinerSaisie();

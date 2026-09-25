@@ -81,7 +81,7 @@ var MATIN = (function () {
   }
 
   // Le code famille arrive par le lien (#famille=…) et reste dans l'adresse,
-  // pour que l'app ajoutée à l'écran d'accueil de l'iPad le garde.
+  // pour que l'app ajoutée à l'écran d'accueil du téléphone le garde.
   function codeFamille() {
     var m = location.hash.match(/famille=([A-Za-z0-9_-]{24,})/);
     if (m) { ecrireLocal("matin.famille", m[1]); return m[1]; }
@@ -460,6 +460,28 @@ var MATIN = (function () {
     { id: "bouee",           nom: "Bouée canard",        emoji: "🛟", cout: 8,  rayon: "saison", saison: "ete", emplacement: "dos" },
     { id: "maillotBain",     nom: "Maillot de bain",     emoji: "🩱", cout: 8,  rayon: "saison", saison: "ete", emplacement: "tenue" }
   ];
+  // Des collections à compléter : une jauge dans la boutique, et un cadeau en étoiles quand elle est pleine
+  var COLLECTIONS = [
+    { cle: "ailes",     nom: "Toutes les ailes",           emoji: "🧚", cadeau: 8,
+      articles: ["ailes", "ailesAnge", "ailesPapillon", "ailesDragon"] },
+    { cle: "animaux",   nom: "Les déguisements d'animaux", emoji: "🐾", cadeau: 10,
+      articles: ["sundae", "lapin", "renard", "panda", "dinosaure"] },
+    { cle: "pokemon",   nom: "Les masques Pokémon",        emoji: "⚡", cadeau: 12,
+      articles: ["pikachu", "evoli", "salameche", "carapuce", "bulbizarre", "rondoudou"] },
+    { cle: "coiffures", nom: "Toutes les coiffures",       emoji: "💇‍♀️", cadeau: 10,
+      articles: ["demiQueue", "tresse", "nattes", "couettesHautes", "chignon", "macarons", "ondules", "boucles"] },
+    { cle: "tenues",    nom: "Toute la garde-robe",        emoji: "👗", cadeau: 12,
+      articles: ["robePois", "robeFleurs", "salopette", "jeanCoeur", "survetement", "manteau", "tutu", "kimono", "robeEtoilee"] },
+    { cle: "pieds",     nom: "Toutes les chaussures",      emoji: "👟", cadeau: 6,
+      articles: ["chaussettes", "ballerines", "bottesPluie", "baskets", "basketsMontantes", "bottesCowboy"] }
+  ];
+  // collections/<prénom>/<clé> = le jour où le cadeau a été donné
+  function collection(stock, nom, c) {
+    var n = 0;
+    c.articles.forEach(function (id) { if (possede(stock, nom, id)) n++; });
+    return { a: n, sur: c.articles.length, pleine: n >= c.articles.length,
+             payee: !!stock.lire("collections/" + nom + "/" + c.cle) };
+  }
   function catalogue() { return CATALOGUE.map(function (a) { return a; }); }
   function articleDe(id) {
     for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i];
@@ -642,6 +664,7 @@ var MATIN = (function () {
     cleNote: cleNote, total: total, totalTous: totalTous, bonus: bonus, cagnotte: cagnotte,
     articles: articles, achats: achats, depense: depense, solde: solde, vitrine: vitrine,
     RAYONS: RAYONS, EMPLACEMENTS: EMPLACEMENTS, catalogue: catalogue, articleDe: articleDe,
+    COLLECTIONS: COLLECTIONS, collection: collection,
     possede: possede, portes: portes, apparence: apparence, enRayon: enRayon, saisonOuverte: saisonOuverte,
     CRITERES: CRITERES, criteresDe: criteresDe, compterCriteres: compterCriteres,
     rappelsDuJour: rappelsDuJour, decorDuJour: decorDuJour,
