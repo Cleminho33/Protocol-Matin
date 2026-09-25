@@ -6,7 +6,18 @@ var AVATARS = (function () {
 
   var NS = "http://www.w3.org/2000/svg";
   var PEAU = "#FFD7B5", PEAU_OMBRE = "#F0B993", ENCRE = "#2D2D3A", BOUCHE = "#8E3B46";
-  var CHEVEUX = { blond: "#E6B656", blondChatain: "#B98A4E", chatain: "#8B5A2B", brun: "#4A2E1C", roux: "#C65A2E", noir: "#262020" };
+  var CHEVEUX = { blond: "#E6B656", blondChatain: "#B98A4E", chatain: "#8B5A2B", brun: "#4A2E1C", roux: "#C65A2E", noir: "#262020",
+                  rose: "#FF6FA5", bleu: "#5FD0FF", violet: "#B78BFF", vert: "#6BE38A", turquoise: "#3FC7B4",
+                  rouge: "#E5484D", blanc: "#EDEDF5" };
+  // Les manches suivent le haut : peau quand il n'y en a pas, couleur quand le vêtement en a
+  var MANCHES = { debardeur: "peau", topPaillettes: "peau", maillotBain: "peau", tutu: "peau", sirene: "peau",
+                  princesse: "peau", robeEtoilee: "peau", maillotFoot: "#E5484D", pullRaye: "#FF6FA5",
+                  chemisier: "#FFF2F8", sweatCapuche: "#6D7BA8", hautArcEnCiel: "#FF5FA2", tshirtCoeur: "#FFFFFF",
+                  teeShirt: "#FFFFFF", survetement: "#2F3A56", manteau: "#8A4F6D", kimono: "#F4EDE4",
+                  pullNoel: "#D7263D", jeanCoeur: "#FFFFFF", salopette: "#FFFFFF", robePois: "#4A73B8" };
+  // Les bas qui couvrent les jambes, et de quelle couleur
+  var PANTALONS = { jeanSimple: "#3E63A0", jupeJean: "", legging: "#2F3A56", pantalonLarge: "#8A6FB8",
+                    pantalonEtoiles: "#2B2D64", salopette: "#4A73B8", survetement: "#2F3A56" };
   var BRAS1 = 30, BRAS2 = 30, JAMBE1 = 31, JAMBE2 = 31;
   var compteurSvg = 0; // identifiants uniques des dégradés de cheveux
 
@@ -485,6 +496,31 @@ var AVATARS = (function () {
       });
       return null;
     }
+    if (id === "coeurJoue") {
+      el("path", { d: coeurD(5.5), fill: "#FF3D85", transform: "translate(134 98)" }, g);
+      return null;
+    }
+    if (id === "maquillagePapillon") {
+      var pa = el("g", {}, g);
+      [[-1, "#7CD5FF"], [1, "#B78BFF"]].forEach(function (c) {
+        var s2 = c[0];
+        el("path", { d: "M" + (110 + s2 * 6) + " 84 q" + (s2 * 16) + " -12 " + (s2 * 22) + " 2 q" + (-s2 * 8) + " 6 " + (-s2 * 22) + " -2 Z", fill: c[1], opacity: .85 }, pa);
+        el("path", { d: "M" + (110 + s2 * 6) + " 88 q" + (s2 * 13) + " 2 " + (s2 * 17) + " 12 q" + (-s2 * 10) + " 2 " + (-s2 * 17) + " -12 Z", fill: c[1], opacity: .65 }, pa);
+      });
+      el("path", { d: etoileD(3), fill: "#FFD93D", transform: "translate(124 86)" }, pa);
+      el("path", { d: etoileD(3), fill: "#FFD93D", transform: "translate(96 86)" }, pa);
+      return null;
+    }
+    if (id === "maquillageLicorne") {
+      var li = el("g", {}, g);
+      el("path", { d: "M104 50 L110 22 L116 50 Z", fill: "#FFD93D", stroke: "#E0A800", "stroke-width": 1.4 }, li);
+      el("path", { d: "M106 44 L114 40 M106 38 L113 34 M107 32 L112 29", stroke: "#E0A800", "stroke-width": 1.2 }, li);
+      [["#FF6FA5", 0], ["#FFB03B", 4], ["#6BE38A", 8], ["#5FD0FF", 12]].forEach(function (c) {
+        el("path", { d: "M" + (86 + c[1]) + " 90 q4 -9 12 -12", stroke: c[0], "stroke-width": 2.4, fill: "none", "stroke-linecap": "round" }, li);
+        el("path", { d: "M" + (134 - c[1]) + " 90 q-4 -9 -12 -12", stroke: c[0], "stroke-width": 2.4, fill: "none", "stroke-linecap": "round" }, li);
+      });
+      return null;
+    }
     if (id === "maquillageChat") {
       var m = el("g", {}, g);
       el("path", { d: "M105 88 L115 88 L110 92 Z", fill: "#2D2D3A" }, m);
@@ -542,64 +578,161 @@ var AVATARS = (function () {
     return null;
   }
 
-  // ---------- Au poignet (placé à chaque image sur la main droite) ----------
-  function objetPoignet(id, g, tc) {
-    if (id === "bracelet") {
-      var b = el("g", {}, g);
-      [0, 60, 120, 180, 240, 300].forEach(function (a) {
-        el("circle", { r: 2.4, fill: a % 120 ? "#7CD5FF" : "#FF6FA5",
-                       transform: "rotate(" + a + ") translate(0 -7)" }, b);
+  // ---------- Le haut (buste seul, quand elle ne porte pas de tenue complète) ----------
+  function objetHaut(id, g, tc) {
+    var b, i;
+    function corps(fond, largeur) {
+      var w = largeur || 54;
+      return el("rect", { x: 110 - w / 2, y: 113, width: w, height: w < 50 ? 48 : 46, rx: w < 50 ? 10 : 16, fill: fond }, g);
+    }
+    function col(couleur) { el("path", { d: "M99 114 L110 127 L121 114 Z", fill: couleur }, g); }
+    function bretelles(couleur) {
+      el("path", { d: "M96 116 L100 130 M124 116 L120 130", stroke: couleur, "stroke-width": 6, "stroke-linecap": "round" }, g);
+    }
+    if (id === "teeShirt") { corps("#FFFFFF"); col(tc); return null; }
+    if (id === "tshirtCoeur") {
+      corps("#FFFFFF"); col("#FF8FC5");
+      el("path", { d: coeurD(13), fill: "#FF3D85", transform: "translate(110 138)" }, g);
+      return null;
+    }
+    if (id === "pullRaye") {
+      corps("#FF6FA5");
+      b = el("g", { fill: "#FFFFFF", opacity: .85 }, g);
+      [122, 132, 142, 152].forEach(function (y) { el("rect", { x: 83, y: y, width: 54, height: 5 }, b); });
+      el("path", { d: "M97 114 Q110 122 123 114", stroke: "#E04E85", "stroke-width": 3, fill: "none" }, g);
+      return null;
+    }
+    if (id === "debardeur") {
+      corps("#7CD5FF", 44); bretelles("#7CD5FF");
+      el("path", { d: etoileD(9), fill: "#FFFFFF", transform: "translate(110 140)" }, g);
+      return null;
+    }
+    if (id === "chemisier") {
+      corps("#FFF2F8"); col("#F4C9DE");
+      [[95, 132], [124, 128], [102, 150], [126, 148]].forEach(function (q) { fleurette(g, q[0], q[1], "#FF8FC5", "#FFD93D", .85); });
+      el("path", { d: "M110 118 V158", stroke: "#F4C9DE", "stroke-width": 2 }, g);
+      [130, 142, 152].forEach(function (y) { el("circle", { cx: 110, cy: y, r: 2.2, fill: "#F4C9DE" }, g); });
+      return null;
+    }
+    if (id === "sweatCapuche") {
+      corps("#6D7BA8");
+      el("path", { d: "M92 114 Q110 134 128 114 Q130 124 120 128 Q110 134 100 128 Q90 124 92 114 Z", fill: "#8593C0" }, g);
+      el("path", { d: "M104 126 V142 M116 126 V142", stroke: "#F4F4F8", "stroke-width": 2.4, "stroke-linecap": "round" }, g);
+      el("path", { d: "M94 146 h32 v10 h-32 Z", fill: "#5C6890", opacity: .8 }, g);
+      return null;
+    }
+    if (id === "hautArcEnCiel") {
+      corps("#FF5FA2"); col("#FFFFFF");
+      [["#FFB03B", 124], ["#6BE38A", 132], ["#5FD0FF", 140]].forEach(function (q) {
+        el("rect", { x: 83, y: q[1], width: 54, height: 8, fill: q[0] }, g);
       });
       return null;
     }
-    if (id === "montre") {
-      var m = el("g", {}, g);
-      el("circle", { r: 8, fill: "none", stroke: "#4A4A5A", "stroke-width": 4 }, m);
-      el("circle", { r: 6, fill: "#F4F4F8", stroke: "#B9B9C8", "stroke-width": 1.5 }, m);
-      el("path", { d: "M0 0 V-4 M0 0 H3", stroke: "#2D2D3A", "stroke-width": 1.4, "stroke-linecap": "round" }, m);
+    if (id === "topPaillettes") {
+      corps("#B78BFF", 44); bretelles("#B78BFF");
+      b = el("g", { fill: "#FFD93D" }, g);
+      [[100, 126, 3], [118, 130, 2.4], [108, 140, 3.4], [122, 148, 2.6], [96, 148, 2.8], [110, 154, 2.2]].forEach(function (q) {
+        el("path", { d: etoileD(q[2]), transform: "translate(" + q[0] + " " + q[1] + ")" }, b);
+      });
+      return null;
+    }
+    if (id === "maillotFoot") {
+      corps("#E5484D"); col("#FFFFFF");
+      b = el("g", { fill: "#FFFFFF", opacity: .9 }, g);
+      [90, 106, 122].forEach(function (x) { el("rect", { x: x, y: 116, width: 6, height: 42 }, b); });
+      el("text", { x: 110, y: 150, "font-size": 20, "font-weight": 800, "text-anchor": "middle", fill: "#FFFFFF" }, g).textContent = "9";
       return null;
     }
     return null;
   }
 
-  // ---------- Dans la main libre ----------
-  function objetMain(id, g, tc) {
+  // ---------- Le bas (jupe, pantalon, short) ----------
+  function objetBas(id, g, tc) {
     var b;
-    if (id === "baguette") {
-      b = el("g", {}, g);
-      el("rect", { x: -2, y: -2, width: 4, height: 38, rx: 2, fill: "#8A5E38" }, b);
-      el("path", { d: etoileD(11), fill: "#FFD93D", stroke: "#E0A800", "stroke-width": 1.5 }, b);
+    function jupe(fond) {
+      return el("path", { d: "M86 150 Q110 144 134 150 L148 190 Q110 199 72 190 Z", fill: fond }, g);
+    }
+    function culotte(fond, hauteur, largeur) {
+      var w = largeur || 52;
+      return el("rect", { x: 110 - w / 2, y: 150, width: w, height: hauteur || 32, rx: 9, fill: fond }, g);
+    }
+    function ceinture(couleur) {
+      el("rect", { x: 84, y: 148, width: 52, height: 7, rx: 3, fill: couleur }, g);
+      el("circle", { cx: 110, cy: 151.5, r: 2.6, fill: "#FFD93D" }, g);
+    }
+    if (id === "jeanSimple") { culotte("#3E63A0"); ceinture("#2C4A7A"); return null; }
+    if (id === "short") {
+      culotte("#5C87CE", 26);
+      el("path", { d: "M110 160 V176", stroke: "#3E63A0", "stroke-width": 2.5 }, g);
+      ceinture("#2C4A7A");
       return null;
     }
-    if (id === "doudou") {
-      b = el("g", {}, g);
-      el("circle", { cx: -9, cy: -9, r: 5, fill: "#C08A5E" }, b);
-      el("circle", { cx: 9, cy: -9, r: 5, fill: "#C08A5E" }, b);
-      el("circle", { cy: -2, r: 11, fill: "#D9A66C" }, b);
-      el("ellipse", { cy: 3, rx: 5, ry: 4, fill: "#F2DCC0" }, b);
-      el("circle", { cx: -4, cy: -4, r: 1.6, fill: "#3D2B1F" }, b);
-      el("circle", { cx: 4, cy: -4, r: 1.6, fill: "#3D2B1F" }, b);
-      el("ellipse", { cy: 14, rx: 10, ry: 9, fill: "#D9A66C" }, b);
+    if (id === "legging") {
+      culotte("#2F3A56", 30, 48);
+      el("path", { d: "M88 158 h44", stroke: "#4A5578", "stroke-width": 2 }, g);
       return null;
     }
-    if (id === "citrouille") {
-      b = el("g", {}, g);
-      el("ellipse", { cy: 4, rx: 13, ry: 11, fill: "#E8792B" }, b);
-      el("path", { d: "M-6 -5 Q-8 4 -6 13 M6 -5 Q8 4 6 13", stroke: "#C25F1B", "stroke-width": 1.6, fill: "none" }, b);
-      el("rect", { x: -2, y: -11, width: 4, height: 8, rx: 2, fill: "#5FA36A" }, b);
-      el("path", { d: "M-6 2 l4 -4 l4 4 Z M2 2 l4 -4 l4 4 Z M-5 8 q5 5 10 0 Z", fill: "#3B2A16" }, b);
+    if (id === "pantalonLarge") {
+      culotte("#8A6FB8", 36, 56);
+      el("path", { d: "M110 160 V186", stroke: "#75599F", "stroke-width": 2.5 }, g);
+      ceinture("#6E5296");
       return null;
     }
-    if (id === "ballons") {
-      b = el("g", {}, g);
-      [[-14, -34, "#FF6FA5"], [0, -42, "#FFD93D"], [14, -34, "#7CD5FF"]].forEach(function (q) {
-        el("path", { d: "M" + q[0] + " " + (q[1] + 13) + " Q" + (q[0] + 2) + " 0 0 0", stroke: "#FFFFFF", "stroke-width": 1.2, fill: "none", opacity: .7 }, b);
-        el("ellipse", { cx: q[0], cy: q[1], rx: 10, ry: 12, fill: q[2] }, b);
-        el("ellipse", { cx: q[0] - 3, cy: q[1] - 4, rx: 2.4, ry: 3.4, fill: "rgba(255,255,255,.55)" }, b);
+    if (id === "pantalonEtoiles") {
+      culotte("#2B2D64", 34, 54);
+      b = el("g", { fill: "#FFD93D" }, g);
+      [[94, 162, 3], [122, 166, 2.6], [106, 174, 3.2], [128, 178, 2.4], [92, 178, 2.6]].forEach(function (q) {
+        el("path", { d: etoileD(q[2]), transform: "translate(" + q[0] + " " + q[1] + ")" }, b);
       });
       return null;
     }
+    if (id === "jupePlissee") {
+      jupe("#B78BFF");
+      b = el("g", { stroke: "#9A72E0", "stroke-width": 2, fill: "none" }, g);
+      [92, 102, 112, 122, 132].forEach(function (x) { el("path", { d: "M" + x + " 152 L" + (x + (x - 112) * 0.28).toFixed(1) + " 192" }, b); });
+      ceinture("#9A72E0");
+      return null;
+    }
+    if (id === "jupeJean") {
+      jupe("#4A73B8");
+      el("path", { d: "M74 188 Q110 196 146 188", stroke: "#FFD93D", "stroke-width": 2, fill: "none", "stroke-dasharray": "4 4" }, g);
+      el("path", { d: "M92 162 h16 v12 h-16 Z M122 164 h14 v12 h-14 Z", fill: "none", stroke: "#FFD93D", "stroke-width": 1.6, "stroke-dasharray": "3 3" }, g);
+      ceinture("#2C4A7A");
+      return null;
+    }
+    if (id === "jupeTutu") {
+      b = el("g", {}, g);
+      el("path", { d: "M84 152 Q110 146 136 152 L158 188 Q110 200 62 188 Z", fill: "#FFC7E4" }, b);
+      el("path", { d: "M86 152 Q110 146 134 152 L150 182 Q110 193 70 182 Z", fill: "#FFE3F1", opacity: .92 }, b);
+      el("path", { d: "M84 158 Q110 152 136 158", stroke: "#FF8FC5", "stroke-width": 3, fill: "none" }, b);
+      ceinture("#FF8FC5");
+      return null;
+    }
     return null;
+  }
+
+  // ---------- Les chaussettes (à la place de la socquette blanche) ----------
+  function objetChaussettes(id, f, tc) {
+    if (!id) return;
+    var fx = f.fx, s = f.sens, g = el("g", {}, f.g), i;
+    function bas(fond) { el("ellipse", { cx: fx + s * 2, cy: 242, rx: 10, ry: 5, fill: fond }, g); }
+    if (id === "chaussettes") {
+      bas("#FFFFFF");
+      [-2.6, 0.8].forEach(function (dy, i) {
+        el("rect", { x: fx + s * 2 - 7, y: 242 + dy, width: 14, height: 1.6, rx: .8, fill: i ? "#FF6FA5" : tc }, g);
+      });
+    } else if (id === "chaussettesCoeurs") {
+      bas("#FFE3F1");
+      el("path", { d: coeurD(4), fill: "#FF3D85", transform: "translate(" + (fx + s * 2) + " 241)" }, g);
+    } else if (id === "chaussettesHautes") {
+      el("rect", { x: fx - 7, y: 216, width: 14, height: 26, rx: 4, fill: "#FFFFFF" }, g);
+      el("ellipse", { cx: fx + s * 2, cy: 242, rx: 10, ry: 5, fill: "#FFFFFF" }, g);
+      [220, 226].forEach(function (y) { el("rect", { x: fx - 7, y: y, width: 14, height: 2.4, fill: "#FF6FA5" }, g); });
+    } else if (id === "chaussettesEtoiles") {
+      bas("#5FD0FF");
+      el("path", { d: etoileD(3.4), fill: "#FFD93D", transform: "translate(" + (fx + s * 2) + " 241)" }, g);
+    } else return;
+    f.rayures = g;
   }
 
   // ---------- La tenue (remplace la robe) ----------
@@ -775,6 +908,15 @@ var AVATARS = (function () {
       el("path", { d: "M-28 -6 Q0 8 28 -6", stroke: "#FFD93D", "stroke-width": 5, fill: "none", "stroke-linecap": "round" }, c);
       return function (t) { tissu.setAttribute("transform", "rotate(" + (Math.sin(t * 2.2) * 4).toFixed(1) + " 0 0)"); };
     }
+    if (id === "capeVampire") {
+      c = el("g", { transform: "translate(110 122)" }, g);
+      tissu = el("g", {}, c);
+      el("path", { d: "M-26 -4 Q0 8 26 -4 L56 84 Q42 72 28 84 Q14 72 0 84 Q-14 72 -28 84 Q-42 72 -56 84 Z", fill: "#1E1633" }, tissu);
+      el("path", { d: "M-18 -2 Q0 6 18 -2 L30 48 Q0 58 -30 48 Z", fill: "#7A1533", opacity: .85 }, tissu);
+      el("path", { d: "M-30 -10 Q-26 -22 -12 -18 Q0 -8 12 -18 Q26 -22 30 -10 Q0 4 -30 -10 Z", fill: "#1E1633" }, c);
+      el("circle", { cx: 0, cy: -4, r: 4, fill: "#E5484D" }, c);
+      return function (t) { tissu.setAttribute("transform", "rotate(" + (Math.sin(t * 2.2) * 4).toFixed(1) + " 0 0)"); };
+    }
     if (id === "sundae") return queueSimple({ d: "M0 6 Q42 10 52 -20 Q58 -44 44 -56", large: 14, base: TIGRE.base, fonce: TIGRE.fonce,
       rayures: "M20 8 L24 0 M38 2 L44 -6 M50 -18 L59 -21 M52 -40 L60 -44", bout: TIGRE.clair, bx: 44, by: -56 });
     if (id === "renard") return queueSimple({ d: "M0 8 Q44 14 54 -16 Q60 -40 46 -52", large: 17, base: "#E2712C",
@@ -824,6 +966,22 @@ var AVATARS = (function () {
   // ---------- Autour d'elle ----------
   function objetEffet(id, g, tc) {
     var e, n, i;
+    if (id === "ballonsEffet") {
+      var lot = [[62, 70, "#FF6FA5"], [160, 62, "#FFD93D"], [52, 140, "#7CD5FF"], [168, 132, "#B78BFF"]].map(function (q) {
+        var b = el("g", { transform: "translate(" + q[0] + " " + q[1] + ")" }, g);
+        el("path", { d: "M0 14 q4 18 -2 34", stroke: "#FFFFFF", "stroke-width": 1.2, fill: "none", opacity: .7 }, b);
+        el("ellipse", { rx: 12, ry: 14, fill: q[2] }, b);
+        el("ellipse", { cx: -4, cy: -5, rx: 3, ry: 4, fill: "rgba(255,255,255,.55)" }, b);
+        el("path", { d: "M-3 13 L3 13 L0 18 Z", fill: q[2] }, b);
+        return { n: b, x: q[0], y: q[1] };
+      });
+      return function (t) {
+        lot.forEach(function (b, i) {
+          var dy = Math.sin(t * 1.3 + i * 1.7) * 7;
+          b.n.setAttribute("transform", "translate(" + b.x + " " + (b.y + dy).toFixed(1) + ") rotate(" + (Math.sin(t + i) * 5).toFixed(1) + ")");
+        });
+      };
+    }
     if (id === "papillonVole") {
       e = el("g", {}, g);
       n = el("g", {}, e);
@@ -866,15 +1024,6 @@ var AVATARS = (function () {
   function objetPieds(id, f, tc) {
     if (!id) return;
     var fx = f.fx, s = f.sens, g;
-    if (id === "chaussettes") {
-      g = el("g", {}, f.g);
-      el("ellipse", { cx: fx + s * 2, cy: 242, rx: 10, ry: 5, fill: "#FFFFFF" }, g);
-      [-2.6, 0.8].forEach(function (dy, i) {
-        el("rect", { x: fx + s * 2 - 7, y: 242 + dy, width: 14, height: 1.6, rx: .8, fill: i ? "#FF6FA5" : tc }, g);
-      });
-      f.rayures = g;
-      return;
-    }
     if (id === "baskets") {
       var brille = el("g", { fill: "#FFD93D", stroke: "#E0A800", "stroke-width": .8 }, f.basket);
       [[fx + s * 8, 240, 3], [fx - s * 2, 237, 2.2], [fx + s * 1, 243, 2.6]].forEach(function (q) {
@@ -1097,14 +1246,20 @@ var AVATARS = (function () {
 
     // Vêtements (dessinés après la tête : le haut du pyjama passe par-dessus)
     R.buste = el("g", {}, R.tout);
-    // Maillot de corps (toujours là, sous les vêtements) : jamais de trou ni de buste nu pendant l'habillage
-    el("rect", { x: 86, y: 114, width: 48, height: 68, rx: 20, fill: "#F4F4F8" }, R.buste);
-    el("path", { d: "M100 116 Q110 124 120 116", stroke: "#DADAE6", "stroke-width": 2, fill: "none" }, R.buste);
+    // Le torse en peau : c'est ce qu'on voit si elle choisit de ne pas mettre de haut
+    el("rect", { x: 88, y: 112, width: 44, height: 72, rx: 18, fill: PEAU }, R.buste);
+    el("path", { d: "M99 116 Q110 122 121 116", stroke: PEAU_OMBRE, "stroke-width": 1.6, fill: "none", opacity: .5 }, R.buste);
+    // Maillot de corps sous les vêtements : jamais de trou pendant l'habillage
+    R.maillot = el("g", {}, R.buste);
+    el("rect", { x: 86, y: 114, width: 48, height: 68, rx: 20, fill: "#F4F4F8" }, R.maillot);
+    el("path", { d: "M100 116 Q110 124 120 116", stroke: "#DADAE6", "stroke-width": 2, fill: "none" }, R.maillot);
     R.robe = el("g", {}, R.buste);
     el("path", { d: "M88 116 Q110 108 132 116 L146 188 Q110 198 74 188 Z", fill: tc }, R.robe);
     el("path", { d: "M98 116 L110 130 L122 116 Z", fill: "#FFFFFF" }, R.robe);
     el("path", { d: "M76 176 Q110 186 144 176", stroke: clair, "stroke-width": 3, fill: "none" }, R.robe);
-    R.tenue = el("g", {}, R.buste); // tenue achetée en boutique, à la place de la robe
+    R.tenue = el("g", {}, R.buste); // tenue complète achetée en boutique, à la place de la robe
+    R.bas = el("g", {}, R.buste);   // jupe ou pantalon, sous le haut
+    R.haut = el("g", {}, R.buste);
     R.hautPyjama = el("g", {}, R.buste);
     el("rect", { x: 82, y: 114, width: 56, height: 66, rx: 18, fill: tc }, R.hautPyjama);
     var pois = el("g", { fill: "#FFFFFF", opacity: .55 }, R.hautPyjama);
@@ -1151,13 +1306,19 @@ var AVATARS = (function () {
     poser(objets.joues, objetJoues, R.tete);
     poser(objets.visage, objetVisage, R.tete); // le masque passe devant le reste du visage
     poser(objets.cou, objetCou, R.buste);
-    R.tenuePortee = objets.tenue || "";
-    poser(objets.tenue, objetTenue, R.tenue);
-    R.pieds.forEach(function (f) { objetPieds(objets.pieds, f, tc); });
-    R.poignet = objets.poignet ? el("g", {}, svg) : null;
-    if (R.poignet) objetPoignet(objets.poignet, R.poignet, tc);
-    R.mainObjet = objets.main ? el("g", {}, svg) : null;
-    if (R.mainObjet) objetMain(objets.main, R.mainObjet, tc);
+    // Une tenue complète remplace le haut et le bas ; « robeSimple » est la robe de tous les jours
+    R.robeDefaut = objets.tenue === "robeSimple";
+    R.tenuePortee = R.robeDefaut ? "" : (objets.tenue || "");
+    R.hautPorte = objets.tenue ? "" : (objets.haut || "");
+    R.basPorte = objets.tenue ? "" : (objets.bas || "");
+    poser(R.tenuePortee, objetTenue, R.tenue);
+    poser(R.basPorte, objetBas, R.bas);
+    poser(R.hautPorte, objetHaut, R.haut);
+    var surLeBuste = R.robeDefaut ? "robeSimple" : (R.tenuePortee || R.hautPorte);
+    R.maillotVisible = !!surLeBuste;
+    R.manche = !surLeBuste ? PEAU : MANCHES[surLeBuste] === "peau" ? PEAU : (MANCHES[surLeBuste] || tc);
+    R.pantalonCouleur = PANTALONS[R.tenuePortee || R.basPorte] || "";
+    R.pieds.forEach(function (f) { objetChaussettes(objets.chaussettes, f, tc); objetPieds(objets.pieds, f, tc); });
     if (objets.compagnon) objetCompagnon(objets.compagnon, el("g", {}, svg));
     if (objets.effet) {
       var groupeEffet = el("g", {});
@@ -1494,12 +1655,16 @@ var AVATARS = (function () {
       // Vêtements
       R.hautPyjama.setAttribute("transform", "translate(0 " + P.hautPyjamaY.toFixed(1) + ")");
       voir(R.hautPyjama, P.objets.hautVole !== undefined ? 1 - P.objets.hautVole : clamp(P.pyjama, 0, 1));
-      R.robe.setAttribute("transform", "translate(0 " + P.robeY.toFixed(1) + ")");
-      R.tenue.setAttribute("transform", "translate(0 " + P.robeY.toFixed(1) + ")");
-      voir(R.robe, R.tenuePortee ? 0 : P.robeO);
-      voir(R.tenue, P.robeO);
-      if (R.tenuePortee === "salopette" && P.pyjama < 0.5) voir(R.jambesPyjama, P.robeO);
-      R.pantalon.forEach(function (j) { j.setAttribute("stroke", R.tenuePortee === "salopette" && P.pyjama < 0.5 ? "#4A73B8" : tc); });
+      var glisse = "translate(0 " + P.robeY.toFixed(1) + ")";
+      [R.robe, R.tenue, R.bas, R.haut].forEach(function (n) { n.setAttribute("transform", glisse); });
+      voir(R.robe, R.robeDefaut ? P.robeO : 0);
+      voir(R.tenue, R.tenuePortee ? P.robeO : 0);
+      voir(R.bas, R.basPorte ? P.robeO : 0);
+      voir(R.haut, R.hautPorte ? P.robeO : 0);
+      voir(R.maillot, R.maillotVisible ? 1 : 0);
+      var habillee = P.pyjama < 0.5;
+      if (R.pantalonCouleur && habillee) voir(R.jambesPyjama, P.robeO);
+      R.pantalon.forEach(function (j) { j.setAttribute("stroke", R.pantalonCouleur && habillee ? R.pantalonCouleur : tc); });
 
       // Visage
       R.yeuxOuverts.setAttribute("display", P.yeux === "ouverts" ? "inline" : "none");
@@ -1525,10 +1690,7 @@ var AVATARS = (function () {
         R.bras[n].main.setAttribute("cx", bras.bout.x.toFixed(1));
         R.bras[n].main.setAttribute("cy", bras.bout.y.toFixed(1));
         mainsReelles[n] = bras.bout;
-        if (R.poignet && n === 1) {
-          var poi = vers(bras.milieu, bras.bout, .74);
-          R.poignet.setAttribute("transform", "translate(" + poi.x.toFixed(1) + " " + poi.y.toFixed(1) + ")");
-        }
+        R.bras[n].haut.setAttribute("stroke", P.pyjama < 0.5 ? R.manche : tc);
       });
 
       // Objets : ceux qui sont tenus ({main: n}) se posent exactement dans la main dessinée
@@ -1536,11 +1698,6 @@ var AVATARS = (function () {
       for (var nomObjet in O) {
         var ob = O[nomObjet];
         if (ob && ob.main !== undefined) { ob.x = mainsReelles[ob.main].x; ob.y = mainsReelles[ob.main].y; }
-      }
-      if (R.mainObjet) { // seulement quand ses mains sont libres
-        var libre = !(O.tartine || O.verre || O.brosseDents || O.brosseCheveux || O.pyjamaPlie || O.livre);
-        R.mainObjet.setAttribute("display", libre ? "inline" : "none");
-        if (libre) R.mainObjet.setAttribute("transform", "translate(" + mainsReelles[0].x.toFixed(1) + " " + mainsReelles[0].y.toFixed(1) + ")");
       }
       R.tartine.setAttribute("display", O.tartine ? "inline" : "none");
       if (O.tartine) { place(R.tartine, O.tartine.x, O.tartine.y, O.tartine.r, 0.95); R.tartineCorps.setAttribute("transform", "scale(" + O.tartine.e.toFixed(3) + " 1)"); }

@@ -214,7 +214,7 @@
   /* space-evenly : le contenu se répartit sur toute la hauteur au lieu de se tasser au milieu */
   .calme { justify-content: space-evenly; align-items: center; text-align: center; padding: calc(var(--u) * 7) 5vw calc(var(--u) * 5); }
   /* le soir, on réserve la place des deux boutons sous le texte */
-  body.soir .calme { padding-bottom: calc(var(--u) * 16); }
+  body.soir .calme { padding-bottom: calc(var(--hBoutons, 0px) + var(--u) * 6); }
   .calme .grand { font-size: calc(var(--u) * 18); line-height: 1.1; }
   .calme h2 { font-size: calc(var(--u) * 9); margin-top: calc(var(--u) * 1.5); }
   .calme p { font-size: calc(var(--u) * 5); opacity: .8; margin-top: calc(var(--u) * 1.5); }
@@ -325,6 +325,11 @@
   }
 
   /* ---------- La boutique (le soir) ---------- */
+  #ouvrirGarde {
+    background: linear-gradient(180deg, #FFC7E4, #FF8FC5); color: var(--nuit); border: none;
+    font-size: calc(var(--u) * 4.2); font-weight: 800; border-radius: 99px;
+    padding: calc(var(--u) * 1.6) calc(var(--u) * 4.5); box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(0,0,0,.3);
+  }
   #ouvrirBoutique {
     background: linear-gradient(180deg, #FFE27A, var(--or)); color: var(--nuit); border: none;
     font-size: calc(var(--u) * 5); font-weight: 800; border-radius: 99px;
@@ -338,6 +343,19 @@
   #boutique.visible { display: flex; }
   .bq-tete { display: flex; align-items: center; gap: calc(var(--u) * 3); padding: calc(var(--u) * 2) calc(var(--u) * 4); }
   .bq-titre { font-size: calc(var(--u) * 5); font-weight: 800; }
+  .bq-bascule {
+    background: rgba(255,255,255,.14); color: #fff; border: none; border-radius: 99px;
+    font-size: calc(var(--u) * 2.8); font-weight: 700; padding: calc(var(--u) * 1) calc(var(--u) * 3); cursor: pointer;
+  }
+  .bq-teintes { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 9), 1fr)); gap: calc(var(--u) * 1.2); }
+  .bq-teinte {
+    background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.14); border-radius: calc(var(--u) * 1.6);
+    color: #fff; padding: calc(var(--u) * 1) calc(var(--u) * .4); display: flex; flex-direction: column; align-items: center;
+    gap: calc(var(--u) * .6); font-size: calc(var(--u) * 1.9); font-weight: 700; cursor: pointer;
+  }
+  .bq-teinte i { display: block; width: calc(var(--u) * 4); height: calc(var(--u) * 4); border-radius: 99px; border: 2px solid rgba(255,255,255,.4); }
+  .bq-teinte.choisie { border-color: var(--or); background: rgba(255,217,61,.18); }
+  .bq-note { font-size: calc(var(--u) * 2.2); opacity: .6; margin: calc(var(--u) * .5) 0 calc(var(--u) * 1.5); }
   .bq-qui { display: flex; gap: calc(var(--u) * 2); margin-left: auto; }
   .bq-qui button {
     background: rgba(255,255,255,.08); border: calc(var(--u) * .5) solid transparent; color: #fff;
@@ -494,6 +512,10 @@
     .route { height: calc(var(--u) * 14); }
     .seg-emoji { font-size: calc(var(--u) * 4); height: calc(var(--u) * 5.5); }
     .fin-duo { gap: 2vw; }
+    #boutonsSoir { gap: calc(var(--u) * 1.6); bottom: calc(var(--u) * 3); }
+    #ouvrirBoutique { font-size: calc(var(--u) * 4); padding: calc(var(--u) * 1.4) calc(var(--u) * 4); }
+    #ouvrirGarde { font-size: calc(var(--u) * 3.6); padding: calc(var(--u) * 1.3) calc(var(--u) * 3.5); }
+    #ouvrirAlbum { font-size: calc(var(--u) * 3.4); padding: calc(var(--u) * 1.3) calc(var(--u) * 3.5); }
     .bq-corps { flex-direction: column; gap: calc(var(--u) * 1.5); }
     .bq-vitrine { width: 100%; }
     .bq-vitrine svg { height: calc(var(--u) * 30); }
@@ -627,11 +649,13 @@
   </div>
 </div>
 
+<button id="ouvrirGarde" hidden>🎀 Ma garde-robe</button>
 <button id="ouvrirBoutique" hidden>🛍️ La boutique</button></div>
 
 <div id="boutique">
   <div class="bq-tete">
-    <div class="bq-titre">🛍️ La boutique</div>
+    <div class="bq-titre" id="bqTitre">🛍️ La boutique</div>
+    <button class="bq-bascule" id="bqBascule">🎀 Ma garde-robe</button>
     <div class="bq-qui" id="bqQui"></div>
     <button class="bq-fermer" id="bqFermer" aria-label="Fermer">✕</button>
   </div>
@@ -1046,7 +1070,9 @@
     requestAnimationFrame(animerAvatars);
   }
 
+  var dernierePose = null;
   function poserAvatars(zone, ids, etat, avecPrenom, avecOk) {
+    dernierePose = { zone: zone, ids: ids, etat: etat, avecPrenom: avecPrenom, avecOk: avecOk };
     animes = animes.filter(function (a) { return a.zone !== zone; });
     ids.forEach(function (id, n) {
       var f = FILLES[n], boite = $(id);
@@ -1066,6 +1092,22 @@
       animes.push({ objet: objet, etat: e, zone: zone, sens: n === 0 ? 1 : -1 });
     });
     majBoutonsOk();
+  }
+
+  // Redessine les filles de l'écran en cours : sans ça, ce qu'elles viennent de mettre
+  // dans la garde-robe ne se voit qu'après un rechargement de la page.
+  // Les boutons du soir passent sur deux ou trois lignes en portrait : le texte au-dessus
+  // doit leur laisser exactement la place qu'ils prennent, pas une hauteur devinée.
+  function mesurerBoutons() {
+    var h = document.body.classList.contains("soir") ? $("boutonsSoir").offsetHeight : 0;
+    document.documentElement.style.setProperty("--hBoutons", h + "px");
+  }
+  window.addEventListener("resize", mesurerBoutons);
+
+  function rafraichirAvatars() {
+    var d = dernierePose;
+    if (!d || !$(d.ids[0])) return;
+    poserAvatars(d.zone, d.ids, d.etat, d.avecPrenom, d.avecOk);
   }
 
   // ---------- Affichage d'une routine ----------
@@ -1655,7 +1697,7 @@
 
   // ---------- La boutique : elles dépensent leurs étoiles le soir ----------
   // Ouverte de 15h à 22h (dès 9h les jours sans école), jamais pendant la routine.
-  var BQ = { fille: FILLES[0].nom, ouverte: false, enCours: null, filtre: "tout", essai: null, fete: null };
+  var BQ = { fille: FILLES[0].nom, ouverte: false, mode: "boutique", enCours: null, filtre: "tout", essai: null, fete: null };
 
   function boutiqueOuvrable(s, etat) {
     if (etat === "routine") return false;
@@ -1663,9 +1705,11 @@
   }
   function filleDe(nom) { return FILLES.filter(function (f) { return f.nom === nom; })[0] || FILLES[0]; }
 
-  function ouvrirBoutique(nom) {
+  function ouvrirBoutique(nom, mode) {
     BQ.fille = nom || BQ.fille;
+    BQ.mode = mode || "boutique";
     BQ.ouverte = true;
+    BQ.essai = null;
     $("boutique").classList.add("visible");
     dessinerBoutique();
   }
@@ -1675,41 +1719,69 @@
     $("bqConfirme").hidden = true;
     animes = animes.filter(function (a) { return a.zone !== "boutique"; });
     $("bqAvatar").innerHTML = "";
+    rafraichirAvatars(); // ce qu'elle vient de mettre doit se voir en revenant à l'écran
+  }
+
+  // Ce qu'une fille possède, vêtements de base compris
+  function aElle(nom) {
+    return MATIN.catalogue().filter(function (a) { return MATIN.possede(stock, nom, a.id); });
+  }
+  // On ne se retrouve jamais toute nue : mettre un haut pose un bas s'il n'y en a pas, et l'inverse
+  function habiller(nom, emplacement, id) {
+    var p = MATIN.portes(stock, nom);
+    if (emplacement === "tenue") {
+      stock.ecrire("boutique/portes/" + nom + "/haut", null);
+      stock.ecrire("boutique/portes/" + nom + "/bas", null);
+    } else if (emplacement === "haut" || emplacement === "bas") {
+      if (p.tenue) stock.ecrire("boutique/portes/" + nom + "/tenue", null);
+      var autre = emplacement === "haut" ? "bas" : "haut";
+      if (id && !p[autre]) stock.ecrire("boutique/portes/" + nom + "/" + autre, autre === "bas" ? "jeanSimple" : "teeShirt");
+    }
+    stock.ecrire("boutique/portes/" + nom + "/" + emplacement, id || null);
   }
 
   function dessinerBoutique() {
     if (!BQ.ouverte) return;
+    var garde = BQ.mode === "garderobe";
     var f = filleDe(BQ.fille), sou = MATIN.solde(stock, f.nom), portes = MATIN.portes(stock, f.nom);
     var dispo = MATIN.enRayon(stock, f.nom, maintenant());
     var essai = BQ.essai ? MATIN.articleDe(BQ.essai) : null;
+    $("bqTitre").textContent = garde ? "🎀 Ma garde-robe" : "🛍️ La boutique";
+    $("bqBascule").textContent = garde ? "🛍️ La boutique" : "🎀 Ma garde-robe";
     $("bqQui").innerHTML = FILLES.map(function (g) {
       return '<button data-fille="' + g.nom + '" style="--f:' + g.couleur + '" class="' + (g.nom === BQ.fille ? "choisie" : "") + '">' +
              g.nom + " · " + MATIN.solde(stock, g.nom) + " ⭐</button>";
     }).join("");
     $("bqSolde").textContent = sou + " ⭐ à dépenser";
 
-    // L'avatar d'essayage : ce qu'elle porte, plus l'article qu'elle est en train de regarder
+    // L'avatar : ce qu'elle porte, plus l'article qu'elle est en train de regarder en boutique
     var app = MATIN.apparence(stock, f.nom);
-    if (essai) {
+    if (essai && !garde) {
       app.objets = MATIN.copie(app.objets);
       app.objets[essai.emplacement] = essai.id;
       if (essai.emplacement === "coiffure") app.coiffure = essai.id;
+      if (essai.emplacement === "tenue") { delete app.objets.haut; delete app.objets.bas; }
+      if (essai.emplacement === "haut" || essai.emplacement === "bas") delete app.objets.tenue;
     }
     animes = animes.filter(function (a) { return a.zone !== "boutique"; });
     $("bqAvatar").innerHTML = "";
     var objet = AVATARS.creer($("bqAvatar"), f, app);
-    var e = { tenue: "ecole", chaussures: app.objets.pieds !== "chaussettes", activite: "coucou" };
+    var e = { tenue: "ecole", chaussures: !!app.objets.pieds, activite: "coucou" };
     objet.maj(e, "coucou", performance.now() / 1000, 0, 1);
     animes.push({ objet: objet, etat: e, zone: "boutique", sens: 1 });
 
-    var mis = Object.keys(portes).map(function (k) {
-      var a = MATIN.articleDe(portes[k]);
-      return a ? a.emoji + " " + a.nom : "";
+    var mis = MATIN.SECTIONS.map(function (sec) {
+      return sec.emplacements.map(function (emp) {
+        var a = portes[emp] ? MATIN.articleDe(portes[emp]) : null;
+        return a && a.rayon !== "base" ? a.emoji + " " + a.nom : "";
+      }).filter(Boolean).join(", ");
     }).filter(Boolean);
-    $("bqPorte").textContent = mis.length ? "Elle porte " + mis.join(", ") : "Clique sur un article pour l'essayer";
+    $("bqPorte").textContent = garde
+      ? (mis.length ? "Elle porte " + mis.join(", ") : "Clique pour l'habiller")
+      : (essai ? "Essayage en cours" : "Clique sur un article pour l'essayer");
 
     // Le panneau d'essayage : elle voit d'abord, elle achète ensuite
-    if (essai && !MATIN.possede(stock, f.nom, essai.id)) {
+    if (!garde && essai && !MATIN.possede(stock, f.nom, essai.id)) {
       $("bqEssai").hidden = false;
       $("bqEssai").innerHTML = '<div class="bq-essai-nom">' + essai.emoji + " " + esc(essai.nom) + "</div>" +
         (sou >= essai.cout
@@ -1721,24 +1793,23 @@
       $("bqEssai").innerHTML = "";
     }
 
-    // Les filtres : tout, un rayon, ou sa garde-robe
-    var aElle = dispo.filter(function (a) { return MATIN.possede(stock, f.nom, a.id); });
+    if (garde) return dessinerGardeRobe(f, portes);
+
+    // ---- La boutique : on achète, on n'habille pas ----
     var choix = [{ cle: "tout", nom: "Tout" }];
     MATIN.RAYONS.forEach(function (r) {
       if (dispo.filter(function (a) { return a.rayon === r.cle; }).length) choix.push({ cle: r.cle, nom: r.emoji + " " + r.nom });
     });
     choix.push({ cle: "collections", nom: "🏆 Collections" });
-    choix.push({ cle: "amoi", nom: "🎀 Ma garde-robe (" + aElle.length + ")" });
     if (!choix.filter(function (c) { return c.cle === BQ.filtre; }).length) BQ.filtre = "tout";
     $("bqFiltres").innerHTML = choix.map(function (c) {
       return '<button data-filtre="' + c.cle + '" class="' + (c.cle === BQ.filtre ? "choisi" : "") + '">' + esc(c.nom) + "</button>";
     }).join("");
 
     function carte(a) {
-      var aMoi = MATIN.possede(stock, f.nom, a.id), portee = portes[a.emplacement] === a.id;
-      var cls = portee ? "portee" : BQ.essai === a.id ? "essai" : aMoi ? "a-moi" : sou >= a.cout ? "" : "cher";
-      var dit = portee ? "Elle le porte ✓" : aMoi ? "Dans la garde-robe"
-              : BQ.essai === a.id ? "À l'essai…" : sou >= a.cout ? a.cout + " ⭐" : "Encore " + (a.cout - sou) + " ⭐";
+      var aMoi = MATIN.possede(stock, f.nom, a.id);
+      var cls = aMoi ? "a-moi" : BQ.essai === a.id ? "essai" : sou >= a.cout ? "" : "cher";
+      var dit = aMoi ? "Déjà à toi ✓" : BQ.essai === a.id ? "À l'essai…" : sou >= a.cout ? a.cout + " ⭐" : "Encore " + (a.cout - sou) + " ⭐";
       return '<button class="bq-article ' + cls + '" data-article="' + a.id + '">' +
              '<span class="e">' + a.emoji + '</span><span class="n">' + esc(a.nom) + "</span>" +
              '<span class="p">' + dit + "</span></button>";
@@ -1746,29 +1817,13 @@
     // Les collections : une jauge par thème, et des étoiles offertes quand elle est complète
     if (BQ.filtre === "collections") {
       $("bqRayons").innerHTML = MATIN.COLLECTIONS.map(function (c) {
-        var e = MATIN.collection(stock, f.nom, c);
+        var e2 = MATIN.collection(stock, f.nom, c);
         var liste = c.articles.map(function (id) { return MATIN.articleDe(id); }).filter(Boolean);
-        return '<div class="bq-rayon-titre' + (e.pleine ? " pleine" : "") + '">' + c.emoji + " " + esc(c.nom) +
-          "<small>" + e.a + " sur " + e.sur +
-          (e.pleine ? " · complète, " + c.cadeau + " ⭐ gagnées !" : " · " + c.cadeau + " ⭐ offertes une fois complète") + "</small>" +
-          '<div class="bq-jauge"><i style="width:' + Math.round(e.a / e.sur * 100) + '%"></i></div></div>' +
+        return '<div class="bq-rayon-titre' + (e2.pleine ? " pleine" : "") + '">' + c.emoji + " " + esc(c.nom) +
+          "<small>" + e2.a + " sur " + e2.sur +
+          (e2.pleine ? " · complète, " + c.cadeau + " ⭐ gagnées !" : " · " + c.cadeau + " ⭐ offertes une fois complète") + "</small>" +
+          '<div class="bq-jauge"><i style="width:' + Math.round(e2.a / e2.sur * 100) + '%"></i></div></div>' +
           '<div class="bq-grille">' + liste.map(carte).join("") + "</div>";
-      }).join("");
-      return;
-    }
-    // La garde-robe : rangée par emplacement, avec un « Rien » pour enlever
-    if (BQ.filtre === "amoi") {
-      if (!aElle.length) {
-        $("bqRayons").innerHTML = '<div class="bq-vide">Rien encore. Choisis quelque chose dans les rayons !</div>';
-        return;
-      }
-      $("bqRayons").innerHTML = Object.keys(MATIN.EMPLACEMENTS).map(function (emp) {
-        var liste = aElle.filter(function (a) { return a.emplacement === emp; });
-        if (!liste.length) return "";
-        var rien = '<button class="bq-article rien ' + (portes[emp] ? "" : "portee") + '" data-enlever="' + emp + '">' +
-                   '<span class="e">✕</span><span class="n">Rien</span><span class="p">' + (portes[emp] ? "Enlever" : "Choisi ✓") + "</span></button>";
-        return '<div class="bq-rayon-titre">' + esc(MATIN.EMPLACEMENTS[emp]) + "</div>" +
-               '<div class="bq-grille">' + rien + liste.map(carte).join("") + "</div>";
       }).join("");
       return;
     }
@@ -1781,7 +1836,61 @@
     }).join("");
   }
 
-  $("ouvrirBoutique").addEventListener("click", function () { ouvrirBoutique(null); });
+  // ---------- La garde-robe : elle s'habille, tiroir par tiroir ----------
+  function dessinerGardeRobe(f, portes) {
+    var tout = aElle(f.nom);
+    var sections = MATIN.SECTIONS;
+    if (!sections.filter(function (c) { return c.cle === BQ.filtre; }).length) BQ.filtre = sections[0].cle;
+    $("bqFiltres").innerHTML = sections.map(function (c) {
+      var n = tout.filter(function (a) { return c.emplacements.indexOf(a.emplacement) >= 0; }).length;
+      return '<button data-filtre="' + c.cle + '" class="' + (c.cle === BQ.filtre ? "choisi" : "") + '">' +
+             c.emoji + " " + esc(c.nom) + (n ? " (" + n + ")" : "") + "</button>";
+    }).join("");
+    var sec = sections.filter(function (c) { return c.cle === BQ.filtre; })[0];
+    var html = "";
+    sec.emplacements.forEach(function (emp) {
+      var liste = tout.filter(function (a) { return a.emplacement === emp; });
+      var titre = MATIN.EMPLACEMENTS[emp];
+      if (sec.emplacements.length > 1) html += '<div class="bq-rayon-titre">' + esc(titre) + "</div>";
+      else if (sec.sous) html += '<div class="bq-note">' + esc(sec.sous) + "</div>";
+      if (!liste.length) {
+        html += '<div class="bq-vide">Rien encore dans ce tiroir. Va faire un tour à la boutique !</div>';
+        return;
+      }
+      // La tenue complète n'a pas de « Rien » : la robe de tous les jours joue ce rôle
+      var rien = emp === "tenue" ? "" :
+        '<button class="bq-article rien ' + (portes[emp] ? "" : "portee") + '" data-enlever="' + emp + '">' +
+        '<span class="e">✕</span><span class="n">Rien</span><span class="p">' + (portes[emp] ? "Enlever" : "Choisi ✓") + "</span></button>";
+      html += '<div class="bq-grille">' + rien + liste.map(function (a) {
+        var portee = portes[emp] === a.id || (emp === "tenue" && a.id === "robeSimple" && !portes.tenue && !portes.haut && !portes.bas);
+        return '<button class="bq-article ' + (portee ? "portee" : "a-moi") + '" data-mettre="' + a.id + '">' +
+               '<span class="e">' + a.emoji + '</span><span class="n">' + esc(a.nom) + "</span>" +
+               '<span class="p">' + (portee ? "Elle le porte ✓" : "Mettre") + "</span></button>";
+      }).join("") + "</div>";
+    });
+    // La couleur des cheveux, débloquée par l'arc-en-ciel
+    if (BQ.filtre === "coiffure") {
+      var libre = MATIN.possede(stock, f.nom, "cheveuxArcEnCiel"), t = MATIN.teinte(stock, f.nom);
+      html += '<div class="bq-rayon-titre">Couleur des cheveux<small>' +
+              (libre ? "à toi de choisir" : "achète « Cheveux arc-en-ciel » pour débloquer toutes les couleurs") + "</small></div>";
+      if (libre) html += '<div class="bq-teintes">' + MATIN.TEINTES.map(function (c) {
+        var couleur = c.couleur || (MATIN.reglages(stock).avatars[f.nom] || {}).cheveux;
+        couleur = MATIN.CHEVEUX[couleur] || couleur || "#8B5A2B";
+        return '<button class="bq-teinte ' + (t === c.cle ? "choisie" : "") + '" data-teinte="' + c.cle + '">' +
+               '<i style="background:' + couleur + '"></i>' + esc(c.nom) + "</button>";
+      }).join("") + "</div>";
+    }
+    $("bqRayons").innerHTML = html;
+  }
+
+  $("ouvrirBoutique").addEventListener("click", function () { BQ.filtre = "tout"; ouvrirBoutique(null, "boutique"); });
+  $("ouvrirGarde").addEventListener("click", function () { BQ.filtre = "tenue"; ouvrirBoutique(null, "garderobe"); });
+  $("bqBascule").addEventListener("click", function () {
+    BQ.mode = BQ.mode === "garderobe" ? "boutique" : "garderobe";
+    BQ.filtre = BQ.mode === "garderobe" ? "tenue" : "tout";
+    BQ.essai = null;
+    dessinerBoutique();
+  });
   $("bqFermer").addEventListener("click", fermerBoutique);
   $("bqcNon").addEventListener("click", function () { $("bqConfirme").hidden = true; BQ.enCours = null; });
   // Une collection complétée offre des étoiles, une seule fois
@@ -1820,7 +1929,7 @@
     if (!a || MATIN.solde(stock, nom) < a.cout) return;
     BQ.essai = null;
     stock.ecrire("boutique/achats/" + nom + "/" + a.id, { cout: a.cout, le: MATIN.cleJour(maintenant()) });
-    stock.ecrire("boutique/portes/" + nom + "/" + a.emplacement, a.id);
+    habiller(nom, a.emplacement, a.id);
     jouer("bocal");
     parler(nom + " a acheté " + MATIN.sansEmoji(a.nom) + " !");
     dessinerBoutique();
@@ -1828,43 +1937,52 @@
     if (pleine) montrerFete(pleine);
   });
   $("boutique").addEventListener("click", function (ev) {
-    var q = ev.target.closest && ev.target.closest("button[data-fille]");
+    var C = function (sel) { return ev.target.closest && ev.target.closest(sel); };
+    var q = C("button[data-fille]");
     if (q) { BQ.fille = q.getAttribute("data-fille"); BQ.essai = null; dessinerBoutique(); return; }
-    var fi = ev.target.closest && ev.target.closest("button[data-filtre]");
-    if (fi) { BQ.filtre = fi.getAttribute("data-filtre"); dessinerBoutique(); return; }
-    var stop = ev.target.closest && ev.target.closest("[data-arreter-essai]");
+    var fi = C("button[data-filtre]");
+    if (fi) { BQ.filtre = fi.getAttribute("data-filtre"); BQ.essai = null; dessinerBoutique(); return; }
+    var stop = C("[data-arreter-essai]");
     if (stop) { BQ.essai = null; dessinerBoutique(); return; }
-    var vide = ev.target.closest && ev.target.closest("[data-enlever]");
-    if (vide) { // la case « Rien » de la garde-robe
-      BQ.essai = null;
-      stock.ecrire("boutique/portes/" + BQ.fille + "/" + vide.getAttribute("data-enlever"), null);
+    var teinte = C("[data-teinte]");
+    if (teinte) {
+      stock.ecrire("boutique/teinte/" + BQ.fille, teinte.getAttribute("data-teinte") || null);
       jouer("etoile");
       dessinerBoutique();
       return;
     }
-    var achete = ev.target.closest && ev.target.closest("[data-acheter-essai]");
+    var vide = C("[data-enlever]");
+    if (vide) { // la case « Rien » d'un tiroir
+      habiller(BQ.fille, vide.getAttribute("data-enlever"), null);
+      jouer("etoile");
+      dessinerBoutique();
+      return;
+    }
+    var mettre = C("[data-mettre]");
+    if (mettre) { // la garde-robe : on met, on enlève, ça se voit tout de suite
+      var art = MATIN.articleDe(mettre.getAttribute("data-mettre"));
+      if (!art) return;
+      var dejaLa = MATIN.portes(stock, BQ.fille)[art.emplacement] === art.id;
+      habiller(BQ.fille, art.emplacement, dejaLa && art.emplacement !== "tenue" ? null : art.id);
+      jouer("etoile");
+      dessinerBoutique();
+      return;
+    }
+    var achete = C("[data-acheter-essai]");
     if (achete && BQ.essai) {
-      var art = MATIN.articleDe(BQ.essai);
-      if (!art || MATIN.solde(stock, BQ.fille) < art.cout) return;
-      BQ.enCours = art;
-      $("bqcEmoji").textContent = art.emoji;
-      $("bqcTexte").innerHTML = esc(BQ.fille) + ", tu achètes <b>" + esc(art.nom) + "</b> pour " + art.cout + " ⭐ ?";
+      var a2 = MATIN.articleDe(BQ.essai);
+      if (!a2 || MATIN.solde(stock, BQ.fille) < a2.cout) return;
+      BQ.enCours = a2;
+      $("bqcEmoji").textContent = a2.emoji;
+      $("bqcTexte").innerHTML = esc(BQ.fille) + ", tu achètes <b>" + esc(a2.nom) + "</b> pour " + a2.cout + " ⭐ ?";
       $("bqConfirme").hidden = false;
       return;
     }
-    var b = ev.target.closest && ev.target.closest("button[data-article]");
+    var b = C("button[data-article]");
     if (!b) return;
-    var a = MATIN.articleDe(b.getAttribute("data-article")), nom = BQ.fille;
+    var a = MATIN.articleDe(b.getAttribute("data-article"));
     if (!a) return;
-    if (MATIN.possede(stock, nom, a.id)) { // déjà à elle : on le met ou on l'enlève
-      var portes = MATIN.portes(stock, nom);
-      BQ.essai = null;
-      stock.ecrire("boutique/portes/" + nom + "/" + a.emplacement, portes[a.emplacement] === a.id ? null : a.id);
-      jouer("etoile");
-      dessinerBoutique();
-      return;
-    }
-    BQ.essai = BQ.essai === a.id ? null : a.id; // pas encore à elle : elle l'essaie avant d'acheter
+    BQ.essai = BQ.essai === a.id ? null : a.id; // en boutique, on essaie toujours avant
     jouer("etoile");
     dessinerBoutique();
   });
@@ -1932,8 +2050,10 @@
     cible = nouvelle;
     var boutiquePossible = boutiqueOuvrable(s, etat);
     $("ouvrirBoutique").hidden = !boutiquePossible;
+    $("ouvrirGarde").hidden = !boutiquePossible;
     $("ouvrirAlbum").hidden = !boutiquePossible;
     document.body.classList.toggle("soir", boutiquePossible);
+    mesurerBoutons();
     if (!boutiquePossible && BQ.ouverte) fermerBoutique();
     if (!boutiquePossible && AL.ouvert) fermerAlbum();
     Musique.maj(demarre && musiqueVoulue && etat === "routine");

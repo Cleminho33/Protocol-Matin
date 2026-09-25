@@ -361,119 +361,180 @@ var MATIN = (function () {
     { cle: "coeur",  nom: "Coups de cœur",      emoji: "💎", sous: "Deux semaines, et c'est à toi" },
     { cle: "saison", nom: "Le rayon du moment", emoji: "🎪", sous: "Il ne reste pas toute l'année" }
   ];
+  // Un emplacement = un endroit du corps. Une seule chose à la fois par emplacement.
   var EMPLACEMENTS = {
-    coiffure: "La coiffure", cheveux: "La couleur des cheveux", tete: "Sur la tête", visage: "Sur le visage",
-    joues: "Sur les joues", cou: "Autour du cou", poignet: "Au poignet", tenue: "La tenue",
-    pieds: "Aux pieds", dos: "Dans le dos", main: "Dans la main", effet: "Autour d'elle", compagnon: "À côté d'elle"
+    tenue: "Tenue complète", haut: "Haut", bas: "Bas", pieds: "Chaussures", chaussettes: "Chaussettes",
+    coiffure: "Coiffure", cheveux: "Couleur et mèches", tete: "Accessoire de coiffure",
+    visage: "Masques et lunettes", joues: "Maquillage", cou: "Collier",
+    dos: "Dans le dos", effet: "Autour d'elle", compagnon: "Compagnon"
   };
-  var CATALOGUE = [
+  // Les rayons de la garde-robe : plusieurs emplacements peuvent tenir dans le même tiroir
+  var SECTIONS = [
+    { cle: "tenue",       nom: "Tenue complète",       emoji: "\u{1F457}", emplacements: ["tenue"], sous: "Remplace le haut et le bas" },
+    { cle: "haut",        nom: "Haut",                 emoji: "\u{1F455}", emplacements: ["haut"], sous: "Sans tenue complète" },
+    { cle: "bas",         nom: "Bas",                  emoji: "\u{1F456}", emplacements: ["bas"], sous: "Sans tenue complète" },
+    { cle: "pieds",       nom: "Chaussures",           emoji: "\u{1F45F}", emplacements: ["pieds"] },
+    { cle: "chaussettes", nom: "Chaussettes",          emoji: "\u{1F9E6}", emplacements: ["chaussettes"] },
+    { cle: "coiffure",    nom: "Coiffure",             emoji: "\u{1F487}", emplacements: ["coiffure", "cheveux"] },
+    { cle: "tete",        nom: "Accessoires de coiffure", emoji: "\u{1F380}", emplacements: ["tete"] },
+    { cle: "visage",      nom: "Maquillage et masques", emoji: "\u{1F484}", emplacements: ["visage", "joues"] },
+    { cle: "cou",         nom: "Colliers",             emoji: "\u2B50", emplacements: ["cou"] },
+    { cle: "dos",         nom: "Dans le dos",          emoji: "\u{1F9DA}", emplacements: ["dos"] },
+    { cle: "effet",       nom: "Derrière elle",        emoji: "\u2728", emplacements: ["effet", "compagnon"] }
+  ];
+  // Les couleurs de cheveux débloquées par l'article « Cheveux arc-en-ciel »
+  var TEINTES = [
+    { cle: "", nom: "Sa couleur", couleur: "" },
+    { cle: "rose", nom: "Rose", couleur: "#FF6FA5" },
+    { cle: "bleu", nom: "Bleu", couleur: "#5FD0FF" },
+    { cle: "violet", nom: "Violet", couleur: "#B78BFF" },
+    { cle: "vert", nom: "Vert", couleur: "#6BE38A" },
+    { cle: "turquoise", nom: "Turquoise", couleur: "#3FC7B4" },
+    { cle: "rouge", nom: "Rouge", couleur: "#E5484D" },
+    { cle: "blanc", nom: "Blanc", couleur: "#EDEDF5" },
+    { cle: "blond", nom: "Blond", couleur: "#E6B656" },
+    { cle: "noir", nom: "Noir", couleur: "#262020" }
+  ];
+  // Retirés du catalogue : mal dessinés, on rend les étoiles
+  var RETIRES = { bracelet: 1, montre: 1, baguette: 1, doudou: 1, citrouille: 1, ballons: 1 };
+  // Toujours à elles, gratuites : de quoi s'habiller même sans avoir rien acheté
+  var BASE = [
+    { id: "robeSimple", nom: "Robe de tous les jours", emoji: "\u{1F457}", cout: 0, rayon: "base", emplacement: "tenue" },
+    { id: "teeShirt",   nom: "Tee-shirt tout simple",  emoji: "\u{1F455}", cout: 0, rayon: "base", emplacement: "haut" },
+    { id: "jeanSimple", nom: "Jean tout simple",       emoji: "\u{1F456}", cout: 0, rayon: "base", emplacement: "bas" }
+  ];
+  var CATALOGUE = BASE.concat([
     // 🌈 Petits plus : les détails qui se voient quand même
-    { id: "barrette",       nom: "Barrette cœur",        emoji: "🎀", cout: 2, rayon: "petits", emplacement: "tete" },
-    { id: "serreTete",      nom: "Serre-tête à pois",    emoji: "💖", cout: 3, rayon: "petits", emplacement: "tete" },
-    { id: "fleur",          nom: "Fleur dans les cheveux", emoji: "🌸", cout: 3, rayon: "petits", emplacement: "tete" },
-    { id: "grosNoeud",      nom: "Gros nœud",            emoji: "🎗️", cout: 3, rayon: "petits", emplacement: "tete" },
-    { id: "bandeau",        nom: "Bandeau de sport",     emoji: "🎽", cout: 2, rayon: "petits", emplacement: "tete" },
-    { id: "couronneFleurs", nom: "Couronne de fleurs",   emoji: "🌼", cout: 4, rayon: "petits", emplacement: "tete" },
-    { id: "soleil",         nom: "Lunettes de soleil",   emoji: "😎", cout: 3, rayon: "petits", emplacement: "visage" },
-    { id: "lunettesRondes", nom: "Lunettes rondes",      emoji: "👓", cout: 3, rayon: "petits", emplacement: "visage" },
-    { id: "lunettesCoeur",  nom: "Lunettes en cœur",     emoji: "😍", cout: 4, rayon: "petits", emplacement: "visage" },
-    { id: "taches",         nom: "Taches de rousseur",   emoji: "🤎", cout: 2, rayon: "petits", emplacement: "joues" },
-    { id: "etoileJoue",     nom: "Étoile sur la joue",   emoji: "🌟", cout: 2, rayon: "petits", emplacement: "joues" },
-    { id: "paillettesJoues", nom: "Paillettes sur les joues", emoji: "💫", cout: 3, rayon: "petits", emplacement: "joues" },
-    { id: "collier",        nom: "Collier étoile",       emoji: "⭐", cout: 2, rayon: "petits", emplacement: "cou" },
-    { id: "collierCoeur",   nom: "Collier cœur",         emoji: "💝", cout: 3, rayon: "petits", emplacement: "cou" },
-    { id: "medaille",       nom: "Médaille du matin",    emoji: "🏅", cout: 4, rayon: "petits", emplacement: "cou" },
-    { id: "echarpe",        nom: "Écharpe rayée",        emoji: "🧣", cout: 3, rayon: "petits", emplacement: "cou" },
-    { id: "bracelet",       nom: "Bracelet à perles",    emoji: "📿", cout: 2, rayon: "petits", emplacement: "poignet" },
-    { id: "montre",         nom: "Montre",               emoji: "⌚", cout: 4, rayon: "petits", emplacement: "poignet" },
-    { id: "chaussettes",    nom: "Chaussettes à rayures", emoji: "🧦", cout: 2, rayon: "petits", emplacement: "pieds" },
-    { id: "ballerines",     nom: "Ballerines",           emoji: "👡", cout: 4, rayon: "petits", emplacement: "pieds" },
-    { id: "bottesPluie",    nom: "Bottes de pluie",      emoji: "👢", cout: 4, rayon: "petits", emplacement: "pieds" },
-    { id: "sacDos",         nom: "Petit sac à dos",      emoji: "🎒", cout: 4, rayon: "petits", emplacement: "dos" },
-    { id: "papillonVole",   nom: "Un papillon qui vole autour", emoji: "🦋", cout: 4, rayon: "petits", emplacement: "effet" },
+    { id: "barrette",       nom: "Barrette cœur",        emoji: "🎀", cout: 1, rayon: "petits", emplacement: "tete" },
+    { id: "serreTete",      nom: "Serre-tête à pois",    emoji: "💖", cout: 2, rayon: "petits", emplacement: "tete" },
+    { id: "fleur",          nom: "Fleur dans les cheveux", emoji: "🌸", cout: 2, rayon: "petits", emplacement: "tete" },
+    { id: "grosNoeud",      nom: "Gros nœud",            emoji: "🎗️", cout: 2, rayon: "petits", emplacement: "tete" },
+    { id: "bandeau",        nom: "Bandeau de sport",     emoji: "🎽", cout: 1, rayon: "petits", emplacement: "tete" },
+    { id: "couronneFleurs", nom: "Couronne de fleurs",   emoji: "🌼", cout: 3, rayon: "petits", emplacement: "tete" },
+    { id: "soleil",         nom: "Lunettes de soleil",   emoji: "😎", cout: 2, rayon: "petits", emplacement: "visage" },
+    { id: "lunettesRondes", nom: "Lunettes rondes",      emoji: "👓", cout: 2, rayon: "petits", emplacement: "visage" },
+    { id: "lunettesCoeur",  nom: "Lunettes en cœur",     emoji: "😍", cout: 3, rayon: "petits", emplacement: "visage" },
+    { id: "taches",         nom: "Taches de rousseur",   emoji: "🤎", cout: 1, rayon: "petits", emplacement: "joues" },
+    { id: "etoileJoue",     nom: "Étoile sur la joue",   emoji: "🌟", cout: 1, rayon: "petits", emplacement: "joues" },
+    { id: "coeurJoue",      nom: "Cœur sur la joue",     emoji: "❤️", cout: 1, rayon: "petits", emplacement: "joues" },
+    { id: "paillettesJoues", nom: "Paillettes sur les joues", emoji: "💫", cout: 2, rayon: "petits", emplacement: "joues" },
+    { id: "collier",        nom: "Collier étoile",       emoji: "⭐", cout: 1, rayon: "petits", emplacement: "cou" },
+    { id: "collierCoeur",   nom: "Collier cœur",         emoji: "💝", cout: 2, rayon: "petits", emplacement: "cou" },
+    { id: "medaille",       nom: "Médaille du matin",    emoji: "🏅", cout: 3, rayon: "petits", emplacement: "cou" },
+    { id: "echarpe",        nom: "Écharpe rayée",        emoji: "🧣", cout: 2, rayon: "petits", emplacement: "cou" },
+    { id: "chaussettes",    nom: "Chaussettes à rayures", emoji: "🧦", cout: 1, rayon: "petits", emplacement: "chaussettes" },
+    { id: "chaussettesCoeurs", nom: "Chaussettes à cœurs", emoji: "💗", cout: 1, rayon: "petits", emplacement: "chaussettes" },
+    { id: "chaussettesHautes", nom: "Chaussettes hautes", emoji: "🥿", cout: 2, rayon: "petits", emplacement: "chaussettes" },
+    { id: "chaussettesEtoiles", nom: "Chaussettes à étoiles", emoji: "✨", cout: 2, rayon: "petits", emplacement: "chaussettes" },
+    { id: "ballerines",     nom: "Ballerines",           emoji: "👡", cout: 3, rayon: "petits", emplacement: "pieds" },
+    { id: "bottesPluie",    nom: "Bottes de pluie",      emoji: "👢", cout: 3, rayon: "petits", emplacement: "pieds" },
+    { id: "debardeur",      nom: "Débardeur étoilé",     emoji: "🌟", cout: 3, rayon: "petits", emplacement: "haut" },
+    { id: "tshirtCoeur",    nom: "Tee-shirt à cœur",     emoji: "💕", cout: 3, rayon: "petits", emplacement: "haut" },
+    { id: "pullRaye",       nom: "Pull rayé",            emoji: "🧶", cout: 3, rayon: "petits", emplacement: "haut" },
+    { id: "short",          nom: "Short en jean",        emoji: "🩳", cout: 3, rayon: "petits", emplacement: "bas" },
+    { id: "legging",        nom: "Legging noir",         emoji: "🖤", cout: 3, rayon: "petits", emplacement: "bas" },
+    { id: "sacDos",         nom: "Petit sac à dos",      emoji: "🎒", cout: 3, rayon: "petits", emplacement: "dos" },
+    { id: "papillonVole",   nom: "Un papillon qui vole autour", emoji: "🦋", cout: 3, rayon: "petits", emplacement: "effet" },
 
     // ✨ Grands changements : on la reconnaît de loin
-    { id: "demiQueue",      nom: "Demi-queue",           emoji: "💫", cout: 7,  rayon: "grands", emplacement: "coiffure" },
-    { id: "tresse",         nom: "Tresse sur le côté",   emoji: "💇‍♀️", cout: 8, rayon: "grands", emplacement: "coiffure" },
-    { id: "nattes",         nom: "Deux nattes",          emoji: "👧", cout: 8,  rayon: "grands", emplacement: "coiffure" },
-    { id: "couettesHautes", nom: "Couettes hautes",      emoji: "👱‍♀️", cout: 8, rayon: "grands", emplacement: "coiffure" },
-    { id: "chignon",        nom: "Chignon de danseuse",  emoji: "🩰", cout: 9,  rayon: "grands", emplacement: "coiffure" },
-    { id: "macarons",       nom: "Deux macarons",        emoji: "🍡", cout: 9,  rayon: "grands", emplacement: "coiffure" },
-    { id: "ondules",        nom: "Cheveux ondulés",      emoji: "〰️", cout: 9,  rayon: "grands", emplacement: "coiffure" },
-    { id: "boucles",        nom: "Cheveux bouclés",      emoji: "🌀", cout: 10, rayon: "grands", emplacement: "coiffure" },
-    { id: "meche",          nom: "Mèche colorée",        emoji: "🎨", cout: 6,  rayon: "grands", emplacement: "cheveux" },
-    { id: "pointes",        nom: "Pointes colorées",     emoji: "🖌️", cout: 8,  rayon: "grands", emplacement: "cheveux" },
-    { id: "cheveuxArcEnCiel", nom: "Cheveux arc-en-ciel", emoji: "🌈", cout: 12, rayon: "grands", emplacement: "cheveux" },
-    { id: "robePois",       nom: "Robe à pois",          emoji: "👚", cout: 7,  rayon: "grands", emplacement: "tenue" },
-    { id: "robeFleurs",     nom: "Robe à fleurs",        emoji: "👗", cout: 8,  rayon: "grands", emplacement: "tenue" },
-    { id: "salopette",      nom: "Salopette en jean",    emoji: "👖", cout: 8,  rayon: "grands", emplacement: "tenue" },
-    { id: "jeanCoeur",      nom: "Jean et tee-shirt cœur", emoji: "👕", cout: 8, rayon: "grands", emplacement: "tenue" },
-    { id: "survetement",    nom: "Survêtement de sport", emoji: "🏃", cout: 8,  rayon: "grands", emplacement: "tenue" },
-    { id: "manteau",        nom: "Manteau d'hiver",      emoji: "🧥", cout: 9,  rayon: "grands", emplacement: "tenue" },
-    { id: "tutu",           nom: "Tutu de danseuse",     emoji: "💃", cout: 10, rayon: "grands", emplacement: "tenue" },
-    { id: "kimono",         nom: "Kimono à fleurs",      emoji: "🥋", cout: 10, rayon: "grands", emplacement: "tenue" },
-    { id: "robeEtoilee",    nom: "Robe étoilée",         emoji: "🌌", cout: 10, rayon: "grands", emplacement: "tenue" },
-    { id: "baskets",        nom: "Baskets à paillettes", emoji: "👟", cout: 7,  rayon: "grands", emplacement: "pieds" },
-    { id: "basketsMontantes", nom: "Baskets montantes",  emoji: "🥾", cout: 7,  rayon: "grands", emplacement: "pieds" },
-    { id: "bottesCowboy",   nom: "Bottes de cow-boy",    emoji: "🤠", cout: 8,  rayon: "grands", emplacement: "pieds" },
-    { id: "casquette",      nom: "Casquette",            emoji: "🧢", cout: 7,  rayon: "grands", emplacement: "tete" },
-    { id: "chapeauPaille",  nom: "Chapeau de paille",    emoji: "👒", cout: 7,  rayon: "grands", emplacement: "tete" },
-    { id: "bonnet",         nom: "Bonnet à pompon",      emoji: "🧶", cout: 7,  rayon: "grands", emplacement: "tete" },
-    { id: "baguette",       nom: "Baguette magique",     emoji: "🪄", cout: 9,  rayon: "grands", emplacement: "main" },
-    { id: "doudou",         nom: "Doudou dans les bras", emoji: "🧸", cout: 9,  rayon: "grands", emplacement: "main" },
-    { id: "etoilesEffet",   nom: "Des étoiles qui scintillent", emoji: "✨", cout: 10, rayon: "grands", emplacement: "effet" },
+    { id: "demiQueue",      nom: "Demi-queue",           emoji: "💫", cout: 5, rayon: "grands", emplacement: "coiffure" },
+    { id: "tresse",         nom: "Tresse sur le côté",   emoji: "💇‍♀️", cout: 6, rayon: "grands", emplacement: "coiffure" },
+    { id: "nattes",         nom: "Deux nattes",          emoji: "👧", cout: 6, rayon: "grands", emplacement: "coiffure" },
+    { id: "couettesHautes", nom: "Couettes hautes",      emoji: "👱‍♀️", cout: 6, rayon: "grands", emplacement: "coiffure" },
+    { id: "chignon",        nom: "Chignon de danseuse",  emoji: "🩰", cout: 6, rayon: "grands", emplacement: "coiffure" },
+    { id: "macarons",       nom: "Deux macarons",        emoji: "🍡", cout: 6, rayon: "grands", emplacement: "coiffure" },
+    { id: "ondules",        nom: "Cheveux ondulés",      emoji: "〰️", cout: 6, rayon: "grands", emplacement: "coiffure" },
+    { id: "boucles",        nom: "Cheveux bouclés",      emoji: "🌀", cout: 7, rayon: "grands", emplacement: "coiffure" },
+    { id: "meche",          nom: "Mèche colorée",        emoji: "🎨", cout: 4, rayon: "grands", emplacement: "cheveux" },
+    { id: "pointes",        nom: "Pointes colorées",     emoji: "🖌️", cout: 6, rayon: "grands", emplacement: "cheveux" },
+    { id: "cheveuxArcEnCiel", nom: "Cheveux arc-en-ciel", emoji: "🌈", cout: 8, rayon: "grands", emplacement: "cheveux",
+      note: "Débloque toutes les couleurs de cheveux" },
+    { id: "chemisier",      nom: "Chemisier à fleurs",   emoji: "🌺", cout: 4, rayon: "grands", emplacement: "haut" },
+    { id: "sweatCapuche",   nom: "Sweat à capuche",      emoji: "🧥", cout: 4, rayon: "grands", emplacement: "haut" },
+    { id: "hautArcEnCiel",  nom: "Tee-shirt arc-en-ciel", emoji: "🌈", cout: 4, rayon: "grands", emplacement: "haut" },
+    { id: "maillotFoot",    nom: "Maillot de foot",      emoji: "⚽", cout: 4, rayon: "grands", emplacement: "haut" },
+    { id: "topPaillettes",  nom: "Haut à paillettes",    emoji: "✨", cout: 5, rayon: "grands", emplacement: "haut" },
+    { id: "jupePlissee",    nom: "Jupe plissée",         emoji: "🟪", cout: 4, rayon: "grands", emplacement: "bas" },
+    { id: "jupeJean",       nom: "Jupe en jean",         emoji: "🟦", cout: 4, rayon: "grands", emplacement: "bas" },
+    { id: "pantalonLarge",  nom: "Pantalon large",       emoji: "🟫", cout: 4, rayon: "grands", emplacement: "bas" },
+    { id: "jupeTutu",       nom: "Jupe tutu",            emoji: "🩰", cout: 5, rayon: "grands", emplacement: "bas" },
+    { id: "pantalonEtoiles", nom: "Pantalon étoilé",     emoji: "🌌", cout: 5, rayon: "grands", emplacement: "bas" },
+    { id: "robePois",       nom: "Robe à pois",          emoji: "👚", cout: 5, rayon: "grands", emplacement: "tenue" },
+    { id: "robeFleurs",     nom: "Robe à fleurs",        emoji: "👗", cout: 6, rayon: "grands", emplacement: "tenue" },
+    { id: "salopette",      nom: "Salopette en jean",    emoji: "👖", cout: 6, rayon: "grands", emplacement: "tenue" },
+    { id: "jeanCoeur",      nom: "Jean et tee-shirt cœur", emoji: "👕", cout: 6, rayon: "grands", emplacement: "tenue" },
+    { id: "survetement",    nom: "Survêtement de sport", emoji: "🏃", cout: 6, rayon: "grands", emplacement: "tenue" },
+    { id: "manteau",        nom: "Manteau d'hiver",      emoji: "🧥", cout: 6, rayon: "grands", emplacement: "tenue" },
+    { id: "tutu",           nom: "Tutu de danseuse",     emoji: "💃", cout: 7, rayon: "grands", emplacement: "tenue" },
+    { id: "kimono",         nom: "Kimono à fleurs",      emoji: "🥋", cout: 7, rayon: "grands", emplacement: "tenue" },
+    { id: "robeEtoilee",    nom: "Robe étoilée",         emoji: "🌌", cout: 7, rayon: "grands", emplacement: "tenue" },
+    { id: "baskets",        nom: "Baskets à paillettes", emoji: "👟", cout: 5, rayon: "grands", emplacement: "pieds" },
+    { id: "basketsMontantes", nom: "Baskets montantes",  emoji: "🥾", cout: 5, rayon: "grands", emplacement: "pieds" },
+    { id: "bottesCowboy",   nom: "Bottes de cow-boy",    emoji: "🤠", cout: 6, rayon: "grands", emplacement: "pieds" },
+    { id: "casquette",      nom: "Casquette",            emoji: "🧢", cout: 5, rayon: "grands", emplacement: "tete" },
+    { id: "chapeauPaille",  nom: "Chapeau de paille",    emoji: "👒", cout: 5, rayon: "grands", emplacement: "tete" },
+    { id: "bonnet",         nom: "Bonnet à pompon",      emoji: "🧶", cout: 5, rayon: "grands", emplacement: "tete" },
+    { id: "maquillagePapillon", nom: "Maquillage de papillon", emoji: "🦋", cout: 4, rayon: "grands", emplacement: "joues" },
+    { id: "maquillageLicorne",  nom: "Maquillage de licorne",  emoji: "🦄", cout: 5, rayon: "grands", emplacement: "joues" },
+    { id: "etoilesEffet",   nom: "Des étoiles qui scintillent", emoji: "✨", cout: 7, rayon: "grands", emplacement: "effet" },
 
     // 💎 Coups de cœur : le truc rare
-    { id: "couronne",   nom: "Couronne de princesse", emoji: "👑", cout: 20, rayon: "coeur", emplacement: "tete" },
-    { id: "paillettes", nom: "Pluie de paillettes",   emoji: "🎇", cout: 20, rayon: "coeur", emplacement: "effet" },
-    { id: "ailes",      nom: "Ailes de fée",          emoji: "🧚", cout: 22, rayon: "coeur", emplacement: "dos" },
-    { id: "ailesAnge",  nom: "Ailes d'ange",          emoji: "😇", cout: 22, rayon: "coeur", emplacement: "dos" },
-    { id: "lapin",      nom: "Oreilles et queue de lapin", emoji: "🐰", cout: 22, rayon: "coeur", emplacement: "dos" },
-    { id: "arcEnCiel",  nom: "Un arc-en-ciel derrière elle", emoji: "🌈", cout: 22, rayon: "coeur", emplacement: "effet" },
-    { id: "cape",       nom: "Cape de super-héroïne", emoji: "🦸", cout: 24, rayon: "coeur", emplacement: "dos" },
-    { id: "ailesPapillon", nom: "Ailes de papillon",  emoji: "🦋", cout: 24, rayon: "coeur", emplacement: "dos" },
-    { id: "renard",     nom: "Oreilles et queue de renard", emoji: "🦊", cout: 24, rayon: "coeur", emplacement: "dos" },
-    { id: "panda",      nom: "Oreilles de panda",     emoji: "🐼", cout: 24, rayon: "coeur", emplacement: "dos" },
-    { id: "sundae",     nom: "Déguisement de Sundae", emoji: "🐈", cout: 26, rayon: "coeur", emplacement: "dos" },
-    { id: "ailesDragon", nom: "Ailes de dragon",      emoji: "🐉", cout: 26, rayon: "coeur", emplacement: "dos" },
-    { id: "dinosaure",  nom: "Capuche de dinosaure",  emoji: "🦕", cout: 26, rayon: "coeur", emplacement: "dos" },
-    { id: "rondoudou",  nom: "Masque de Rondoudou",   emoji: "🎈", cout: 26, rayon: "coeur", emplacement: "visage" },
-    { id: "pikachu",    nom: "Masque de Pikachu",     emoji: "⚡", cout: 28, rayon: "coeur", emplacement: "visage" },
-    { id: "evoli",      nom: "Masque d'Évoli",        emoji: "🤎", cout: 28, rayon: "coeur", emplacement: "visage" },
-    { id: "salameche",  nom: "Masque de Salamèche",   emoji: "🔥", cout: 28, rayon: "coeur", emplacement: "visage" },
-    { id: "carapuce",   nom: "Masque de Carapuce",    emoji: "🐢", cout: 28, rayon: "coeur", emplacement: "visage" },
-    { id: "bulbizarre", nom: "Masque de Bulbizarre",  emoji: "🌱", cout: 28, rayon: "coeur", emplacement: "visage" },
-    { id: "princesse",  nom: "Robe de princesse",     emoji: "👸", cout: 28, rayon: "coeur", emplacement: "tenue" },
-    { id: "sirene",     nom: "Queue de sirène",       emoji: "🧜", cout: 30, rayon: "coeur", emplacement: "tenue" },
-    { id: "sundaeAmi",  nom: "Sundae qui te suit",    emoji: "🐾", cout: 30, rayon: "coeur", emplacement: "compagnon" },
+    { id: "couronne",   nom: "Couronne de princesse", emoji: "👑", cout: 14, rayon: "coeur", emplacement: "tete" },
+    { id: "paillettes", nom: "Pluie de paillettes",   emoji: "🎇", cout: 14, rayon: "coeur", emplacement: "effet" },
+    { id: "ailes",      nom: "Ailes de fée",          emoji: "🧚", cout: 15, rayon: "coeur", emplacement: "dos" },
+    { id: "ailesAnge",  nom: "Ailes d'ange",          emoji: "😇", cout: 15, rayon: "coeur", emplacement: "dos" },
+    { id: "lapin",      nom: "Oreilles et queue de lapin", emoji: "🐰", cout: 15, rayon: "coeur", emplacement: "dos" },
+    { id: "arcEnCiel",  nom: "Un arc-en-ciel derrière elle", emoji: "🌈", cout: 15, rayon: "coeur", emplacement: "effet" },
+    { id: "cape",       nom: "Cape de super-héroïne", emoji: "🦸", cout: 17, rayon: "coeur", emplacement: "dos" },
+    { id: "ailesPapillon", nom: "Ailes de papillon",  emoji: "🦋", cout: 17, rayon: "coeur", emplacement: "dos" },
+    { id: "renard",     nom: "Oreilles et queue de renard", emoji: "🦊", cout: 17, rayon: "coeur", emplacement: "dos" },
+    { id: "panda",      nom: "Oreilles de panda",     emoji: "🐼", cout: 17, rayon: "coeur", emplacement: "dos" },
+    { id: "sundae",     nom: "Déguisement de Sundae", emoji: "🐈", cout: 18, rayon: "coeur", emplacement: "dos" },
+    { id: "ailesDragon", nom: "Ailes de dragon",      emoji: "🐉", cout: 18, rayon: "coeur", emplacement: "dos" },
+    { id: "dinosaure",  nom: "Capuche de dinosaure",  emoji: "🦕", cout: 18, rayon: "coeur", emplacement: "dos" },
+    { id: "rondoudou",  nom: "Masque de Rondoudou",   emoji: "🎈", cout: 18, rayon: "coeur", emplacement: "visage" },
+    { id: "pikachu",    nom: "Masque de Pikachu",     emoji: "⚡", cout: 20, rayon: "coeur", emplacement: "visage" },
+    { id: "evoli",      nom: "Masque d'Évoli",        emoji: "🤎", cout: 20, rayon: "coeur", emplacement: "visage" },
+    { id: "salameche",  nom: "Masque de Salamèche",   emoji: "🔥", cout: 20, rayon: "coeur", emplacement: "visage" },
+    { id: "carapuce",   nom: "Masque de Carapuce",    emoji: "🐢", cout: 20, rayon: "coeur", emplacement: "visage" },
+    { id: "bulbizarre", nom: "Masque de Bulbizarre",  emoji: "🌱", cout: 20, rayon: "coeur", emplacement: "visage" },
+    { id: "princesse",  nom: "Robe de princesse",     emoji: "👸", cout: 20, rayon: "coeur", emplacement: "tenue" },
+    { id: "sirene",     nom: "Queue de sirène",       emoji: "🧜", cout: 21, rayon: "coeur", emplacement: "tenue" },
+    { id: "sundaeAmi",  nom: "Sundae qui te suit",    emoji: "🐾", cout: 21, rayon: "coeur", emplacement: "compagnon" },
 
     // 🎪 Le rayon du moment : il n'apparaît qu'à sa période
-    { id: "maquillageChat",  nom: "Maquillage de chat",  emoji: "🐱", cout: 6,  rayon: "saison", saison: "halloween", emplacement: "joues" },
-    { id: "citrouille",      nom: "Petite citrouille",   emoji: "🎃", cout: 8,  rayon: "saison", saison: "halloween", emplacement: "main" },
-    { id: "chapeauSorciere", nom: "Chapeau de sorcière", emoji: "🧙", cout: 10, rayon: "saison", saison: "halloween", emplacement: "tete" },
-    { id: "bonnetNoel",      nom: "Bonnet de Père Noël", emoji: "🎅", cout: 8,  rayon: "saison", saison: "noel", emplacement: "tete" },
-    { id: "boisRenne",       nom: "Bois de renne",       emoji: "🦌", cout: 8,  rayon: "saison", saison: "noel", emplacement: "tete" },
-    { id: "pullNoel",        nom: "Pull de Noël",        emoji: "🎄", cout: 10, rayon: "saison", saison: "noel", emplacement: "tenue" },
-    { id: "couronneAnniv",   nom: "Couronne d'anniversaire", emoji: "🎂", cout: 6, rayon: "saison", saison: "anniv", emplacement: "tete" },
-    { id: "ballons",         nom: "Des ballons",         emoji: "🎈", cout: 8,  rayon: "saison", saison: "anniv", emplacement: "main" },
-    { id: "lunettesPlage",   nom: "Lunettes de plage",   emoji: "🕶️", cout: 6, rayon: "saison", saison: "ete", emplacement: "visage" },
-    { id: "bouee",           nom: "Bouée canard",        emoji: "🛟", cout: 8,  rayon: "saison", saison: "ete", emplacement: "dos" },
-    { id: "maillotBain",     nom: "Maillot de bain",     emoji: "🩱", cout: 8,  rayon: "saison", saison: "ete", emplacement: "tenue" }
-  ];
+    { id: "maquillageChat",  nom: "Maquillage de chat",  emoji: "🐱", cout: 4,  rayon: "saison", saison: "halloween", emplacement: "joues" },
+    { id: "capeVampire",     nom: "Cape de vampire",     emoji: "🧛", cout: 6,  rayon: "saison", saison: "halloween", emplacement: "dos" },
+    { id: "chapeauSorciere", nom: "Chapeau de sorcière", emoji: "🧙", cout: 7,  rayon: "saison", saison: "halloween", emplacement: "tete" },
+    { id: "bonnetNoel",      nom: "Bonnet de Père Noël", emoji: "🎅", cout: 6,  rayon: "saison", saison: "noel", emplacement: "tete" },
+    { id: "boisRenne",       nom: "Bois de renne",       emoji: "🦌", cout: 6,  rayon: "saison", saison: "noel", emplacement: "tete" },
+    { id: "pullNoel",        nom: "Pull de Noël",        emoji: "🎄", cout: 7,  rayon: "saison", saison: "noel", emplacement: "tenue" },
+    { id: "couronneAnniv",   nom: "Couronne d'anniversaire", emoji: "🎂", cout: 4, rayon: "saison", saison: "anniv", emplacement: "tete" },
+    { id: "ballonsEffet",    nom: "Des ballons autour d'elle", emoji: "🎈", cout: 6, rayon: "saison", saison: "anniv", emplacement: "effet" },
+    { id: "lunettesPlage",   nom: "Lunettes de plage",   emoji: "🕶️", cout: 4, rayon: "saison", saison: "ete", emplacement: "visage" },
+    { id: "bouee",           nom: "Bouée canard",        emoji: "🛟", cout: 6,  rayon: "saison", saison: "ete", emplacement: "dos" },
+    { id: "maillotBain",     nom: "Maillot de bain",     emoji: "🩱", cout: 6,  rayon: "saison", saison: "ete", emplacement: "tenue" }
+  ]);
   // Des collections à compléter : une jauge dans la boutique, et un cadeau en étoiles quand elle est pleine
   var COLLECTIONS = [
-    { cle: "ailes",     nom: "Toutes les ailes",           emoji: "🧚", cadeau: 8,
+    { cle: "ailes",     nom: "Toutes les ailes",           emoji: "🧚", cadeau: 6,
       articles: ["ailes", "ailesAnge", "ailesPapillon", "ailesDragon"] },
-    { cle: "animaux",   nom: "Les déguisements d'animaux", emoji: "🐾", cadeau: 10,
+    { cle: "animaux",   nom: "Les déguisements d'animaux", emoji: "🐾", cadeau: 7,
       articles: ["sundae", "lapin", "renard", "panda", "dinosaure"] },
-    { cle: "pokemon",   nom: "Les masques Pokémon",        emoji: "⚡", cadeau: 12,
+    { cle: "pokemon",   nom: "Les masques Pokémon",        emoji: "⚡", cadeau: 8,
       articles: ["pikachu", "evoli", "salameche", "carapuce", "bulbizarre", "rondoudou"] },
-    { cle: "coiffures", nom: "Toutes les coiffures",       emoji: "💇‍♀️", cadeau: 10,
+    { cle: "coiffures", nom: "Toutes les coiffures",       emoji: "💇‍♀️", cadeau: 7,
       articles: ["demiQueue", "tresse", "nattes", "couettesHautes", "chignon", "macarons", "ondules", "boucles"] },
-    { cle: "tenues",    nom: "Toute la garde-robe",        emoji: "👗", cadeau: 12,
+    { cle: "tenues",    nom: "Toutes les tenues complètes", emoji: "👗", cadeau: 8,
       articles: ["robePois", "robeFleurs", "salopette", "jeanCoeur", "survetement", "manteau", "tutu", "kimono", "robeEtoilee"] },
-    { cle: "pieds",     nom: "Toutes les chaussures",      emoji: "👟", cadeau: 6,
-      articles: ["chaussettes", "ballerines", "bottesPluie", "baskets", "basketsMontantes", "bottesCowboy"] }
+    { cle: "hauts",     nom: "Tous les hauts",             emoji: "👕", cadeau: 6,
+      articles: ["debardeur", "tshirtCoeur", "pullRaye", "chemisier", "sweatCapuche", "hautArcEnCiel", "maillotFoot", "topPaillettes"] },
+    { cle: "bas",       nom: "Tous les bas",               emoji: "👖", cadeau: 5,
+      articles: ["short", "legging", "jupePlissee", "jupeJean", "pantalonLarge", "jupeTutu", "pantalonEtoiles"] },
+    { cle: "chaussettes", nom: "Toutes les chaussettes",   emoji: "🧦", cadeau: 3,
+      articles: ["chaussettes", "chaussettesCoeurs", "chaussettesHautes", "chaussettesEtoiles"] },
+    { cle: "pieds",     nom: "Toutes les chaussures",      emoji: "👟", cadeau: 4,
+      articles: ["ballerines", "bottesPluie", "baskets", "basketsMontantes", "bottesCowboy"] }
   ];
   // collections/<prénom>/<clé> = le jour où le cadeau a été donné
   function collection(stock, nom, c) {
@@ -506,6 +567,7 @@ var MATIN = (function () {
     var regl = reglages(stock);
     d = d || new Date();
     return articles(stock).filter(function (a) {
+      if (a.rayon === "base") return false; // déjà à elle, elle la retrouve dans la garde-robe
       return !a.saison || possede(stock, nom, a.id) || saisonOuverte(a.saison, d, regl, nom);
     });
   }
@@ -521,31 +583,55 @@ var MATIN = (function () {
   function achats(stock, nom) {
     var a = stock.lire("boutique/achats/" + nom) || {}, out = [];
     Object.keys(a).forEach(function (id) {
-      if (!a[id]) return;
+      if (!a[id] || RETIRES[id]) return;
       var art = articleDe(id) || { id: id, nom: a[id].nom || "Article", emoji: a[id].emoji || "🎁", emplacement: "", rayon: "maison" };
       out.push({ id: id, nom: art.nom, emoji: art.emoji, emplacement: art.emplacement, rayon: art.rayon,
                  cout: +a[id].cout || art.cout || 0, le: a[id].le });
     });
     return out.sort(function (x, y) { return (x.le || "").localeCompare(y.le || "") || x.cout - y.cout; });
   }
-  function possede(stock, nom, id) { return !!(stock.lire("boutique/achats/" + nom) || {})[id]; }
+  function estBase(id) { var a = articleDe(id); return !!a && a.rayon === "base"; }
+  function possede(stock, nom, id) {
+    if (RETIRES[id]) return false;
+    if (estBase(id)) return true;
+    return !!(stock.lire("boutique/achats/" + nom) || {})[id];
+  }
   function depense(stock, nom) {
-    return achats(stock, nom).reduce(function (s, a) { return s + a.cout; }, 0);
+    return achats(stock, nom).reduce(function (s, a) {
+      var art = articleDe(a.id);
+      return s + (art ? art.cout : a.cout); // si le prix baisse, la différence lui est rendue
+    }, 0);
   }
   function solde(stock, nom) { return total(stock, nom) - depense(stock, nom); }
   // Ce qu'elle porte : {emplacement: idArticle}, nettoyé de ce qui n'est plus acheté
   function portes(stock, nom) {
     var p = stock.lire("boutique/portes/" + nom) || {}, out = {};
     Object.keys(p).forEach(function (e) {
-      if (p[e] && possede(stock, nom, p[e])) out[e] = p[e];
+      if (!EMPLACEMENTS[e] || !p[e]) return;
+      var art = articleDe(p[e]);
+      if (!art || art.emplacement !== e) return;     // un article déplacé de tiroir ne compte plus
+      if (possede(stock, nom, p[e])) out[e] = p[e];
     });
+    // Une tenue complète prend la place du haut et du bas : jamais les deux en même temps
+    if (out.tenue) { delete out.haut; delete out.bas; }
     return out;
+  }
+  // La couleur de cheveux choisie, une fois « Cheveux arc-en-ciel » débloqué
+  function teinte(stock, nom) {
+    if (!possede(stock, nom, "cheveuxArcEnCiel")) return "";
+    var t = stock.lire("boutique/teinte/" + nom) || "";
+    for (var i = 0; i < TEINTES.length; i++) if (TEINTES[i].cle && TEINTES[i].cle === t) return t;
+    return "";
   }
   // L'apparence complète passée au dessin : les réglages parents plus les objets portés
   function apparence(stock, nom) {
     var a = copie(reglages(stock).avatars[nom] || {});
     a.objets = portes(stock, nom);
     if (a.objets.coiffure) a.coiffure = a.objets.coiffure;
+    // Rien en tenue, rien en haut, rien en bas : elle garde sa robe de tous les jours
+    if (!a.objets.tenue && !a.objets.haut && !a.objets.bas) a.objets.tenue = "robeSimple";
+    var t = teinte(stock, nom);
+    if (t) a.cheveux = t;
     return a;
   }
   // Le prochain objectif en boutique pour une fille : ce qu'elle peut déjà s'offrir, sinon le moins cher pas encore acheté
@@ -663,7 +749,8 @@ var MATIN = (function () {
     routines: routines, normaliserRoutine: normaliserRoutine, programme: programme,
     cleNote: cleNote, total: total, totalTous: totalTous, bonus: bonus, cagnotte: cagnotte,
     articles: articles, achats: achats, depense: depense, solde: solde, vitrine: vitrine,
-    RAYONS: RAYONS, EMPLACEMENTS: EMPLACEMENTS, catalogue: catalogue, articleDe: articleDe,
+    RAYONS: RAYONS, EMPLACEMENTS: EMPLACEMENTS, SECTIONS: SECTIONS, TEINTES: TEINTES,
+    catalogue: catalogue, articleDe: articleDe, teinte: teinte,
     COLLECTIONS: COLLECTIONS, collection: collection,
     possede: possede, portes: portes, apparence: apparence, enRayon: enRayon, saisonOuverte: saisonOuverte,
     CRITERES: CRITERES, criteresDe: criteresDe, compterCriteres: compterCriteres,
