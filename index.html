@@ -175,8 +175,8 @@
   .anneau.calin .emoji-centre { visibility: hidden; }
 
   /* Au départ du bus */
-  .fin-duo { position: absolute; left: 3vw; right: 3vw; bottom: calc(var(--u) * 3); display: flex; justify-content: space-between; pointer-events: none; }
-  .fin-duo > div { height: calc(var(--u) * 44); }
+  .fin-duo { position: absolute; left: 3vw; right: 3vw; bottom: calc(var(--u) * 2); display: flex; justify-content: space-between; pointer-events: none; }
+  .fin-duo > div { height: calc(var(--u) * 50); }
   @keyframes coucouMain { from { transform: rotate(-30deg); } to { transform: rotate(25deg); } }
 
   /* ---------- La route ---------- */
@@ -211,10 +211,13 @@
   .arret { font-size: calc(var(--u) * 9); line-height: 1; }
 
   /* ---------- Écrans calmes ---------- */
-  .calme { justify-content: center; align-items: center; text-align: center; }
-  .calme .grand { font-size: calc(var(--u) * 26); line-height: 1.1; }
-  .calme h2 { font-size: calc(var(--u) * 10); margin-top: calc(var(--u) * 2); }
-  .calme p { font-size: calc(var(--u) * 5.5); opacity: .8; margin-top: calc(var(--u) * 2); }
+  /* space-evenly : le contenu se répartit sur toute la hauteur au lieu de se tasser au milieu */
+  .calme { justify-content: space-evenly; align-items: center; text-align: center; padding: calc(var(--u) * 7) 5vw calc(var(--u) * 5); }
+  /* le soir, on réserve la place des deux boutons sous le texte */
+  body.soir .calme { padding-bottom: calc(var(--u) * 16); }
+  .calme .grand { font-size: calc(var(--u) * 18); line-height: 1.1; }
+  .calme h2 { font-size: calc(var(--u) * 9); margin-top: calc(var(--u) * 1.5); }
+  .calme p { font-size: calc(var(--u) * 5); opacity: .8; margin-top: calc(var(--u) * 1.5); }
   .calme .horloge { position: absolute; top: calc(var(--u) * 5); left: 5vw; }
   .calme .compteurs { position: absolute; top: calc(var(--u) * 6); right: 5vw; }
   .calme p.bocal-ligne { color: var(--or); opacity: 1; font-size: calc(var(--u) * 4.5); }
@@ -241,11 +244,16 @@
   [hidden] { display: none !important; }
 
   /* ---------- L'album des matins ---------- */
+  #boutonsSoir {
+    position: fixed; left: 0; right: 0; bottom: calc(var(--u) * 4.5); z-index: 12;
+    display: flex; flex-wrap: wrap; gap: calc(var(--u) * 2.5); align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  #boutonsSoir button { pointer-events: auto; }
   #ouvrirAlbum {
-    position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--u) * 12); z-index: 12;
     background: rgba(255,255,255,.14); color: #fff; border: none;
-    font-size: calc(var(--u) * 3.6); font-weight: 700; border-radius: 99px;
-    padding: calc(var(--u) * 1.2) calc(var(--u) * 4);
+    font-size: calc(var(--u) * 4); font-weight: 700; border-radius: 99px;
+    padding: calc(var(--u) * 1.6) calc(var(--u) * 4.5);
   }
   #album { position: fixed; inset: 0; z-index: 18; display: none; flex-direction: column; background: #10132A; text-align: left; }
   #album.visible { display: flex; }
@@ -318,10 +326,9 @@
 
   /* ---------- La boutique (le soir) ---------- */
   #ouvrirBoutique {
-    position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--u) * 4); z-index: 12;
     background: linear-gradient(180deg, #FFE27A, var(--or)); color: var(--nuit); border: none;
     font-size: calc(var(--u) * 5); font-weight: 800; border-radius: 99px;
-    padding: calc(var(--u) * 2) calc(var(--u) * 6); box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(0,0,0,.35);
+    padding: calc(var(--u) * 1.8) calc(var(--u) * 5.5); box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(0,0,0,.35);
     animation: respire 3s ease-in-out infinite;
   }
   #boutique {
@@ -567,7 +574,6 @@
   <h2 id="finMessage">Bonne journée les filles !</h2>
   <p id="finSous">❤️ À ce soir</p>
   <p class="bocal-ligne" id="finBocal"></p>
-  <p class="bocal-ligne" id="finBoutique"></p>
   <div class="fin-duo"><div id="finGauche"></div><div id="finDroite"></div></div>
 </section>
 
@@ -587,7 +593,7 @@
   <div class="annonce-titre" id="annonceTitre"></div>
 </div>
 
-<button id="ouvrirAlbum" hidden>📅 L'album</button>
+<div id="boutonsSoir"><button id="ouvrirAlbum" hidden>📅 L'album</button>
 
 <div id="album">
   <div class="bq-tete">
@@ -621,7 +627,7 @@
   </div>
 </div>
 
-<button id="ouvrirBoutique" hidden>🛍️ La boutique</button>
+<button id="ouvrirBoutique" hidden>🛍️ La boutique</button></div>
 
 <div id="boutique">
   <div class="bq-tete">
@@ -785,12 +791,6 @@
       : "🫙 Encore " + pluriel(c.objectif - c.progres, "étoile") + " pour " + c.recompense;
     $("finBocal").textContent = texte;
     $("reposBocal").textContent = texte;
-    $("finBoutique").textContent = FILLES.map(function (f) {
-      var v = MATIN.vitrine(stock, f.nom);
-      if (!v) return "";
-      return v.manque ? f.nom + " : encore " + pluriel(v.manque, "étoile") + " pour " + v.article.emoji
-                      : f.nom + " peut s'offrir " + v.article.emoji + " !";
-    }).filter(Boolean).join("   ·   ");
     $("dodoCriteres").innerHTML = "⭐ Les 3 étoiles : " + MATIN.CRITERES.map(function (k) {
       return "<b>" + k.emoji + "</b> " + esc(k.court);
     }).join(" · ");
@@ -1933,6 +1933,7 @@
     var boutiquePossible = boutiqueOuvrable(s, etat);
     $("ouvrirBoutique").hidden = !boutiquePossible;
     $("ouvrirAlbum").hidden = !boutiquePossible;
+    document.body.classList.toggle("soir", boutiquePossible);
     if (!boutiquePossible && BQ.ouverte) fermerBoutique();
     if (!boutiquePossible && AL.ouvert) fermerAlbum();
     Musique.maj(demarre && musiqueVoulue && etat === "routine");
