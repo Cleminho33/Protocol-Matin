@@ -110,6 +110,28 @@ var AVATARS = (function () {
     el("circle", { cx: -8, cy: 4, r: 2, fill: "#FFFFFF", opacity: .6 }, g);
     el("circle", { cx: 7, cy: -5, r: 2, fill: "#FFFFFF", opacity: .6 }, g);
   }
+  function dessinerTalkie(g, couleur) {
+    el("rect", { x: 3, y: -30, width: 3.5, height: 15, rx: 1.75, fill: "#2F3A56" }, g);
+    el("rect", { x: -8, y: -16, width: 16, height: 30, rx: 3.5, fill: "#3A4666", stroke: "#222B44", "stroke-width": 1.5 }, g);
+    el("rect", { x: -5, y: -12, width: 10, height: 8, rx: 1.5, fill: "#7CD5FF" }, g);
+    el("circle", { cx: -2.5, cy: 2, r: 2.2, fill: "#B9B9C8" }, g);
+    el("circle", { cx: 2.5, cy: 2, r: 2.2, fill: "#B9B9C8" }, g);
+    el("rect", { x: -5, y: 7, width: 10, height: 4, rx: 2, fill: couleur }, g);
+    var ondes = el("g", { fill: "none", stroke: "#FFD93D", "stroke-width": 3, "stroke-linecap": "round" }, g);
+    el("path", { d: "M12 -30 q8 8 0 16" }, ondes);
+    el("path", { d: "M19 -34 q13 12 0 24" }, ondes);
+    el("path", { d: "M26 -38 q18 16 0 32" }, ondes);
+    return ondes;
+  }
+  function dessinerCartes(g) {
+    [[-17, 5, -20, "#E5484D"], [0, 0, 0, "#4A73B8"], [17, 5, 20, "#FFC93D"]].forEach(function (q) {
+      var c = el("g", { transform: "translate(" + q[0] + " " + q[1] + ") rotate(" + q[2] + ")" }, g);
+      el("rect", { x: -11, y: -16, width: 22, height: 32, rx: 3, fill: "#FFFFFF", stroke: "#D8D8E8", "stroke-width": 1.5 }, c);
+      el("rect", { x: -8, y: -13, width: 16, height: 17, rx: 2, fill: q[3] }, c);
+      el("circle", { cy: -4.5, r: 4.5, fill: "#FFFFFF", opacity: .85 }, c);
+      el("rect", { x: -8, y: 7, width: 16, height: 3, rx: 1.5, fill: "#E8E8F0" }, c);
+    });
+  }
   function dessinerLivre(g) {
     el("path", { d: "M0 -16 Q-14 -20 -28 -15 L-28 14 Q-14 9 0 13 Z", fill: "#FFFFFF", stroke: "#C9C9D6", "stroke-width": 1.5 }, g);
     el("path", { d: "M0 -16 Q14 -20 28 -15 L28 14 Q14 9 0 13 Z", fill: "#FFFFFF", stroke: "#C9C9D6", "stroke-width": 1.5 }, g);
@@ -1048,10 +1070,9 @@ var AVATARS = (function () {
       mache: el("ellipse", { cx: 110, cy: 100, rx: 6, ry: 2.5, fill: BOUCHE }, R.tete),
       dents: el("g", {}, R.tete)
     };
-    el("rect", { x: 97, y: 93, width: 26, height: 16, rx: 7, fill: BOUCHE }, R.bouches.dents);
-    el("rect", { x: 100, y: 94.5, width: 20, height: 4.5, rx: 1.5, fill: "#FFFFFF" }, R.bouches.dents);
-    el("rect", { x: 101, y: 103, width: 18, height: 4, rx: 1.5, fill: "#FFFFFF" }, R.bouches.dents);
-    el("path", { d: "M105 94.5 V99 M110 94.5 V99 M115 94.5 V99 M106 103 V107 M114 103 V107", stroke: "#E8D6D6", "stroke-width": .8 }, R.bouches.dents);
+    el("rect", { x: 100, y: 94, width: 20, height: 12, rx: 6, fill: BOUCHE }, R.bouches.dents);
+    el("path", { d: "M102 95.5 H118 V100 Q110 102.5 102 100 Z", fill: "#FFFFFF" }, R.bouches.dents);
+    el("path", { d: "M107 95.5 V100.6 M113 95.5 V100.6", stroke: "#E8D6D6", "stroke-width": .7 }, R.bouches.dents);
     R.mousse = el("g", { fill: "#FFFFFF" }, R.tete);
     [[97, 104, 4], [103, 109, 3.2], [118, 109, 3], [123, 104, 3.5], [110, 111, 2.5]].forEach(function (c) { el("circle", { cx: c[0], cy: c[1], r: c[2] }, R.mousse); });
     R.frangeSage = el("path", { d: "M76 74 Q76 40 110 40 Q144 40 144 74 Q130 56 110 58 Q92 56 76 74 Z", fill: ch }, R.tete);
@@ -1110,6 +1131,8 @@ var AVATARS = (function () {
     R.brosseCheveux = el("g", {}, svg); dessinerBrosseCheveux(R.brosseCheveux);
     R.pyjamaPlie = el("g", {}, svg); dessinerPyjamaPlie(R.pyjamaPlie, tc);
     R.livre = el("g", {}, svg); dessinerLivre(R.livre);
+    R.talkie = el("g", {}, svg); R.ondes = dessinerTalkie(R.talkie, tc);
+    R.cartes = el("g", {}, svg); dessinerCartes(R.cartes);
     R.zzz = el("text", { x: 150, y: 40, "font-size": 22, "text-anchor": "middle" }, svg); R.zzz.textContent = "💤";
     R.scratch = el("text", { "font-size": 19, "font-weight": 800, "text-anchor": "middle", fill: "#FFD93D", stroke: ENCRE, "stroke-width": 4, "paint-order": "stroke" }, svg);
     R.scratch.textContent = "scratch !";
@@ -1286,7 +1309,7 @@ var AVATARS = (function () {
           break;
 
         case "jeu":
-          jouer();
+          tempsLibre();
           break;
 
         case "histoire":
@@ -1353,6 +1376,57 @@ var AVATARS = (function () {
         P.tete = -7;
         P.yeux = "joie";
         if (etat.bataille) P.bataille = 1 - clamp(pc * 1.6, 0, 1);
+      }
+
+      // Le temps libre change de jeu toutes les 16 secondes. Les deux filles partagent la même horloge,
+      // donc elles jouent au même jeu en même temps et peuvent se répondre.
+      function tempsLibre() {
+        var jeux = [jouer, talkie, lecture, cartes, danse];
+        jeux[Math.floor(t / 16) % jeux.length]();
+      }
+
+      function talkie() {
+        var jeParle = (cycle(t, 7) < 0.5) === (sens > 0);
+        var mainCentre = jeParle ? pt(130, 106) : pt(134, 92);
+        var autre = pt(84, 168 + Math.sin(t * 2) * 2);
+        P.mains = sens > 0 ? [autre, mainCentre] : [pt(220 - mainCentre.x, mainCentre.y), pt(220 - autre.x, autre.y)];
+        P.objets.talkie = { main: sens > 0 ? 1 : 0, r: jeParle ? 12 : -8, ondes: jeParle ? 1 : 0 };
+        P.bouche = jeParle ? (cycle(t, 0.45) < 0.5 ? "ouverte" : "sourire") : "sourire";
+        P.tete = jeParle ? 2 : -7;
+        P.yeux = "joie";
+      }
+
+      function lecture() {
+        c = cycle(t, 7);
+        var tourne = c > 0.84 ? (c - 0.84) / 0.16 : 0;
+        var mainD = tourne ? trajet([[0, pt(128, 152)], [0.5, pt(142, 122)], [1, pt(128, 152)]], tourne) : pt(128, 152);
+        P.mains = [pt(92, 152), mainD];
+        P.objets.livre = { x: 110, y: 150 };
+        P.tete = 14;
+        P.bouche = "sourire";
+        P.dy = Math.sin(t * 1.6);
+      }
+
+      function cartes() {
+        c = cycle(t + (sens > 0 ? 0 : 2.5), 6);
+        var montre = c > 0.5 && c < 0.82;
+        var mainCentre = montre ? pt(142, 98) : pt(126, 142);
+        var autre = pt(92, 152);
+        P.mains = sens > 0 ? [autre, mainCentre] : [pt(220 - mainCentre.x, mainCentre.y), pt(220 - autre.x, autre.y)];
+        P.objets.cartes = { main: sens > 0 ? 1 : 0, r: montre ? -14 : 10 };
+        P.yeux = montre ? "joie" : "ouverts";
+        P.bouche = montre ? "grand" : "sourire";
+        P.tete = montre ? -5 : 7;
+      }
+
+      function danse() {
+        var h = Math.sin(t * 2.6);
+        P.saut = Math.abs(Math.sin(t * 2.6)) * 8;
+        P.lean = h * 7;
+        P.tete = -h * 6;
+        P.mains = [pt(72 + h * 8, 94 - h * 12), pt(148 + h * 8, 94 + h * 12)];
+        P.yeux = "joie";
+        P.bouche = "grand";
       }
 
       function jouer() {
@@ -1485,6 +1559,10 @@ var AVATARS = (function () {
       if (O.pyjamaPlie) { place(R.pyjamaPlie, O.pyjamaPlie.x, O.pyjamaPlie.y, O.pyjamaPlie.r); voir(R.pyjamaPlie, O.pyjamaPlie.o); }
       R.livre.setAttribute("display", O.livre ? "inline" : "none");
       if (O.livre) place(R.livre, O.livre.x, O.livre.y, 0);
+      R.talkie.setAttribute("display", O.talkie ? "inline" : "none");
+      if (O.talkie) { place(R.talkie, O.talkie.x, O.talkie.y, O.talkie.r, .95); voir(R.ondes, O.talkie.ondes); }
+      R.cartes.setAttribute("display", O.cartes ? "inline" : "none");
+      if (O.cartes) place(R.cartes, O.cartes.x, O.cartes.y, O.cartes.r, .8);
       voir(R.zzz, P.zzz);
       R.zzz.setAttribute("y", (40 - cycle(t, 1.6) * 10).toFixed(1));
       if (P.scratchTexte) {

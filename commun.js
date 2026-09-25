@@ -324,11 +324,13 @@ var MATIN = (function () {
 
   // ---------- Étoiles ----------
   function cleNote(jour, routineId) { return !routineId || routineId === "ecole" ? jour : jour + "~" + routineId; }
+  // Étoiles gagnées = celles des routines, plus le bonus donné à la main dans les réglages (week-end sage, etc.)
   function total(stock, nom) {
     var notes = stock.lire("notes") || {}, t = 0;
     for (var cle in notes) if (notes[cle] && notes[cle][nom]) t += notes[cle][nom];
-    return t;
+    return t + bonus(stock, nom);
   }
+  function bonus(stock, nom) { return +stock.lire("bonus/" + nom) || 0; }
   function totalTous(stock) {
     return FILLES.reduce(function (s, f) { return s + total(stock, f.nom); }, 0);
   }
@@ -637,7 +639,7 @@ var MATIN = (function () {
     sceneDe: sceneDe, activiteDe: activiteDe, etatAvatar: etatAvatar, etatFinAvatar: etatFinAvatar,
     CHEVEUX: CHEVEUX, CHEVEUX_NOMS: CHEVEUX_NOMS, COIFFURES: COIFFURES, ACCESSOIRES: ACCESSOIRES,
     routines: routines, normaliserRoutine: normaliserRoutine, programme: programme,
-    cleNote: cleNote, total: total, totalTous: totalTous, cagnotte: cagnotte,
+    cleNote: cleNote, total: total, totalTous: totalTous, bonus: bonus, cagnotte: cagnotte,
     articles: articles, achats: achats, depense: depense, solde: solde, vitrine: vitrine,
     RAYONS: RAYONS, EMPLACEMENTS: EMPLACEMENTS, catalogue: catalogue, articleDe: articleDe,
     possede: possede, portes: portes, apparence: apparence, enRayon: enRayon, saisonOuverte: saisonOuverte,

@@ -46,7 +46,7 @@
 
   .ecran {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    padding: calc(var(--u) * 5) 5vw; display: none; flex-direction: column;
+    padding: calc(var(--u) * 3) 5vw; display: none; flex-direction: column;
   }
   .ecran.actif { display: flex; }
 
@@ -124,13 +124,14 @@
   .anneau.urgent { animation: battement 1s ease-in-out infinite; }
   @keyframes battement { 50% { transform: scale(1.05); } }
 
-  .texte { text-align: center; padding: calc(var(--u) * .5) 0 calc(var(--u) * 1); }
+  /* hauteur réservée : sans ça, une étape avec des puces de détail écrase la scène et les filles rapetissent */
+  .texte { text-align: center; padding: calc(var(--u) * .5) 0 calc(var(--u) * 1); min-height: calc(var(--u) * 19); }
   .etape-num { font-size: calc(var(--u) * 3); opacity: .7; font-weight: 500; }
-  .texte h1 { font-size: calc(var(--u) * 8); line-height: 1.05; margin: 0 0 calc(var(--u) * 1); }
+  .texte h1 { font-size: calc(var(--u) * 8); line-height: 1.05; margin: 0 0 calc(var(--u) * .6); }
   .details { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * 1.5); }
   .puce {
-    font-size: calc(var(--u) * 3.8); font-weight: 600; background: rgba(255,255,255,.12);
-    border: calc(var(--u) * .5) solid var(--c); padding: calc(var(--u) * .6) calc(var(--u) * 2.2); border-radius: 99px;
+    font-size: calc(var(--u) * 3.2); font-weight: 600; background: rgba(255,255,255,.12);
+    border: calc(var(--u) * .5) solid var(--c); padding: calc(var(--u) * .5) calc(var(--u) * 1.8); border-radius: 99px;
   }
   .puce.rappel { border-color: var(--or); background: rgba(255,217,61,.15); }
   .rappels-ligne { font-size: calc(var(--u) * 3.5); margin-top: calc(var(--u) * 1); color: var(--or); font-weight: 600; }
@@ -141,13 +142,13 @@
   .avatar svg { flex: 1 1 auto; min-height: 0; height: 100%; max-height: calc(var(--u) * 58); aspect-ratio: 220 / 260; width: auto; overflow: visible; }
   .scene.fort .avatar svg { filter: drop-shadow(0 0 calc(var(--u) * 1.2) var(--c)); }
   .avatar .prenom {
-    font-size: calc(var(--u) * 4.2); font-weight: 700; color: var(--f);
+    font-size: calc(var(--u) * 3.8); font-weight: 700; color: var(--f);
     background: rgba(20,24,51,.75); padding: 0 calc(var(--u) * 2); border-radius: 99px; margin-top: calc(var(--u) * -1);
   }
   .ok-btn {
-    margin-top: calc(var(--u) * 1.5); font-size: calc(var(--u) * 3.6); font-weight: 700; color: #fff;
+    margin-top: calc(var(--u) * 1.2); font-size: calc(var(--u) * 3.2); font-weight: 700; color: #fff;
     background: rgba(255,255,255,.12); border: calc(var(--u) * .5) solid rgba(255,255,255,.35);
-    border-radius: 99px; padding: calc(var(--u) * 1.2) calc(var(--u) * 3.2); white-space: nowrap;
+    border-radius: 99px; padding: calc(var(--u) * 1) calc(var(--u) * 2.6); white-space: nowrap;
   }
   .ok-btn.valide { background: #7CFFB2; border-color: #7CFFB2; color: var(--nuit); }
   /* Les 3 critères des étoiles, rappelés sous chaque fille pendant la routine */
@@ -172,7 +173,7 @@
   @keyframes coucouMain { from { transform: rotate(-30deg); } to { transform: rotate(25deg); } }
 
   /* ---------- La route ---------- */
-  .route { display: flex; align-items: flex-end; gap: 2vw; height: calc(var(--u) * 19); }
+  .route { display: flex; align-items: flex-end; gap: 2vw; height: calc(var(--u) * 16); }
   .piste-zone { position: relative; flex: 1; height: 100%; }
   .piste { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: .6vw; }
   .seg { flex-basis: 0; display: flex; flex-direction: column; align-items: center; min-width: 0; }
@@ -231,6 +232,49 @@
 
   /* ---------- Les étoiles ---------- */
   [hidden] { display: none !important; }
+
+  /* ---------- Réglages (roue crantée, code 0313) ---------- */
+  #ouvrirAdmin {
+    position: fixed; right: 1vw; bottom: calc(var(--u) * 4.5); z-index: 21; /* au-dessus de l'écran de démarrage */
+    background: rgba(255,255,255,.08); border: none; color: #fff; opacity: .3;
+    width: calc(var(--u) * 6); height: calc(var(--u) * 6); border-radius: 99px; font-size: calc(var(--u) * 3.2);
+  }
+  #ouvrirAdmin:hover { opacity: .9; }
+  #admin {
+    position: fixed; inset: 0; z-index: 22; display: none; align-items: center; justify-content: center;
+    background: rgba(16,19,42,.97);
+  }
+  #admin.visible { display: flex; }
+  .ad-boite { position: relative; width: min(86vw, calc(var(--u) * 92)); max-height: 92vh; overflow-y: auto; text-align: center; }
+  .ad-titre { font-size: calc(var(--u) * 5); font-weight: 800; margin-bottom: calc(var(--u) * 2); }
+  .ad-boite .bq-fermer { position: absolute; top: 0; right: 0; }
+  .ad-points { display: flex; gap: calc(var(--u) * 2); justify-content: center; margin-bottom: calc(var(--u) * 3); }
+  .ad-points span {
+    width: calc(var(--u) * 3); height: calc(var(--u) * 3); border-radius: 99px;
+    border: calc(var(--u) * .4) solid rgba(255,255,255,.4);
+  }
+  .ad-points span.plein { background: var(--or); border-color: var(--or); }
+  .ad-clavier { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--u) * 1.6); max-width: calc(var(--u) * 44); margin: 0 auto; }
+  .ad-clavier button {
+    background: rgba(255,255,255,.1); border: none; color: #fff; border-radius: calc(var(--u) * 2.4);
+    padding: calc(var(--u) * 2) 0; font-size: calc(var(--u) * 5); font-weight: 700;
+  }
+  .ad-clavier button:active { background: rgba(255,255,255,.25); }
+  .ad-boite.faux { animation: secousse .4s; }
+  .ad-bloc { background: rgba(255,255,255,.06); border-radius: calc(var(--u) * 3); padding: calc(var(--u) * 2); margin-bottom: calc(var(--u) * 2); }
+  .ad-bloc h3 { font-size: calc(var(--u) * 3.6); margin: 0 0 calc(var(--u) * 1.5); }
+  .ad-bloc small { display: block; font-size: calc(var(--u) * 2.4); opacity: .6; margin-top: calc(var(--u) * 1.2); }
+  .ad-fille { display: flex; align-items: center; gap: calc(var(--u) * 1.4); margin-bottom: calc(var(--u) * 1.4); flex-wrap: wrap; justify-content: center; }
+  .ad-fille .qui { font-size: calc(var(--u) * 3.6); font-weight: 800; color: var(--f); min-width: calc(var(--u) * 13); text-align: right; }
+  .ad-fille .compte { font-size: calc(var(--u) * 3); min-width: calc(var(--u) * 26); text-align: left; opacity: .85; }
+  .ad-fille button, .ad-liens button {
+    background: rgba(255,255,255,.12); border: none; color: #fff; border-radius: 99px;
+    padding: calc(var(--u) * 1) calc(var(--u) * 2.2); font-size: calc(var(--u) * 3); font-weight: 700;
+  }
+  .ad-fille button.plus { background: rgba(124,255,178,.22); }
+  .ad-fille button.moins { background: rgba(255,158,190,.2); }
+  .ad-liens { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 1.4); justify-content: center; }
+  .ad-liens button { padding: calc(var(--u) * 1.4) calc(var(--u) * 2.6); }
 
   /* ---------- La boutique (le soir) ---------- */
   #ouvrirBoutique {
@@ -470,6 +514,24 @@
   <div class="annonce-emoji" id="annonceEmoji"></div>
   <div class="annonce-sur">C'est l'heure !</div>
   <div class="annonce-titre" id="annonceTitre"></div>
+</div>
+
+<button id="ouvrirAdmin" aria-label="Réglages">⚙️</button>
+
+<div id="admin">
+  <div class="ad-boite" id="adBoite">
+    <button class="bq-fermer" id="adFermer" aria-label="Fermer">✕</button>
+    <div id="adCode">
+      <div class="ad-titre">🔒 Code</div>
+      <div class="ad-points" id="adPoints"></div>
+      <div class="ad-clavier" id="adClavier"></div>
+    </div>
+    <div id="adPanneau" hidden>
+      <div class="ad-titre">⚙️ Réglages</div>
+      <div class="ad-bloc" id="adEtoiles"></div>
+      <div class="ad-bloc" id="adTest"></div>
+    </div>
+  </div>
 </div>
 
 <button id="ouvrirBoutique" hidden>🛍️ La boutique</button>
@@ -878,9 +940,11 @@
       var f = FILLES[n], boite = $(id);
       if (!f || !boite) return;
       var okHtml = avecOk ? '<button type="button" class="ok-btn" data-nom="' + f.nom + '">✅ OK</button>' : "";
-      if (avecOk && cible && cible.r.etoiles) okHtml += '<div class="crit-rappel" data-crit="' + f.nom + '">' + MATIN.CRITERES.map(function (k) {
-        return '<span data-k="' + k.cle + '">' + k.emoji + (k.cle === "seule" ? '<span class="n"></span>' : "") + '</span>';
-      }).join("") + '</div>';
+      // Seul le critère « toute seule » est affiché pendant la routine : c'est le seul qui bouge en direct
+      if (avecOk && cible && cible.r.etoiles) okHtml += '<div class="crit-rappel" data-crit="' + f.nom + '">' +
+        MATIN.CRITERES.filter(function (k) { return k.cle === "seule"; }).map(function (k) {
+          return '<span data-k="' + k.cle + '">' + k.emoji + '<span class="n"></span></span>';
+        }).join("") + '</div>';
       boite.innerHTML = avecPrenom ? '<div class="avatar" style="--f:' + f.couleur + '"><div class="prenom">' + f.nom + '</div>' + okHtml + '</div>' : "";
       var hote = avecPrenom ? boite.firstChild : boite;
       var objet = AVATARS.creer(hote, f, MATIN.apparence(stock, f.nom));
@@ -1279,6 +1343,99 @@
     blocsCompteurs[k].addEventListener("click", function () { ouvrirNotes(null); });
   }
 
+  // ---------- Réglages parents : roue crantée, code secret, étoiles à la main et mode test ----------
+  var CODE_ADMIN = "0313", adSaisie = "", adOuvert = false;
+
+  function ouvrirAdmin() {
+    adSaisie = ""; adOuvert = false;
+    $("adCode").hidden = false;
+    $("adPanneau").hidden = true;
+    $("admin").classList.add("visible");
+    dessinerCode();
+  }
+  function fermerAdmin() {
+    $("admin").classList.remove("visible");
+    adOuvert = false; adSaisie = "";
+  }
+  function dessinerCode() {
+    var p = "";
+    for (var i = 0; i < 4; i++) p += '<span class="' + (i < adSaisie.length ? "plein" : "") + '"></span>';
+    $("adPoints").innerHTML = p;
+  }
+  $("adClavier").innerHTML = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"].map(function (t) {
+    return t === "" ? "<span></span>" : '<button data-touche="' + t + '">' + t + "</button>";
+  }).join("");
+  $("adClavier").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button[data-touche]");
+    if (!b) return;
+    var t = b.getAttribute("data-touche");
+    if (t === "⌫") adSaisie = adSaisie.slice(0, -1);
+    else if (adSaisie.length < 4) adSaisie += t;
+    dessinerCode();
+    if (adSaisie.length < 4) return;
+    if (adSaisie === CODE_ADMIN) {
+      adOuvert = true;
+      $("adCode").hidden = true;
+      $("adPanneau").hidden = false;
+      dessinerAdmin();
+    } else {
+      var boite = $("adBoite");
+      boite.classList.remove("faux");
+      void boite.offsetWidth;
+      boite.classList.add("faux");
+      adSaisie = "";
+      dessinerCode();
+    }
+  });
+
+  function dessinerAdmin() {
+    if (!adOuvert) return;
+    $("adEtoiles").innerHTML = "<h3>⭐ Les étoiles</h3>" + FILLES.map(function (f) {
+      var b = MATIN.bonus(stock, f.nom);
+      return '<div class="ad-fille" style="--f:' + f.couleur + '"><div class="qui">' + f.nom + "</div>" +
+        '<button class="moins" data-etoiles="' + f.nom + '|-5">−5</button>' +
+        '<button class="moins" data-etoiles="' + f.nom + '|-1">−1</button>' +
+        '<button class="plus" data-etoiles="' + f.nom + '|1">+1</button>' +
+        '<button class="plus" data-etoiles="' + f.nom + '|5">+5</button>' +
+        '<button class="plus" data-etoiles="' + f.nom + '|10">+10</button>' +
+        '<div class="compte">' + MATIN.solde(stock, f.nom) + " ⭐ à dépenser · " + MATIN.total(stock, f.nom) + " gagnées" +
+        (b ? " (dont " + (b > 0 ? "+" : "") + b + " donnée" + (Math.abs(b) > 1 ? "s" : "") + " ici)" : "") + "</div></div>";
+    }).join("") + "<small>Ces étoiles s'ajoutent à celles des matins et comptent aussi pour le bocal commun. Elles se dépensent en boutique.</small>";
+
+    var suite = PARENT ? "&parent=" + encodeURIComponent(PARENT) : "";
+    $("adTest").innerHTML = "<h3>🧪 Mode test</h3><div class=\"ad-liens\">" +
+      '<button data-test="heure=07:24&ecole=1&vitesse=20&auto=1">☀️ Le matin en accéléré</button>' +
+      '<button data-test="heure=18:30&auto=1">🛍️ Le soir et la boutique</button>' +
+      '<button data-test="heure=08:10&ecole=1&auto=1">🏁 La fin du matin</button>' +
+      (SIM ? '<button data-test="">⬅️ Revenir au vrai mode</button>' : "") +
+      '<button data-parent="1">📱 L\'espace parent</button></div>' +
+      "<small>En mode test, rien n'est enregistré : les étoiles et les achats ne bougent pas pour de vrai." +
+      (SIM ? " Tu es en mode test en ce moment." : "") + "</small>";
+    $("adTest").setAttribute("data-suite", suite);
+  }
+
+  $("ouvrirAdmin").addEventListener("click", ouvrirAdmin);
+  $("adFermer").addEventListener("click", fermerAdmin);
+  $("admin").addEventListener("click", function (ev) {
+    var e = ev.target.closest("button[data-etoiles]");
+    if (e) {
+      var p = e.getAttribute("data-etoiles").split("|"), n = MATIN.bonus(stock, p[0]) + parseInt(p[1], 10);
+      stock.ecrire("bonus/" + p[0], n || null);
+      jouer("etoile");
+      dessinerAdmin();
+      majCompteurs();
+      return;
+    }
+    var t = ev.target.closest("button[data-test]");
+    if (t) {
+      var q = t.getAttribute("data-test");
+      location.href = location.pathname + (q ? "?" + q + ($("adTest").getAttribute("data-suite") || "") : "") + location.hash;
+      location.reload();
+      return;
+    }
+    if (ev.target.closest("button[data-parent]")) location.href = "parent.html" + location.hash;
+  });
+
   // ---------- La boutique : elles dépensent leurs étoiles le soir ----------
   // Ouverte de 15h à 22h (dès 9h les jours sans école), jamais pendant la routine.
   var BQ = { fille: FILLES[0].nom, ouverte: false, enCours: null, filtre: "tout", essai: null };
@@ -1459,6 +1616,7 @@
     verifierNouvellesNotes();
     majEtatSync();
     if (BQ.ouverte) dessinerBoutique();
+    if (adOuvert) dessinerAdmin();
   });
 
   function majEtatSync() {
