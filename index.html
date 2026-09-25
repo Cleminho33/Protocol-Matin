@@ -310,6 +310,11 @@
   .ad-fille button.moins { background: rgba(255,158,190,.2); }
   .ad-liens { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 1.4); justify-content: center; }
   .ad-liens button { padding: calc(var(--u) * 1.4) calc(var(--u) * 2.6); }
+  .ad-liens select {
+    background: rgba(255,255,255,.12); border: none; color: #fff; border-radius: 99px;
+    padding: calc(var(--u) * 1.2) calc(var(--u) * 2.4); font-size: calc(var(--u) * 3); font-weight: 700;
+    max-width: calc(var(--u) * 46);
+  }
 
   /* ---------- La boutique (le soir) ---------- */
   #ouvrirBoutique {
@@ -610,6 +615,7 @@
     <div id="adPanneau" hidden>
       <div class="ad-titre">⚙️ Réglages</div>
       <div class="ad-bloc" id="adEtoiles"></div>
+      <div class="ad-bloc" id="adVoix"></div>
       <div class="ad-bloc" id="adTest"></div>
     </div>
   </div>
@@ -873,17 +879,42 @@
   })();
 
   // ---------- Voix ----------
+  // ---------- Le choix de la voix ----------
+  // Les voix disponibles dépendent de l'appareil : le choix est donc gardé sur l'appareil, pas dans la base.
+  // Ordre de préférence quand rien n'a été choisi : les voix féminines douces d'abord, les robotiques en dernier.
+  var PREFERENCES_VOIX = ["Audrey", "Aurélie", "Marie", "Chantal", "Sandy", "Shelley", "Flo", "Amélie", "Jacques", "Daniel", "Thomas"];
+  var voixGardee = null;
+  try { voixGardee = localStorage.getItem("matin.voix"); } catch (err) {}
+  function voixFrancaises() {
+    if (!window.speechSynthesis || !speechSynthesis.getVoices) return [];
+    return speechSynthesis.getVoices().filter(function (v) { return /^fr/i.test(v.lang); });
+  }
+  function laVoix() {
+    var toutes = voixFrancaises(), i, v;
+    if (!toutes.length) return null;
+    for (i = 0; i < toutes.length; i++) if (toutes[i].name === voixGardee) return toutes[i];
+    // à défaut de choix, une voix de France plutôt que du Canada, et dans l'ordre de préférence
+    var liste = toutes.filter(function (x) { return /^fr[-_]FR/i.test(x.lang); });
+    if (!liste.length) liste = toutes;
+    for (i = 0; i < PREFERENCES_VOIX.length; i++) {
+      v = liste.filter(function (x) { return x.name.indexOf(PREFERENCES_VOIX[i]) === 0; })[0];
+      if (v) return v;
+    }
+    return liste[0];
+  }
+  function direMaintenant(txt) {
+    if (!window.speechSynthesis) return;
+    var u = new SpeechSynthesisUtterance(txt);
+    u.lang = "fr-FR"; u.rate = .95; u.pitch = 1.1;
+    var v = laVoix();
+    if (v) u.voice = v;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }
   function parler(txt, delai) {
     if (!VOIX_ACTIVE || !demarre || !window.speechSynthesis || !txt) return;
     Musique.baisser();
-    setTimeout(function () {
-      var u = new SpeechSynthesisUtterance(txt);
-      u.lang = "fr-FR"; u.rate = .95; u.pitch = 1.1;
-      var v = speechSynthesis.getVoices().filter(function (x) { return /^fr/i.test(x.lang); })[0];
-      if (v) u.voice = v;
-      speechSynthesis.cancel();
-      speechSynthesis.speak(u);
-    }, delai === undefined ? 1100 : delai);
+    setTimeout(function () { direMaintenant(txt); }, delai === undefined ? 1100 : delai);
   }
 
   // =====================================================================
@@ -1568,6 +1599,16 @@
         (b ? " (dont " + (b > 0 ? "+" : "") + b + " donnée" + (Math.abs(b) > 1 ? "s" : "") + " ici)" : "") + "</div></div>";
     }).join("") + "<small>Ces étoiles s'ajoutent à celles des matins et comptent aussi pour le bocal commun. Elles se dépensent en boutique.</small>";
 
+    var liste = voixFrancaises(), v = laVoix();
+    $("adVoix").innerHTML = "<h3>🗣️ La voix de l'écran</h3>" + (liste.length
+      ? '<div class="ad-liens"><select id="adChoixVoix">' + liste.map(function (x) {
+          return '<option value="' + esc(x.name) + '"' + (v && x.name === v.name ? " selected" : "") + ">" + esc(x.name) + "</option>";
+        }).join("") + '</select><button data-essai-voix="1">▶️ Essayer</button></div>' +
+        "<small>Les voix proposées sont celles installées sur cet appareil, le choix ne vaut que pour lui. " +
+        "Sur le Mac, tu peux en télécharger de bien meilleures dans Réglages Système, Accessibilité, Contenu énoncé, Voix système, Gérer les voix : " +
+        "prends une voix française marquée « Premium » ou « Améliorée », elle apparaîtra ici après le téléchargement.</small>"
+      : "<small>Aucune voix française trouvée sur cet appareil.</small>");
+
     var suite = PARENT ? "&parent=" + encodeURIComponent(PARENT) : "";
     $("adTest").innerHTML = "<h3>🧪 Mode test</h3><div class=\"ad-liens\">" +
       '<button data-test="heure=07:24&ecole=1&vitesse=20&auto=1">☀️ Le matin en accéléré</button>' +
@@ -1580,6 +1621,7 @@
     $("adTest").setAttribute("data-suite", suite);
   }
 
+  if (window.speechSynthesis) speechSynthesis.onvoiceschanged = function () { if (adOuvert) dessinerAdmin(); };
   $("ouvrirAdmin").addEventListener("click", ouvrirAdmin);
   $("adFermer").addEventListener("click", fermerAdmin);
   $("admin").addEventListener("click", function (ev) {
@@ -1590,6 +1632,15 @@
       jouer("etoile");
       dessinerAdmin();
       majCompteurs();
+      return;
+    }
+    if (ev.target.closest("button[data-essai-voix]")) {
+      var choix = $("adChoixVoix");
+      if (choix) {
+        voixGardee = choix.value;
+        try { localStorage.setItem("matin.voix", voixGardee); } catch (err) {}
+      }
+      direMaintenant("Bonjour Lou, bonjour Alba ! C'est l'heure de se préparer.");
       return;
     }
     var t = ev.target.closest("button[data-test]");

@@ -30,6 +30,7 @@
   .carte { background: var(--carte); border-radius: 20px; padding: 18px; margin-bottom: 14px; }
   .carte h2 { font-size: 19px; margin-bottom: 12px; }
   small, .vide { color: var(--doux); font-size: 14px; line-height: 1.4; }
+  .alerte { color: #FFB3B3; font-weight: 600; }
   .avert {
     background: rgba(255,159,67,.14); border: 1px solid rgba(255,159,67,.5);
     border-radius: 14px; padding: 12px 14px; font-size: 14px; margin-bottom: 14px; line-height: 1.4;
@@ -297,6 +298,15 @@
     <h2>🏖️ Vacances et jours fériés</h2>
     <small>Les routines marquées « jours d'école » ne se lancent pas pendant les vacances de la zone A ni les jours fériés.</small>
     <div class="espace"><small id="prochaines"></small></div>
+  </div>
+  <div class="carte">
+    <h2>💾 Sauvegarde</h2>
+    <small>Les étoiles, les achats, les routines et les rappels vivent dans une base gratuite, sans copie de secours.
+    Enregistre un fichier de temps en temps, et garde-le ailleurs que sur ce téléphone.</small>
+    <div class="espace" id="etatSauvegarde"></div>
+    <button class="btn" id="btnSauver">Enregistrer une sauvegarde</button>
+    <button class="btn second espace" id="btnRestaurer">Restaurer une sauvegarde</button>
+    <input type="file" id="fichierRestore" accept="application/json,.json" hidden>
   </div>
   <div class="carte" id="carteLiens">
     <h2>🔗 Liens</h2>
@@ -997,6 +1007,80 @@
   });
 
   // =====================================================================
+  // Sauvegarde : tout est dans une base gratuite sans copie de secours
+  // =====================================================================
+  function donneesCompletes() { return stock.lire("") || {}; }
+  function resumeDonnees(d) {
+    var notes = d.notes || {}, jours = 0, etoiles = {}, achats = 0;
+    FILLES.forEach(function (f) { etoiles[f.nom] = 0; });
+    Object.keys(notes).forEach(function (k) {
+      if (!notes[k]) return;
+      jours++;
+      FILLES.forEach(function (f) { etoiles[f.nom] += notes[k][f.nom] || 0; });
+    });
+    FILLES.forEach(function (f) {
+      var b = (d.boutique && d.boutique.achats && d.boutique.achats[f.nom]) || {};
+      achats += Object.keys(b).length;
+      etoiles[f.nom] += +((d.bonus || {})[f.nom]) || 0;
+    });
+    return { jours: jours, achats: achats, etoiles: etoiles,
+             texte: jours + " matins notés · " + FILLES.map(function (f) { return f.nom + " " + etoiles[f.nom] + " ⭐"; }).join(" · ") +
+                    " · " + achats + " achats" };
+  }
+  function telecharger(nom, objet) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(objet, null, 1)], { type: "application/json" }));
+    a.download = nom;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }
+  function dessinerSauvegarde() {
+    var quand = null;
+    try { quand = localStorage.getItem("matin.sauvegarde"); } catch (e) {}
+    var enLigne = stock.etat() === "en ligne";
+    var jours = quand ? Math.floor((Date.now() - (+new Date(quand))) / 864e5) : null;
+    var etat = !enLigne
+      ? '<span class="alerte">Cette page n\'est pas reliée à la base : la sauvegarde ne contiendrait que ce téléphone.</span>'
+      : quand
+        ? "Dernière sauvegarde : " + dateLisible(quand.slice(0, 10)) + (jours > 30 ? " (ça commence à dater)" : "") + "."
+        : "Aucune sauvegarde faite depuis ce téléphone.";
+    $("etatSauvegarde").innerHTML = etat + "<br><small>" + esc(resumeDonnees(donneesCompletes()).texte) + "</small>";
+  }
+  $("btnSauver").addEventListener("click", function () {
+    var d = donneesCompletes();
+    if (!d || !Object.keys(d).length) return toast("Rien à sauvegarder", true);
+    telecharger("matin-des-filles-" + aujourdhui() + ".json", { fait: new Date().toISOString(), donnees: d });
+    try { localStorage.setItem("matin.sauvegarde", new Date().toISOString()); } catch (e) {}
+    dessinerSauvegarde();
+    toast("Sauvegarde enregistrée ✓");
+  });
+  $("btnRestaurer").addEventListener("click", function () { $("fichierRestore").click(); });
+  $("fichierRestore").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    this.value = "";
+    if (!f) return;
+    var lecteur = new FileReader();
+    lecteur.onload = function () {
+      var lu;
+      try { lu = JSON.parse(lecteur.result); } catch (e) { return toast("Ce fichier n'est pas une sauvegarde", true); }
+      var d = lu && lu.donnees ? lu.donnees : lu;
+      if (!d || typeof d !== "object" || (!d.notes && !d.routines && !d.boutique)) return toast("Ce fichier n'est pas une sauvegarde", true);
+      var avant = resumeDonnees(donneesCompletes()), apres = resumeDonnees(d);
+      if (!confirm("Remplacer les données par cette sauvegarde ?\n\nMaintenant : " + avant.texte +
+                   "\nSauvegarde : " + apres.texte +
+                   "\n\nUne copie de l'état actuel va d'abord être enregistrée sur cet appareil.")) return;
+      telecharger("matin-des-filles-avant-restauration-" + aujourdhui() + ".json", { fait: new Date().toISOString(), donnees: donneesCompletes() });
+      var actuelles = Object.keys(donneesCompletes());
+      Object.keys(d).forEach(function (k) { stock.ecrire(k, d[k]); });
+      actuelles.forEach(function (k) { if (!(k in d)) stock.ecrire(k, null); });
+      toast("Sauvegarde restaurée ✓");
+      dessinerSauvegarde();
+    };
+    lecteur.readAsText(f);
+  });
+
+  // =====================================================================
   // Boutique : catalogue fourni, les filles achètent le soir depuis l'écran du matin
   // =====================================================================
   function dessinerBoutique() {
@@ -1065,6 +1149,7 @@
   function toutDessiner() {
     majEtat();
     dessinerOublis();
+    dessinerSauvegarde();
     dessinerBoutique();
     majChoixRoutine();
     if (!saisieTouchee) chargerSaisie(); else dessinerSaisie();
